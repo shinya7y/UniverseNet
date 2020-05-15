@@ -20,6 +20,11 @@ class WaymoOpenDataset(CustomDataset):
 
     # "ALL_NS" setting (all object types except signs)
     CLASSES = ('TYPE_VEHICLE', 'TYPE_PEDESTRIAN', 'TYPE_CYCLIST')
+    CLASSWISE_IOU = {
+        'TYPE_VEHICLE': 0.7,
+        'TYPE_PEDESTRIAN': 0.5,
+        'TYPE_CYCLIST': 0.5
+    }
 
     def load_annotations(self, ann_file):
         self.coco = COCO(ann_file)
@@ -394,32 +399,57 @@ class WaymoOpenDataset(CustomDataset):
                     # precision: (iou, recall, cls, area range, max dets)
                     assert len(self.cat_ids) == precisions.shape[2]
 
-                    results_per_category = []
-                    for idx, catId in enumerate(self.cat_ids):
-                        # area range index 0: all area ranges
-                        # max dets index -1: typically 100 per image
-                        nm = self.coco.loadCats(catId)[0]
-                        precision = precisions[:, :, idx, 0, -1]
-                        precision = precision[precision > -1]
-                        if precision.size:
-                            ap = np.mean(precision)
-                        else:
-                            ap = float('nan')
-                        results_per_category.append(
-                            (f'{nm["name"]}', f'{float(ap):0.3f}'))
+                    table_data = []
+                    waymo_iou_metrics = {}
+                    iouThr_dict = {None: 'AP', 0.5: 'AP 0.5', 0.7: 'AP 0.7'}
+                    for iouThr, metric_name in iouThr_dict.items():
+                        results_per_category = []
+                        for idx, catId in enumerate(self.cat_ids):
+                            # area range index 0: all area ranges
+                            # max dets index -1: typically 100 per image
+                            nm = self.coco.loadCats(catId)[0]
+                            precision = precisions[:, :, idx, 0, -1]
+                            if iouThr is not None:
+                                t = np.where(
+                                    iouThr == cocoEval.params.iouThrs)[0]
+                                precision = precision[t]
+                            precision = precision[precision > -1]
+                            if precision.size:
+                                ap = np.mean(precision)
+                            else:
+                                ap = float('nan')
+                            results_per_category.append(
+                                (f'{nm["name"]}', f'{float(ap):0.4f}'))
 
-                    num_columns = min(6, len(results_per_category) * 2)
-                    results_flatten = list(
-                        itertools.chain(*results_per_category))
-                    headers = ['category', 'AP'] * (num_columns // 2)
-                    results_2d = itertools.zip_longest(*[
-                        results_flatten[i::num_columns]
-                        for i in range(num_columns)
-                    ])
-                    table_data = [headers]
-                    table_data += [result for result in results_2d]
+                            if self.CLASSWISE_IOU[nm["name"]] == iouThr:
+                                waymo_iou_metrics[nm["name"]] = ap
+
+                        num_columns = min(6, len(results_per_category) * 2)
+                        results_flatten = list(
+                            itertools.chain(*results_per_category))
+                        headers = ['category', metric_name] * (
+                            num_columns // 2)
+                        results_2d = itertools.zip_longest(*[
+                            results_flatten[i::num_columns]
+                            for i in range(num_columns)
+                        ])
+                        table_data += [headers]
+                        table_data += [result for result in results_2d]
                     table = AsciiTable(table_data)
+                    table.inner_heading_row_border = False
+                    table.inner_row_border = True
                     print_log('\n' + table.table, logger=logger)
+
+                    for category, category_iou in self.CLASSWISE_IOU.items():
+                        print_log(
+                            f'AP{category_iou} ({category}): ' +
+                            f'{waymo_iou_metrics[category]:0.4f}',
+                            logger=logger)
+                    ap_waymo = np.mean(list(waymo_iou_metrics.values()))
+                    print_log(
+                        'AP (Waymo challenge IoU, COCO script): ' +
+                        f'{ap_waymo:0.4f}',
+                        logger=logger)
 
                 metric_items = [
                     'mAP', 'mAP_50', 'mAP_75', 'mAP_s', 'mAP_m', 'mAP_l'
