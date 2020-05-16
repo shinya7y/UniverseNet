@@ -7,6 +7,7 @@ from mmcv import Config, DictAction
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import get_dist_info, init_dist, load_checkpoint
 from tools.fuse_conv_bn import fuse_module
+from tools.rearrange_weights import rearrange_classes
 
 from mmdet.apis import multi_gpu_test, single_gpu_test
 from mmdet.core import wrap_fp16_model
@@ -54,7 +55,15 @@ def parse_args():
         help='tmp directory used for collecting results from multiple '
         'workers, available when gpu-collect is not specified')
     parser.add_argument(
-        '--options', nargs='+', action=DictAction, help='arguments in dict')
+        '--cfg-options',
+        nargs='+',
+        action=DictAction,
+        help='arguments in dict to overwrite config')
+    parser.add_argument(
+        '--options',
+        nargs='+',
+        action=DictAction,
+        help='arguments in dict for evaluation')
     parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
@@ -83,6 +92,8 @@ def main():
         raise ValueError('The output file must be a pkl file.')
 
     cfg = Config.fromfile(args.config)
+    if args.cfg_options is not None:
+        cfg.merge_from_dict(args.cfg_options)
     # set cudnn_benchmark
     if cfg.get('cudnn_benchmark', False):
         torch.backends.cudnn.benchmark = True
@@ -112,6 +123,10 @@ def main():
     if fp16_cfg is not None:
         wrap_fp16_model(model)
     checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
+    # perform model surgery
+    classes_rearrange = cfg.get('classes_rearrange', False)
+    if classes_rearrange:
+        model = rearrange_classes(model, cfg.classes, cfg.dataset_type)
     if args.fuse_conv_bn:
         model = fuse_module(model)
     # old versions did not save class info in checkpoints, this walkaround is

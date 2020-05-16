@@ -11,6 +11,7 @@ from mmdet.core import (DistEvalHook, DistOptimizerHook, EvalHook,
                         Fp16OptimizerHook, build_optimizer)
 from mmdet.datasets import build_dataloader, build_dataset
 from mmdet.utils import get_root_logger
+from tools.rearrange_weights import rearrange_classes
 
 
 def set_random_seed(seed, deterministic=False):
@@ -162,4 +163,10 @@ def train_detector(model,
         runner.resume(cfg.resume_from)
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
+
+    classes_rearrange = cfg.get('classes_rearrange', False)
+    if classes_rearrange:
+        runner.model = rearrange_classes(runner.model, cfg.classes,
+                                         cfg.dataset_type)
+
     runner.run(data_loaders, cfg.workflow, cfg.total_epochs)
