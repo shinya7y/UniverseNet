@@ -164,7 +164,8 @@ class WaymoOpenDataset(CustomDataset):
         for idx in range(len(self)):
             img_id = self.img_ids[idx]
             result = results[idx]
-            for label in range(len(result)):
+            num_valid_labels = min(len(result), len(self.cat_ids))
+            for label in range(num_valid_labels):
                 bboxes = result[label]
                 for i in range(bboxes.shape[0]):
                     data = dict()
@@ -441,6 +442,8 @@ class WaymoOpenDataset(CustomDataset):
                     print_log('\n' + table.table, logger=logger)
 
                     for category, category_iou in self.CLASSWISE_IOU.items():
+                        if category not in waymo_iou_metrics:
+                            continue
                         print_log(
                             f'AP{category_iou} ({category}): ' +
                             f'{waymo_iou_metrics[category]:0.4f}',
