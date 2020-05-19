@@ -476,3 +476,22 @@ class ATSSHead(AnchorHead):
             int(flags.sum()) for flags in split_inside_flags
         ]
         return num_level_anchors_inside
+
+
+@HEADS.register_module()
+class ATSSSEPCHead(ATSSHead):
+
+    def forward_single(self, x, scale):
+        if not isinstance(x, list):
+            x = [x, x]
+        cls_feat = x[0]
+        reg_feat = x[1]
+        for cls_conv in self.cls_convs:
+            cls_feat = cls_conv(cls_feat)
+        for reg_conv in self.reg_convs:
+            reg_feat = reg_conv(reg_feat)
+        cls_score = self.atss_cls(cls_feat)
+        # we just follow atss, not apply exp in bbox_pred
+        bbox_pred = scale(self.atss_reg(reg_feat)).float()
+        centerness = self.atss_centerness(reg_feat)
+        return cls_score, bbox_pred, centerness
