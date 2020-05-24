@@ -3,8 +3,12 @@ import math
 import torch
 import torch.nn as nn
 import torch.utils.checkpoint as cp
-from mmcv.cnn import build_conv_layer, build_norm_layer
+from torch.nn.modules.batchnorm import _BatchNorm
+from mmcv.cnn import (build_conv_layer, build_norm_layer, constant_init,
+                      kaiming_init)
+from mmcv.runner import load_checkpoint
 
+from mmdet.utils import get_root_logger
 from ..builder import BACKBONES
 from .resnet import Bottleneck as _Bottleneck
 from .resnet import ResNet
@@ -304,6 +308,31 @@ class Res2Net(ResNet):
         self.base_width = base_width
         super(Res2Net, self).__init__(
             style='pytorch', deep_stem=True, avg_down=True, **kwargs)
+
+    def init_weights(self, pretrained=None):
+        if isinstance(pretrained, str):
+            logger = get_root_logger()
+            load_checkpoint(self, pretrained, strict=False, logger=logger)
+        elif pretrained is None:
+            for m in self.modules():
+                if isinstance(m, nn.Conv2d):
+                    kaiming_init(m)
+                elif isinstance(m, (_BatchNorm, nn.GroupNorm)):
+                    constant_init(m, 1)
+
+            if self.dcn is not None:
+                for m in self.modules():
+                    if isinstance(m, _Bottleneck):
+                        for conv2 in m.convs:
+                            if hasattr(conv2, 'conv_offset'):
+                                constant_init(conv2.conv_offset, 0)
+
+            if self.zero_init_residual:
+                for m in self.modules():
+                    if isinstance(m, _Bottleneck):
+                        constant_init(m.norm3, 0)
+        else:
+            raise TypeError('pretrained must be a str or None')
 
     def make_res_layer(self, **kwargs):
         return Res2Layer(
