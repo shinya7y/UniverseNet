@@ -25,6 +25,13 @@ class WaymoOpenDataset(CustomDataset):
         'TYPE_PEDESTRIAN': 0.5,
         'TYPE_CYCLIST': 0.5
     }
+    # class id mapping to "enum Type" in
+    # https://github.com/waymo-research/waymo-open-dataset/blob/master/waymo_open_dataset/label.proto
+    CLASS_TYPE_TO_SUBMIT = {
+        'TYPE_VEHICLE': 1,
+        'TYPE_PEDESTRIAN': 2,
+        'TYPE_CYCLIST': 4
+    }
 
     def load_annotations(self, ann_file):
         self.coco = COCO(ann_file)
@@ -145,6 +152,42 @@ class WaymoOpenDataset(CustomDataset):
             _bbox[3] - _bbox[1],
         ]
 
+    def xyxy2cxcywh(self, bbox):
+        _bbox = bbox.tolist()
+        return [
+            (_bbox[0] + _bbox[2]) / 2,
+            (_bbox[1] + _bbox[3]) / 2,
+            _bbox[2] - _bbox[0],
+            _bbox[3] - _bbox[1],
+        ]
+
+    def _det2dicts(self, results):
+        dict_results = []
+        for idx in range(len(self)):
+            img_info = self.data_infos[idx]
+            result = results[idx]
+            num_valid_labels = min(len(result), len(self.cat_ids))
+            for label in range(num_valid_labels):
+                bboxes = result[label]
+                for i in range(bboxes.shape[0]):
+                    cx, cy, w, h = self.xyxy2cxcywh(bboxes[i])
+                    class_name = self.CLASSES[label]
+                    data = dict()
+                    data['context_name'] = img_info['context_name']
+                    data['timestamp_micros'] = img_info['timestamp_micros']
+                    data['camera_name'] = img_info['camera_id']
+                    data['frame_index'] = img_info['frame_id']
+                    data['center_x'] = cx
+                    data['center_y'] = cy
+                    data['length'] = w  # length: dim x
+                    data['width'] = h  # width: dim y
+                    data['score'] = float(bboxes[i][4])
+                    data['type'] = self.CLASS_TYPE_TO_SUBMIT[class_name]
+                    data['id'] = f'{idx}_{label}_{i}'  # dummy tracking id
+                    dict_results.append(data)
+
+        return dict_results
+
     def _proposal2json(self, results):
         json_results = []
         for idx in range(len(self)):
@@ -213,6 +256,16 @@ class WaymoOpenDataset(CustomDataset):
                     segm_json_results.append(data)
         return bbox_json_results, segm_json_results
 
+    def results2dicts(self, results, outfile_prefix):
+        result_files = dict()
+        if isinstance(results[0], list):
+            dict_results = self._det2dicts(results)
+            result_files['bbox'] = f'{outfile_prefix}.bbox.pkl'
+            mmcv.dump(dict_results, result_files['bbox'])
+        else:
+            raise TypeError('invalid type of results')
+        return result_files
+
     def results2json(self, results, outfile_prefix):
         """Dump the detection results to a json file.
 
@@ -277,38 +330,49 @@ class WaymoOpenDataset(CustomDataset):
         ar = recalls.mean(axis=1)
         return ar
 
-    def format_results(self, results, jsonfile_prefix=None, **kwargs):
+    def format_results(self,
+                       results,
+                       outfile_prefix=None,
+                       format_type='waymo',
+                       **kwargs):
         """Format the results to json (standard format for COCO evaluation).
 
         Args:
             results (list): Testing results of the dataset.
-            jsonfile_prefix (str | None): The prefix of json files. It includes
+            outfile_prefix (str | None): The prefix of json files. It includes
                 the file path and the prefix of filename, e.g., "a/b/prefix".
                 If not specified, a temp file will be created. Default: None.
 
         Returns:
             tuple: (result_files, tmp_dir), result_files is a dict containing
                 the json filepaths, tmp_dir is the temporal directory created
-                for saving json files when jsonfile_prefix is not specified.
+                for saving json files when outfile_prefix is not specified.
         """
         assert isinstance(results, list), 'results must be a list'
         assert len(results) == len(self), (
             'The length of results is not equal to the dataset len: {} != {}'.
             format(len(results), len(self)))
 
-        if jsonfile_prefix is None:
+        if outfile_prefix is None:
             tmp_dir = tempfile.TemporaryDirectory()
-            jsonfile_prefix = osp.join(tmp_dir.name, 'results')
+            outfile_prefix = osp.join(tmp_dir.name, 'results')
         else:
             tmp_dir = None
-        result_files = self.results2json(results, jsonfile_prefix)
+
+        if format_type == 'waymo':
+            result_files = self.results2dicts(results, outfile_prefix)
+        elif format_type == 'coco':
+            result_files = self.results2json(results, outfile_prefix)
+        else:
+            raise ValueError('invalid format type')
+
         return result_files, tmp_dir
 
     def evaluate(self,
                  results,
                  metric='bbox',
                  logger=None,
-                 jsonfile_prefix=None,
+                 outfile_prefix=None,
                  classwise=False,
                  proposal_nums=(100, 300, 1000),
                  iou_thrs=np.arange(0.5, 0.96, 0.05)):
@@ -319,7 +383,7 @@ class WaymoOpenDataset(CustomDataset):
             metric (str | list[str]): Metrics to be evaluated.
             logger (logging.Logger | str | None): Logger used for printing
                 related information during evaluation. Default: None.
-            jsonfile_prefix (str | None): The prefix of json files. It includes
+            outfile_prefix (str | None): The prefix of json files. It includes
                 the file path and the prefix of filename, e.g., "a/b/prefix".
                 If not specified, a temp file will be created. Default: None.
             classwise (bool): Whether to evaluating the AP for each class.
@@ -340,7 +404,8 @@ class WaymoOpenDataset(CustomDataset):
             if metric not in allowed_metrics:
                 raise KeyError(f'metric {metric} is not supported')
 
-        result_files, tmp_dir = self.format_results(results, jsonfile_prefix)
+        result_files, tmp_dir = self.format_results(
+            results, outfile_prefix, format_type='coco')
 
         eval_results = {}
         cocoGt = self.coco
@@ -462,9 +527,11 @@ class WaymoOpenDataset(CustomDataset):
                     val = float(f'{cocoEval.stats[i]:.3f}')
                     eval_results[key] = val
                 ap = cocoEval.stats[:6]
-                eval_results[f'{metric}_mAP_copypaste'] = (
-                    f'{ap[0]:.3f} {ap[1]:.3f} {ap[2]:.3f} {ap[3]:.3f} '
-                    f'{ap[4]:.3f} {ap[5]:.3f}')
+                map_copypaste = (f'{ap[0]:.3f} {ap[1]:.3f} {ap[2]:.3f} '
+                                 f'{ap[3]:.3f} {ap[4]:.3f} {ap[5]:.3f}')
+                eval_results[f'{metric}_mAP_copypaste'] = map_copypaste
+                print_log(
+                    f'{metric}_mAP_copypaste: {map_copypaste}', logger=logger)
         if tmp_dir is not None:
             tmp_dir.cleanup()
         return eval_results
