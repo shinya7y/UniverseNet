@@ -217,6 +217,13 @@ class WaymoOpenDataset(CustomDataset):
                     data['score'] = float(bboxes[i][4])
                     data['category_id'] = self.cat_ids[label]
                     json_results.append(data)
+
+        num_dets = len(json_results)
+        num_imgs = len(self)
+        avg_dets = num_dets / num_imgs
+        print(
+            f'{num_dets} detections, {num_imgs} images (avg. {avg_dets:.2f})')
+
         return json_results
 
     def _segm2json(self, results):
@@ -375,6 +382,7 @@ class WaymoOpenDataset(CustomDataset):
                  outfile_prefix=None,
                  classwise=False,
                  proposal_nums=(100, 300, 1000),
+                 largest_max_dets=None,
                  iou_thrs=np.arange(0.5, 0.96, 0.05)):
         """Evaluation in COCO protocol.
 
@@ -455,6 +463,12 @@ class WaymoOpenDataset(CustomDataset):
                     val = float(f'{cocoEval.stats[i + 6]:.3f}')
                     eval_results[item] = val
             else:
+                if largest_max_dets is not None:
+                    assert largest_max_dets > 100, \
+                        'specify largest_max_dets only when' \
+                        'you need to evaluate more than 100 detections'
+                    cocoEval.params.maxDets[-1] = largest_max_dets
+                    cocoEval.params.maxDets[-2] = 100
                 cocoEval.evaluate()
                 cocoEval.accumulate()
                 cocoEval.summarize()
