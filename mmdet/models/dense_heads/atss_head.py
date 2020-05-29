@@ -251,7 +251,8 @@ class ATSSHead(AnchorHead):
                    centernesses,
                    img_metas,
                    cfg=None,
-                   rescale=False):
+                   rescale=False,
+                   nms=True):
         cfg = self.test_cfg if cfg is None else cfg
         assert len(cls_scores) == len(bbox_preds)
         num_levels = len(cls_scores)
@@ -276,7 +277,8 @@ class ATSSHead(AnchorHead):
             proposals = self._get_bboxes_single(cls_score_list, bbox_pred_list,
                                                 centerness_pred_list,
                                                 mlvl_anchors, img_shape,
-                                                scale_factor, cfg, rescale)
+                                                scale_factor, cfg, rescale,
+                                                nms)
             result_list.append(proposals)
         return result_list
 
@@ -288,7 +290,8 @@ class ATSSHead(AnchorHead):
                            img_shape,
                            scale_factor,
                            cfg,
-                           rescale=False):
+                           rescale=False,
+                           nms=True):
         assert len(cls_scores) == len(bbox_preds) == len(mlvl_anchors)
         mlvl_bboxes = []
         mlvl_scores = []
@@ -329,14 +332,17 @@ class ATSSHead(AnchorHead):
         mlvl_scores = torch.cat([mlvl_scores, padding], dim=1)
         mlvl_centerness = torch.cat(mlvl_centerness)
 
-        det_bboxes, det_labels = multiclass_nms(
-            mlvl_bboxes,
-            mlvl_scores,
-            cfg.score_thr,
-            cfg.nms,
-            cfg.max_per_img,
-            score_factors=mlvl_centerness)
-        return det_bboxes, det_labels
+        if nms:
+            det_bboxes, det_labels = multiclass_nms(
+                mlvl_bboxes,
+                mlvl_scores,
+                cfg.score_thr,
+                cfg.nms,
+                cfg.max_per_img,
+                score_factors=mlvl_centerness)
+            return det_bboxes, det_labels
+        else:
+            return mlvl_bboxes, mlvl_scores, mlvl_centerness
 
     def get_targets(self,
                     anchor_list,
