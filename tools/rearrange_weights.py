@@ -1,5 +1,6 @@
 import torch
 
+from mmdet.datasets import NightOwlsDataset
 from mmdet.datasets import WaymoOpenDataset
 
 
@@ -34,10 +35,13 @@ def rearrange_class_weights(model, indices):
 
 
 def rearrange_classes(model, classes_to_use, dataset_type):
-    if dataset_type != 'WaymoOpenDataset':
+    if dataset_type not in ['NightOwlsDataset', 'WaymoOpenDataset']:
         raise NotImplementedError
 
-    all_classes = WaymoOpenDataset.CLASSES
+    if dataset_type == 'NightOwlsDataset':
+        all_classes = NightOwlsDataset.CLASSES
+    if dataset_type == 'WaymoOpenDataset':
+        all_classes = WaymoOpenDataset.CLASSES
     print("classes_to_use:", classes_to_use)
     print("all_classes:", all_classes)
     assert set(classes_to_use) <= set(all_classes)

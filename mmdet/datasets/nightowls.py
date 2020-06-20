@@ -567,7 +567,8 @@ class COCOeval(_COCOeval):
                         # continue to next gt unless better match made
                         if ious[dind, gind] < iou:
                             continue
-                        # if match successful and best so far, store appropriately
+                        # if match successful and best so far,
+                        # store appropriately
                         iou = ious[dind, gind]
                         m = gind
                     # if match made store id of match for both dt and gt
