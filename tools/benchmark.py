@@ -85,7 +85,9 @@ def main():
         if (i + 1) == 200:
             pure_inf_time += elapsed
             fps = (i + 1 - num_warmup) / pure_inf_time
+            spf = 1 / fps
             print(f'Overall fps: {fps:.1f} img / s')
+            print(f'Overall spf: {spf:.4f} s / img')
             break
 
 
