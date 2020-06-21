@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/atss_r2_50_fpn_sepc_noibn_dcn.py',
+    '../_base_/models/universenet50.py',
     '../_base_/datasets/nightowls_mstrain_640_1280.py',
     '../_base_/schedules/schedule_7e.py', '../_base_/default_runtime.py'
 ]
@@ -11,4 +11,4 @@ optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0001)
 
 fp16 = dict(loss_scale=512.)
 
-load_from = '../data/checkpoints/atss_r2_50_fpn_sepc_noibn_dcn_fp16_8x2_lr0001_mstrain_640_1280_7e_waymo_open_20200526_080330/epoch_7_for_nightowls.pth'  # noqa
+load_from = '../data/checkpoints/universenet50_fp16_8x2_lr0001_mstrain_640_1280_7e_waymo_open_20200526_080330/epoch_7_for_nightowls.pth'  # noqa
