@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from mmdet.core import auto_fp16
-# TODO https://github.com/open-mmlab/mmdetection/issues/2661
 from mmdet.ops.dcn.sepc_dconv import SEPCConv
 # from mmdet.ops.dcn.sepc_dconv import ModulatedSEPCConv as SEPCConv
 from ..builder import NECKS
@@ -19,7 +18,8 @@ class SEPC(nn.Module):
                  stacked_convs=4,
                  pconv_deform=False,
                  lcconv_deform=False,
-                 ibn=False):
+                 ibn=False,
+                 lcconv_padding=0):
         super(SEPC, self).__init__()
         assert isinstance(in_channels, list)
         self.in_channels = in_channels
@@ -40,9 +40,19 @@ class SEPC(nn.Module):
                     part_deform=pconv_deform))
 
         self.lconv = SEPCConv(
-            256, 256, kernel_size=3, dilation=1, part_deform=lcconv_deform)
+            256,
+            256,
+            kernel_size=3,
+            padding=lcconv_padding,
+            dilation=1,
+            part_deform=lcconv_deform)
         self.cconv = SEPCConv(
-            256, 256, kernel_size=3, dilation=1, part_deform=lcconv_deform)
+            256,
+            256,
+            kernel_size=3,
+            padding=lcconv_padding,
+            dilation=1,
+            part_deform=lcconv_deform)
         self.relu = nn.ReLU()
         if self.ibn:
             self.lbn = nn.BatchNorm2d(256)
