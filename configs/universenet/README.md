@@ -20,7 +20,7 @@ UniverseNet is the SOTA single-stage detector on the Waymo Open Dataset 2D detec
 
 - In addition to ATSS+SEPC, UniverseNet uses Res2Net-v1b-50, DCN, and multi-scale training (480-960).
 - iBN of SEPC is set to False to allow for batch sizes less than 4.
-- All models are trained and evaluated using fp16 (mixed precision).
+- All models were trained and evaluated using fp16 (mixed precision).
 - The above UniverseNet (2x) model is a checkpoint at epoch 23. The AP of [a checkpoint at epoch 24](https://github.com/shinya7y/UniverseNet/releases/download/20.06/universenet50_fp16_8x2_mstrain_480_960_2x_coco_20200523_epoch_24-726c5c93.pth) is quite similar (48.9) but slightly worse.
 
 
@@ -43,13 +43,17 @@ UniverseNet can achieve the EfficientDet-D4 level AP (val AP: 49.0, test-dev AP:
 -->
 
 
-### warmup_iters and details for reproduction
+### Other hyperparameters and details for reproduction
 
-- The above checkpoints were trained with a warmup_iters of 500. To accelerate training, we use 8 GPUs for 9-24 epochs, after using 4 GPUs for 1-8 epochs.
-- To make training more stable, the current config sets warmup_iters to 1000. The difference will not affect the final accuracy so much.
-- Your training is going well if the AP of the first epoch model is around 20-22.
+| warmup_iters | lcconv_padding | GPUs x samples_per_gpu | box AP |
+| :----------: | :------------: | :--------------------: | :----: |
+|     500      |       0        |       4x4 -> 8x2       |  48.9  |
+|     1000     |       1        |          4x4           |  48.9  |
+|     3665     |       0        |          4x4           |  48.8  |
 
-| warmup_iters | box AP |
-| :----------: | :----: |
-|     500      |  48.9  |
-|     3665     |  48.8  |
+- The above checkpoints were trained with a warmup_iters of 500.
+  To make training more stable, the current config sets warmup_iters to 1000. The difference will not affect the final accuracy so much.
+  Your training is going well if the AP of the first epoch model is around 20-22.
+- In the official SEPC implementation, [padding=0](https://github.com/jshilong/SEPC/issues/13) in lconv and cconv (lcconv_padding).
+  Setting lcconv_padding to 1 doesn't affect accuracy.
+- To accelerate training for CVPR competitions, we used 8 GPUs for 9-24 epochs, after using 4 GPUs for 1-8 epochs.

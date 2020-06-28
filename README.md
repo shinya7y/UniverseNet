@@ -2,18 +2,31 @@
 
 UniverseNet is the state-of-the-art detector that can be trained in 24 epochs.
 
-![COCO AP](docs/img/coco_ap_time_epoch.png)
+![COCO AP](docs/imgs/coco_ap_time_epoch.png)
 
-## Aimed features:
-
+Concepts:
 1. Universal scale detection
 2. Universal training settings (standard hyperparameters)
 3. Universal Background Model (base model to be transferred)
+
+## Features not in the original MMDetection
+
+- [x] [Waymo Open Dataset](mmdet/datasets/waymo_open.py)
+- [x] [Waymo Open Dataset configs (SOTA single-stage detector)](configs/waymo_open/)
+- [x] [NightOwls Dataset](mmdet/datasets/nightowls.py)
+- [x] [NightOwls Dataset configs (1st place all-objects detector)](configs/nightowls/)
+- [x] [UniverseNet](configs/universenet/)
+- [x] SEPC
+- [x] ATSS+SEPC
+- [x] [ATSS test-time augmentation](mmdet/models/detectors/atss.py)
+- [x] [Classification weights rearrangement](tools/rearrange_weights.py)
 
 ## Acknowledgements
 
 Some codes are modified from the repositories of [Res2Net](https://github.com/Res2Net/mmdetection), [SEPC](https://github.com/jshilong/SEPC), and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
 When merging, please note that there are some minor differences from the above repositories and [the original MMDetection repository](https://github.com/open-mmlab/mmdetection).
+
+<br><br>
 
 
 # MMDetection
