@@ -20,7 +20,7 @@ UniverseNet is the SOTA single-stage detector on the Waymo Open Dataset 2D detec
 
 - In addition to ATSS+SEPC, UniverseNet uses Res2Net-v1b-50, DCN, and multi-scale training (480-960).
 - iBN of SEPC is set to False to allow for batch sizes less than 4.
-- All models were trained and evaluated using fp16 (mixed precision).
+- All models except for ATSS+SEPC were trained and evaluated using fp16 (mixed precision).
 - The above UniverseNet (2x) model is a checkpoint at epoch 23. The AP of [a checkpoint at epoch 24](https://github.com/shinya7y/UniverseNet/releases/download/20.06/universenet50_fp16_8x2_mstrain_480_960_2x_coco_20200523_epoch_24-726c5c93.pth) is quite similar (48.9) but slightly worse.
 
 
