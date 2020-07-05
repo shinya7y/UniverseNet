@@ -9,6 +9,7 @@
 - GCC 4.9+
 - [mmcv](https://github.com/open-mmlab/mmcv)
 
+mmcv 0.5.5 is recommended for UniverseNet 20.06 (June 2020).
 
 ### Install mmdetection
 
