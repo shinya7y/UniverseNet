@@ -23,7 +23,7 @@ Concepts:
 
 ## Acknowledgements
 
-Some codes are modified from the repositories of [Res2Net](https://github.com/Res2Net/mmdetection), [SEPC](https://github.com/jshilong/SEPC), and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
+Some codes are modified from the repositories of [SEPC](https://github.com/jshilong/SEPC) and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
 When merging, please note that there are some minor differences from the above repositories and [the original MMDetection repository](https://github.com/open-mmlab/mmdetection).
 
 <br><br>

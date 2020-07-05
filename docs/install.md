@@ -7,9 +7,7 @@
 - PyTorch 1.3+
 - CUDA 9.2+ (If you build PyTorch from source, CUDA 9.0 is also compatible)
 - GCC 5+
-- [mmcv](https://github.com/open-mmlab/mmcv)
-
-mmcv 0.5.5 is recommended for UniverseNet 20.06 (June 2020).
+- [mmcv](https://github.com/open-mmlab/mmcv) 0.6.2+
 
 ### Install mmdetection
 
