@@ -424,13 +424,11 @@ int deform_conv_backward_parameters_cuda(
                                 nOutputPlane, outputHeight, outputWidth});
   gradOutput.transpose_(1, 2);
 
-//   at::Tensor gradOutputBuffer = at::zeros_like(gradOutput);
-  at::Tensor gradOutputBuffer = at::zeros(
-      {batchSize / im2col_step, nOutputPlane, im2col_step,
-      outputHeight, outputWidth}, input.options());
+  at::Tensor gradOutputBuffer = at::zeros_like(gradOutput);
   gradOutputBuffer =
       gradOutputBuffer.view({batchSize / im2col_step, nOutputPlane, im2col_step,
                              outputHeight, outputWidth});
+  gradOutputBuffer = gradOutputBuffer.contiguous();
   gradOutputBuffer.copy_(gradOutput);
   gradOutputBuffer =
       gradOutputBuffer.view({batchSize / im2col_step, nOutputPlane,

@@ -1,4 +1,4 @@
-API Documentation
+API Reference
 =================
 
 mmdet.apis
@@ -73,6 +73,11 @@ detectors
 backbones
 ^^^^^^^^^^
 .. automodule:: mmdet.models.backbones
+    :members:
+
+necks
+^^^^^^^^^^^^
+.. automodule:: mmdet.models.necks
     :members:
 
 dense_heads

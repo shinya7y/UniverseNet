@@ -1,5 +1,109 @@
 ## Changelog
 
+### v2.2.0 (1/7/2020)
+
+**Highlights**
+- Support new methods: [DetectoRS](https://arxiv.org/abs/2006.02334), [PointRend](https://arxiv.org/abs/1912.08193), [Generalized Focal Loss](https://arxiv.org/abs/2006.04388), [Dynamic R-CNN](https://arxiv.org/abs/2004.06002)
+
+**Bug Fixes**
+ - Fix FreeAnchor when no gt in image (#3176)
+ - Clean up deprecated usage of `register_module()` (#3092, #3161)
+ - Fix pretrain bug in NAS FCOS (#3145)
+ - Fix `num_classes` in SSD (#3142)
+ - Fix FCOS warmup (#3119)
+ - Fix `rstrip` in `tools/publish_model.py`
+ - Fix `flip_ratio` default value in RandomFLip pipeline (#3106)
+ - Fix cityscapes eval with ms_rcnn (#3112)
+ - Fix RPN softmax (#3056)
+ - Fix filename of LVIS@v0.5 (#2998)
+ - Fix nan loss by filtering out-of-frame gt_bboxes in COCO (#2999)
+ - Fix bug in FSAF (#3018)
+ - Add FocalLoss `num_classes` check (#2964)
+ - Fix PISA Loss when there are no gts (#2992)
+ - Avoid nan in `iou_calculator` (#2975)
+ - Prevent possible bugs in loading and transforms caused by shallow copy (#2967)
+
+**New Features**
+- Add DetectoRS (#3064)
+- Support Generalize Focal Loss (#3097)
+- Support PointRend (#2752)
+- Support Dynamic R-CNN (#3040)
+- Add DeepFashion dataset (#2968)
+- Implement FCOS training tricks (#2935)
+- Use BaseDenseHead as base class for anchor-base heads (#2963)
+- Add `with_cp` for BasicBlock (#2891)
+- Add `stem_channles` argument for ResNet (#2954)
+
+**Improvements**
+
+- Add anchor free base head (#2867)
+- Migrate to github action (#3137)
+- Add docstring for datasets, pipelines, core modules and methods (#3130, #3125, #3120)
+- Add VOC benchmark (#3060)
+- Add `concat` mode in GRoI (#3098)
+- Remove cmd arg `autorescale-lr` (#3080)
+- Use `len(data['img_metas'])` to indicate `num_samples` (#3073, #3053)
+- Switch to EpochBasedRunner (#2976)
+
+
+### v2.1.0 (8/6/2020)
+
+**Highlights**
+- Support new backbones: [RegNetX](https://arxiv.org/abs/2003.13678), [Res2Net](https://arxiv.org/abs/1904.01169)
+- Support new methods: [NASFCOS](https://arxiv.org/abs/1906.04423), [PISA](https://arxiv.org/abs/1904.04821), [GRoIE](https://arxiv.org/abs/2004.13665)
+- Support new dataset: [LVIS](https://arxiv.org/abs/1908.03195)
+
+**Bug Fixes**
+- Change the CLI argument `--validate` to `--no-validate` to enable validation after training epochs by default. (#2651)
+- Add missing cython to docker file (#2713)
+- Fix bug in nms cpu implementation (#2754)
+- Fix bug when showing mask results (#2763)
+- Fix gcc requirement (#2806)
+- Fix bug in async test (#2820)
+- Fix mask encoding-decoding bugs in test API (#2824)
+- Fix bug in test time augmentation (#2858, #2921, #2944)
+- Fix a typo in comment of apis/train (#2877)
+- Fix the bug of returning None when no gt bboxes are in the original image in `RandomCrop`. Fix the bug that misses to handle `gt_bboxes_ignore`, `gt_label_ignore`, and `gt_masks_ignore` in `RandomCrop`, `MinIoURandomCrop` and `Expand` modules. (#2810)
+- Fix bug of `base_channels` of regnet (#2917)
+- Fix the bug of logger when loading pre-trained weights in base detector (#2936)
+
+**New Features**
+- Add IoU models (#2666)
+- Add colab demo for inference
+- Support class agnostic nms (#2553)
+- Add benchmark gathering scripts for development only (#2676)
+- Add mmdet-based project links (#2736, #2767, #2895)
+- Add config dump in training (#2779)
+- Add ClassBalancedDataset (#2721)
+- Add res2net backbone (#2237)
+- Support RegNetX models (#2710)
+- Use `mmcv.FileClient` to support different storage backends (#2712)
+- Add ClassBalancedDataset (#2721)
+- Code Release: Prime Sample Attention in Object Detection (CVPR 2020) (#2626)
+- Implement NASFCOS (#2682)
+- Add class weight in CrossEntropyLoss (#2797)
+- Support LVIS dataset (#2088)
+- Support GRoIE (#2584)
+
+**Improvements**
+- Allow different x and y strides in anchor heads. (#2629)
+- Make FSAF loss more robust to no gt (#2680)
+- Compute pure inference time instead (#2657) and update inference speed (#2730)
+- Avoided the possibility that a patch with 0 area is cropped. (#2704)
+- Add warnings when deprecated `imgs_per_gpu` is used. (#2700)
+- Add a mask rcnn example for config (#2645)
+- Update model zoo (#2762, #2866, #2876, #2879, #2831)
+- Add `ori_filename` to img_metas and use it in test show-dir (#2612)
+- Use `img_fields` to handle multiple images during image transform (#2800)
+- Add upsample_cfg support in FPN (#2787)
+- Add `['img']` as default `img_fields` for back compatibility (#2809)
+- Rename the pretrained model from `open-mmlab://resnet50_caffe` and `open-mmlab://resnet50_caffe_bgr` to `open-mmlab://detectron/resnet50_caffe` and `open-mmlab://detectron2/resnet50_caffe`. (#2832)
+- Added sleep(2) in test.py to reduce hanging problem (#2847)
+- Support `c10::half` in CARAFE (#2890)
+- Improve documentations (#2918, #2714)
+- Use optimizer constructor in mmcv and clean the original implementation in `mmdet.core.optimizer` (#2947)
+
+
 ### v2.0.0 (6/5/2020)
 In this release, we made lots of major refactoring and modifications.
 
@@ -13,12 +117,12 @@ In this release, we made lots of major refactoring and modifications.
 
 5. **Better configuration system**. Inheritance is supported to reduce the redundancy of configs.
 
-6. **Better modular desing**. Towards the goal of simplicity and flexibility, we simplify some encapsulation while add more other configurable modules like BBoxCoder, IoUCalculator, OptimizerConstructor, RoIHead. Target computation is also included in heads and the call hierarchy is simpler.
+6. **Better modular design**. Towards the goal of simplicity and flexibility, we simplify some encapsulation while add more other configurable modules like BBoxCoder, IoUCalculator, OptimizerConstructor, RoIHead. Target computation is also included in heads and the call hierarchy is simpler.
 
 7. Support new methods: [FSAF](https://arxiv.org/abs/1903.00621) and PAFPN (part of [PAFPN](https://arxiv.org/abs/1803.01534)).
 
 **Breaking Changes**
-Models training with mmdetection 1.x are not fully compatible with 2.0, please refer to the [compatibility doc](compatibility.md) for the details and how to migrate to the new version.
+Models training with MMDetection 1.x are not fully compatible with 2.0, please refer to the [compatibility doc](compatibility.md) for the details and how to migrate to the new version.
 
 **Improvements**
 - Unify cuda and cpp API for custom ops. (#2277)

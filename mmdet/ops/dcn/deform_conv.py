@@ -177,6 +177,7 @@ class ModulatedDeformConvFunction(Function):
         channels_out = weight.size(0)
         height, width = input.shape[2:4]
         kernel_h, kernel_w = weight.shape[2:4]
+        # TODO: support different padding/stride/dilation in height and width
         height_out = (height + 2 * ctx.padding -
                       (ctx.dilation * (kernel_h - 1) + 1)) // ctx.stride + 1
         width_out = (width + 2 * ctx.padding -
@@ -253,9 +254,17 @@ class DeformConv(nn.Module):
         return out
 
 
-@CONV_LAYERS.register_module('DCN')
+@CONV_LAYERS.register_module(name='DCN')
 class DeformConvPack(DeformConv):
     """A Deformable Conv Encapsulation that acts as normal Conv layers.
+
+    The offset tensor is like `[y0, x0, y1, x1, y2, x2, ..., y8, x8]`.
+    The spatial arrangement is like:
+    ```
+    (x0, y0) (x1, y1) (x2, y2)
+    (x3, y3) (x4, y4) (x5, y5)
+    (x6, y6) (x7, y7) (x8, y8)
+    ```
 
     Args:
         in_channels (int): Same as nn.Conv2d.
@@ -356,9 +365,9 @@ class ModulatedDeformConv(nn.Module):
             self.bias = nn.Parameter(torch.Tensor(out_channels))
         else:
             self.register_parameter('bias', None)
-        self.reset_parameters()
+        self.init_weights()
 
-    def reset_parameters(self):
+    def init_weights(self):
         n = self.in_channels
         for k in self.kernel_size:
             n *= k
@@ -373,17 +382,18 @@ class ModulatedDeformConv(nn.Module):
                                      self.groups, self.deformable_groups)
 
 
-@CONV_LAYERS.register_module('DCNv2')
+@CONV_LAYERS.register_module(name='DCNv2')
 class ModulatedDeformConvPack(ModulatedDeformConv):
-    """A ModulatedDeformable Conv Encapsulation that acts as normal Conv layers.
+    """A ModulatedDeformable Conv Encapsulation that acts as normal Conv
+    layers.
 
     Args:
         in_channels (int): Same as nn.Conv2d.
         out_channels (int): Same as nn.Conv2d.
         kernel_size (int or tuple[int]): Same as nn.Conv2d.
-        stride (int or tuple[int]): Same as nn.Conv2d.
-        padding (int or tuple[int]): Same as nn.Conv2d.
-        dilation (int or tuple[int]): Same as nn.Conv2d.
+        stride (int): Same as nn.Conv2d, while tuple is not supported.
+        padding (int): Same as nn.Conv2d, while tuple is not supported.
+        dilation (int): Same as nn.Conv2d, while tuple is not supported.
         groups (int): Same as nn.Conv2d.
         bias (bool or str): If specified as `auto`, it will be decided by the
             norm_cfg. Bias will be set as True if norm_cfg is None, otherwise
@@ -404,11 +414,13 @@ class ModulatedDeformConvPack(ModulatedDeformConv):
             padding=_pair(self.padding),
             dilation=_pair(self.dilation),
             bias=True)
-        self.init_offset()
+        self.init_weights()
 
-    def init_offset(self):
-        self.conv_offset.weight.data.zero_()
-        self.conv_offset.bias.data.zero_()
+    def init_weights(self):
+        super(ModulatedDeformConvPack, self).init_weights()
+        if hasattr(self, 'conv_offset'):
+            self.conv_offset.weight.data.zero_()
+            self.conv_offset.bias.data.zero_()
 
     def forward(self, x):
         out = self.conv_offset(x)
