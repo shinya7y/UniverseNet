@@ -23,8 +23,7 @@ model = dict(
             in_channels=[256, 512, 1024, 2048],
             out_channels=256,
             start_level=1,
-            add_extra_convs=True,
-            extra_convs_on_inputs=False,
+            add_extra_convs='on_output',
             num_outs=5),
         dict(
             type='SEPC',
