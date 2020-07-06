@@ -3,7 +3,7 @@ from .deform_conv import (DeformConv, DeformConvPack, ModulatedDeformConv,
                           modulated_deform_conv)
 from .deform_pool import (DeformRoIPooling, DeformRoIPoolingPack,
                           ModulatedDeformRoIPoolingPack, deform_roi_pooling)
-from .sepc_dconv import SEPCConv, ModulatedSEPCConv
+from .sepc_dconv import ModulatedSEPCConv, SEPCConv
 
 __all__ = [
     'DeformConv', 'DeformConvPack', 'ModulatedDeformConv',

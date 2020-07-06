@@ -1,12 +1,10 @@
 import torch
 
-from mmdet.datasets import NightOwlsDataset
-from mmdet.datasets import WaymoOpenDataset
+from mmdet.datasets import NightOwlsDataset, WaymoOpenDataset
 
 
 def rearrange_class_weights(model, indices):
-    """ Rearrange weights and biases of classification layer
-    """
+    """Rearrange weights and biases of classification layer."""
     target_layers = ['bbox_head.atss_cls', 'module.bbox_head.atss_cls']
     num_found_target_layer = 0
     for name, module in model.named_modules():
@@ -42,8 +40,8 @@ def rearrange_classes(model, classes_to_use, dataset_type):
         all_classes = NightOwlsDataset.CLASSES
     if dataset_type == 'WaymoOpenDataset':
         all_classes = WaymoOpenDataset.CLASSES
-    print("classes_to_use:", classes_to_use)
-    print("all_classes:", all_classes)
+    print('classes_to_use:', classes_to_use)
+    print('all_classes:', all_classes)
     assert set(classes_to_use) <= set(all_classes)
 
     indices = [all_classes.index(c) for c in classes_to_use]

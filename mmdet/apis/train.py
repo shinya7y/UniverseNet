@@ -5,11 +5,11 @@ import torch
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (DistSamplerSeedHook, EpochBasedRunner, OptimizerHook,
                          build_optimizer)
+from tools.rearrange_weights import rearrange_classes
 
 from mmdet.core import DistEvalHook, EvalHook, Fp16OptimizerHook
 from mmdet.datasets import build_dataloader, build_dataset
 from mmdet.utils import get_root_logger
-from tools.rearrange_weights import rearrange_classes
 
 
 def set_random_seed(seed, deterministic=False):
