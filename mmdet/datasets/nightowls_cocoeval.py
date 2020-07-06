@@ -1,22 +1,35 @@
-"""
-Modified from https://gitlab.com/vgg/nightowlsapi
+"""Modified from https://gitlab.com/vgg/nightowlsapi.
 
 License:
-This dataset is made freely available to academic and non-academic entities for non-commercial purposes such as academic research, teaching, scientific publications, or personal experimentation. Permission is granted to use the data given that you agree:
+This dataset is made freely available to academic and non-academic entities
+for non-commercial purposes such as academic research, teaching, scientific
+publications, or personal experimentation. Permission is granted to use the
+data given that you agree:
 
-1. That the dataset comes “AS IS”, without express or implied warranty. Although every effort has been made to ensure accuracy, we (University of Oxford) do not accept any responsibility for errors or omissions.
-2. That you include a reference to the Nightowls Dataset in any work that makes use of the dataset.
-3. That you do not distribute this dataset or modified versions. It is permissible to distribute derivative works in as far as they are abstract representations of this dataset (such as models trained on it or additional annotations that do not directly include any of our data) and do not allow to recover the dataset or something similar in character.
-4. You may not use the dataset or any derivative work for commercial purposes such as, for example, licensing or selling the data, or using the data with a purpose to procure a commercial gain.
-5. That all rights not expressly granted to you are reserved by us (University of Oxford).
+1. That the dataset comes “AS IS”, without express or implied warranty.
+Although every effort has been made to ensure accuracy, we (University of
+Oxford) do not accept any responsibility for errors or omissions.
+2. That you include a reference to the Nightowls Dataset in any work that
+makes use of the dataset.
+3. That you do not distribute this dataset or modified versions. It is
+permissible to distribute derivative works in as far as they are abstract
+representations of this dataset (such as models trained on it or additional
+annotations that do not directly include any of our data) and do not allow
+to recover the dataset or something similar in character.
+4. You may not use the dataset or any derivative work for commercial purposes
+such as, for example, licensing or selling the data, or using the data with a
+purpose to procure a commercial gain.
+5. That all rights not expressly granted to you are reserved by us (University
+of Oxford).
 """
 
-import numpy as np
+# from . import mask as maskUtils
+import copy
 import datetime
 import time
 from collections import defaultdict
-# from . import mask as maskUtils
-import copy
+
+import numpy as np
 
 
 class COCOeval:
@@ -70,12 +83,12 @@ class COCOeval:
     # Code written by Piotr Dollar and Tsung-Yi Lin, 2015.
     # Licensed under the Simplified BSD License [see coco/license.txt]
     def __init__(self, cocoGt=None, cocoDt=None, iouType='segm'):
-        '''
-        Initialize CocoEval using coco APIs for gt and dt
+        """Initialize CocoEval using coco APIs for gt and dt.
+
         :param cocoGt: coco object with ground truth annotations
         :param cocoDt: coco object with detection results
         :return: None
-        '''
+        """
         if not iouType:
             print('iouType not specified. use default iouType segm')
         self.cocoGt = cocoGt  # ground truth COCO API
@@ -90,7 +103,7 @@ class COCOeval:
         self._paramsEval = {}  # parameters for evaluation
         self.stats = []  # result summarization
         self.ious = {}  # ious between all gts and dts
-        if not cocoGt is None:
+        if cocoGt is not None:
             self.params.imgIds = sorted(cocoGt.getImgIds())
             self.params.catIds = sorted(cocoGt.getCatIds())
 
@@ -116,8 +129,12 @@ class COCOeval:
             if 'vis_ratio' not in gt:
                 gt['vis_ratio'] = 0.5 if gt['occluded'] else 1.0
 
-            gt['ignore'] = 1 if (gt['height'] < self.params.HtRng[id_setup][0] or gt['height'] > self.params.HtRng[id_setup][1]) or \
-               ( gt['vis_ratio'] < self.params.VisRng[id_setup][0] or gt['vis_ratio'] > self.params.VisRng[id_setup][1]) else gt['ignore']
+            gt['ignore'] = 1 if (
+                gt['height'] < self.params.HtRng[id_setup][0]
+                or gt['height'] > self.params.HtRng[id_setup][1]) or (
+                    gt['vis_ratio'] < self.params.VisRng[id_setup][0]
+                    or gt['vis_ratio'] > self.params.VisRng[id_setup][1]
+                ) else gt['ignore']
         for dt in dts:
             dt['height'] = dt['height'] if 'height' in dt else dt['bbox'][3]
 
@@ -133,14 +150,15 @@ class COCOeval:
 
     def evaluate(self, id_setup):
         '''
-        Run per image evaluation on given images and store results (a list of dict) in self.evalImgs
+        Run per image evaluation on given images and store results (a list of
+        dict) in self.evalImgs
         :return: None
         '''
         tic = time.time()
         print('Running per image evaluation...')
         p = self.params
         # add backward compatibility if useSegm is specified in params
-        if not p.useSegm is None:
+        if p.useSegm is not None:
             p.iouType = 'segm' if p.useSegm == 1 else 'bbox'
             print('useSegm (deprecated) is not None. Running {} evaluation'.
                   format(p.iouType))
@@ -157,9 +175,8 @@ class COCOeval:
 
         computeIoU = self.computeIoU
 
-        self.ious = {(imgId, catId): computeIoU(imgId, catId) \
-                        for imgId in p.imgIds
-                        for catId in catIds}
+        self.ious = {(imgId, catId): computeIoU(imgId, catId)
+                     for imgId in p.imgIds for catId in catIds}
 
         evaluateImg = self.evaluateImg
         maxDet = p.maxDets[-1]
@@ -302,7 +319,8 @@ class COCOeval:
                         # continue to next gt unless better match made
                         if ious[dind, gind] < bstOa:
                             continue
-                        # if match successful and best so far, store appropriately
+                        # if match successful and best so far, store
+                        # appropriately
                         bstOa = ious[dind, gind]
                         bstg = gind
                         if gtIg[gind] == 0:
@@ -335,11 +353,12 @@ class COCOeval:
         }
 
     def accumulate(self, p=None):
-        '''
-        Accumulate per image evaluation results and store the result in self.eval
+        """Accumulate per image evaluation results and store the result in
+        self.eval.
+
         :param p: input params for evaluation
         :return: None
-        '''
+        """
         print('Accumulating evaluation results...')
         tic = time.time()
         if not self.evalImgs:
@@ -357,7 +376,7 @@ class COCOeval:
 
         # create dictionary for future indexing
         _pe = self._paramsEval
-        catIds = [1]  #_pe.catIds if _pe.useCats else [-1]
+        catIds = [1]  # _pe.catIds if _pe.useCats else [-1]
         setK = set(catIds)
         setM = set(_pe.maxDets)
         setI = set(_pe.imgIds)
@@ -373,13 +392,14 @@ class COCOeval:
             Nk = k0 * I0
             for m, maxDet in enumerate(m_list):
                 E = [self.evalImgs[Nk + i] for i in i_list]
-                E = [e for e in E if not e is None]
+                E = [e for e in E if e is not None]
                 if len(E) == 0:
                     continue
 
                 dtScores = np.concatenate([e['dtScores'][0:maxDet] for e in E])
 
-                # different sorting method generates slightly different results.
+                # different sorting method generates slightly different
+                # results.
                 # mergesort is used to be consistent as Matlab implementation.
 
                 inds = np.argsort(-dtScores, kind='mergesort')
@@ -407,7 +427,8 @@ class COCOeval:
                     recall = tp / npig
                     q = np.zeros((R, ))
 
-                    # numpy is slow without cython optimization for accessing elements
+                    # numpy is slow without cython optimization for accessing
+                    # elements
                     # use python array gets significant speed improvement
                     recall = recall.tolist()
                     q = q.tolist()
@@ -420,7 +441,7 @@ class COCOeval:
                     try:
                         for ri, pi in enumerate(inds):
                             q[ri] = recall[pi]
-                    except:
+                    except:  # noqa: E722
                         pass
                     ys[t, :, k, m] = np.array(q)
         self.eval = {
@@ -433,14 +454,16 @@ class COCOeval:
         print('DONE (t={:0.2f}s).'.format(toc - tic))
 
     def summarize(self, id_setup, res_file=None):
-        '''
-        Compute and display summary metrics for evaluation results.
-        Note this functin can *only* be applied on the default parameter setting
-        '''
+        """Compute and display summary metrics for evaluation results.
+
+        Note this functin can *only* be applied on the default parameter
+        setting
+        """
 
         def _summarize(iouThr=None, maxDets=100):
             p = self.params
-            iStr = ' {:<18} {} @ {:<18} [ IoU={:<9} | height={:>6s} | visibility={:>6s} ] = {:0.2f}%'
+            iStr = (' {:<18} {} @ {:<18} [ IoU={:<9} | height={:>6s} | '
+                    'visibility={:>6s} ] = {:0.2f}%')
             titleStr = 'Average Miss Rate'
             typeStr = '(MR)'
             setupStr = p.SetupLbl[id_setup]
@@ -486,14 +509,13 @@ class COCOeval:
 
 
 class Params:
-    '''
-    Params for coco evaluation api
-    '''
+    """Params for coco evaluation api."""
 
     def setDetParams(self):
         self.imgIds = []
         self.catIds = []
-        # np.arange causes trouble.  the data point on arange is slightly larger than the true value
+        # np.arange causes trouble. the data point on arange is slightly
+        # larger than the true value
 
         self.recThrs = np.linspace(
             .0, 1.00, int(np.round((1.00 - .0) / .01)) + 1, endpoint=True)
@@ -505,9 +527,8 @@ class Params:
         self.expFilter = 1.25
         self.useCats = 1
 
-        self.iouThrs = np.array(
-            [0.5]
-        )  # np.linspace(.5, 0.95, np.round((0.95 - .5) / .05) + 1, endpoint=True)
+        self.iouThrs = np.array([0.5])
+        # np.linspace(.5, 0.95, np.round((0.95 - .5) / .05) + 1, endpoint=True)
 
         self.HtRng = [[50, 1e5**2], [50, 75], [50, 1e5**2], [20, 1e5**2]]
         self.VisRng = [[0.65, 1e5**2], [0.65, 1e5**2], [0.2, 0.65],
