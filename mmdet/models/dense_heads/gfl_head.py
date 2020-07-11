@@ -52,7 +52,7 @@ class Integral(nn.Module):
                 offsets from the box center in four directions, shape (N, 4).
         """
         x = F.softmax(x.reshape(-1, self.reg_max + 1), dim=1)
-        x = F.linear(x, self.project).reshape(-1, 4)
+        x = F.linear(x, self.project.type_as(x)).reshape(-1, 4)
         return x
 
 
@@ -629,3 +629,20 @@ class GFLHead(AnchorHead):
             int(flags.sum()) for flags in split_inside_flags
         ]
         return num_level_anchors_inside
+
+
+@HEADS.register_module()
+class GFLSEPCHead(GFLHead):
+
+    def forward_single(self, x, scale):
+        if not isinstance(x, list):
+            x = [x, x]
+        cls_feat = x[0]
+        reg_feat = x[1]
+        for cls_conv in self.cls_convs:
+            cls_feat = cls_conv(cls_feat)
+        for reg_conv in self.reg_convs:
+            reg_feat = reg_conv(reg_feat)
+        cls_score = self.gfl_cls(cls_feat)
+        bbox_pred = scale(self.gfl_reg(reg_feat)).float()
+        return cls_score, bbox_pred
