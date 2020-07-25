@@ -4,6 +4,8 @@ UniverseNet is the state-of-the-art detector that can be trained in 24 epochs.
 
 ![COCO AP](docs/imgs/coco_ap_time_epoch.png)
 
+UniverseNet+GFL (Res2Net-101) is further accurate (val AP: 50.8).
+
 Concepts:
 1. Universal scale detection
 2. Universal training settings (standard hyperparameters)
@@ -18,6 +20,7 @@ Concepts:
 - [x] [UniverseNet](configs/universenet/)
 - [x] SEPC
 - [x] ATSS+SEPC
+- [x] GFL+SEPC
 - [x] [ATSS test-time augmentation](mmdet/models/detectors/atss.py)
 - [x] [Classification weights rearrangement](tools/rearrange_weights.py)
 
