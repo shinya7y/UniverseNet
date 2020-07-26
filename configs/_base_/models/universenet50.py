@@ -15,7 +15,7 @@ model = dict(
         norm_cfg=dict(type='BN', requires_grad=True),
         norm_eval=True,
         style='pytorch',
-        dcn=dict(type='DCN', deformable_groups=1, fallback_on_stride=False),
+        dcn=dict(type='DCN', deform_groups=1, fallback_on_stride=False),
         stage_with_dcn=(False, True, True, True)),
     neck=[
         dict(
@@ -69,5 +69,5 @@ test_cfg = dict(
     nms_pre=1000,
     min_bbox_size=0,
     score_thr=0.05,
-    nms=dict(type='nms', iou_thr=0.6),
+    nms=dict(type='nms', iou_threshold=0.6),
     max_per_img=100)

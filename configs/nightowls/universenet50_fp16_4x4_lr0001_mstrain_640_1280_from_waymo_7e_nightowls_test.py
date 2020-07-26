@@ -31,7 +31,7 @@ test_cfg = dict(
     nms_pre=1000,
     min_bbox_size=0,
     score_thr=0.02,
-    nms=dict(type='nms', iou_thr=0.6),
+    nms=dict(type='nms', iou_threshold=0.6),
     max_per_img=1000)
 
 fp16 = dict(loss_scale=512.)
