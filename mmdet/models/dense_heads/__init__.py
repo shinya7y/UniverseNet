@@ -1,6 +1,7 @@
 from .anchor_free_head import AnchorFreeHead
 from .anchor_head import AnchorHead
 from .atss_head import ATSSHead, ATSSSEPCHead
+from .corner_head import CornerHead
 from .fcos_head import FCOSHead
 from .fovea_head import FoveaHead
 from .free_anchor_retina_head import FreeAnchorRetinaHead
@@ -23,5 +24,6 @@ __all__ = [
     'RPNHead', 'GARPNHead', 'RetinaHead', 'RetinaSepBNHead', 'GARetinaHead',
     'SSDHead', 'FCOSHead', 'RepPointsHead', 'FoveaHead',
     'FreeAnchorRetinaHead', 'ATSSHead', 'ATSSSEPCHead', 'FSAFHead',
-    'NASFCOSHead', 'PISARetinaHead', 'PISASSDHead', 'GFLHead', 'GFLSEPCHead'
+    'NASFCOSHead', 'PISARetinaHead', 'PISASSDHead', 'GFLHead', 'GFLSEPCHead',
+    'CornerHead'
 ]
