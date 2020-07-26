@@ -1,12 +1,12 @@
 import torch
 import torch.nn as nn
+from mmcv.ops.deform_conv import DeformConv2d, deform_conv2d
+from mmcv.ops.modulated_deform_conv import (ModulatedDeformConv2d,
+                                            modulated_deform_conv2d)
 from torch.nn.modules.utils import _pair
 
-from mmdet.ops.dcn import (DeformConv, ModulatedDeformConv, deform_conv,
-                           modulated_deform_conv)
 
-
-class SEPCConv(DeformConv):
+class SEPCConv(DeformConv2d):
 
     def __init__(self, *args, part_deform=False, **kwargs):
         super(SEPCConv, self).__init__(*args, **kwargs)
@@ -14,7 +14,7 @@ class SEPCConv(DeformConv):
         if self.part_deform:
             self.conv_offset = nn.Conv2d(
                 self.in_channels,
-                self.deformable_groups * 2 * self.kernel_size[0] *
+                self.deform_groups * 2 * self.kernel_size[0] *
                 self.kernel_size[1],
                 kernel_size=self.kernel_size,
                 stride=_pair(self.stride),
@@ -42,13 +42,13 @@ class SEPCConv(DeformConv):
                 groups=self.groups)
 
         offset = self.conv_offset(x)
-        return deform_conv(x, offset, self.weight, self.stride, self.padding,
-                           self.dilation, self.groups,
-                           self.deformable_groups) + self.bias.unsqueeze(
-                               0).unsqueeze(-1).unsqueeze(-1)
+        return deform_conv2d(x, offset, self.weight, self.stride, self.padding,
+                             self.dilation, self.groups,
+                             self.deform_groups) + self.bias.unsqueeze(
+                                 0).unsqueeze(-1).unsqueeze(-1)
 
 
-class ModulatedSEPCConv(ModulatedDeformConv):
+class ModulatedSEPCConv(ModulatedDeformConv2d):
 
     _version = 2
 
@@ -58,7 +58,7 @@ class ModulatedSEPCConv(ModulatedDeformConv):
         if self.part_deform:
             self.conv_offset = nn.Conv2d(
                 self.in_channels,
-                self.deformable_groups * 3 * self.kernel_size[0] *
+                self.deform_groups * 3 * self.kernel_size[0] *
                 self.kernel_size[1],
                 kernel_size=self.kernel_size,
                 stride=_pair(self.stride),
@@ -90,7 +90,7 @@ class ModulatedSEPCConv(ModulatedDeformConv):
         offset = torch.cat((o1, o2), dim=1)
         mask = torch.sigmoid(mask)
 
-        return modulated_deform_conv(
+        return modulated_deform_conv2d(
             x, offset, mask, self.weight, None, self.stride, self.padding,
-            self.dilation, self.groups, self.deformable_groups
+            self.dilation, self.groups, self.deform_groups
         ) + self.bias.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
