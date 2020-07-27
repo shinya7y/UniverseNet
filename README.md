@@ -19,9 +19,8 @@ Concepts:
 - [x] [NightOwls Dataset configs (1st place all-objects detector)](configs/nightowls/)
 - [x] [UniverseNet](configs/universenet/)
 - [x] SEPC
-- [x] ATSS+SEPC
-- [x] GFL+SEPC
-- [x] [ATSS test-time augmentation](mmdet/models/detectors/atss.py)
+- [x] ATSS+SEPC, GFL+SEPC
+- [x] Test-time augmentation for ATSS and GFL
 - [x] [Classification weights rearrangement](tools/rearrange_weights.py)
 
 ## Acknowledgements
