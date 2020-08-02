@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from mmcv.cnn import build_norm_layer
 
 from mmdet.core import auto_fp16
 from mmdet.ops.dcn.sepc_dconv import SEPCConv
@@ -19,6 +20,7 @@ class SEPC(nn.Module):
                  pconv_deform=False,
                  lcconv_deform=False,
                  ibn=False,
+                 norm_cfg=dict(type='BN', requires_grad=True),
                  lcconv_padding=0):
         super(SEPC, self).__init__()
         assert isinstance(in_channels, list)
@@ -29,6 +31,7 @@ class SEPC(nn.Module):
         assert num_outs == 5
         self.fp16_enabled = False
         self.ibn = ibn
+        self.norm_cfg = norm_cfg
         self.pconvs = nn.ModuleList()
 
         for i in range(stacked_convs):
@@ -37,6 +40,7 @@ class SEPC(nn.Module):
                     in_channels[i],
                     out_channels,
                     ibn=self.ibn,
+                    norm_cfg=self.norm_cfg,
                     part_deform=pconv_deform))
 
         self.lconv = SEPCConv(
@@ -53,18 +57,32 @@ class SEPC(nn.Module):
             padding=lcconv_padding,
             dilation=1,
             part_deform=lcconv_deform)
-        self.relu = nn.ReLU()
         if self.ibn:
-            self.lbn = nn.BatchNorm2d(256)
-            self.cbn = nn.BatchNorm2d(256)
+            self.lnorm_name, lnorm = build_norm_layer(
+                self.norm_cfg, 256, postfix='_loc')
+            self.cnorm_name, cnorm = build_norm_layer(
+                self.norm_cfg, 256, postfix='_cls')
+            self.add_module(self.lnorm_name, lnorm)
+            self.add_module(self.cnorm_name, cnorm)
+        self.relu = nn.ReLU()
         self.init_weights()
 
     def init_weights(self):
-        for str in ["l", "c"]:
-            m = getattr(self, str + "conv")
+        for str in ['l', 'c']:
+            m = getattr(self, str + 'conv')
             nn.init.normal_(m.weight.data, 0, 0.01)
             if m.bias is not None:
                 m.bias.data.zero_()
+
+    @property
+    def lnorm(self):
+        """nn.Module: normalization layer after localization conv layer"""
+        return getattr(self, self.lnorm_name)
+
+    @property
+    def cnorm(self):
+        """nn.Module: normalization layer after classification conv layer"""
+        return getattr(self, self.cnorm_name)
 
     @auto_fp16()
     def forward(self, inputs):
@@ -75,8 +93,8 @@ class SEPC(nn.Module):
         cls_feats = [self.cconv(level, item) for level, item in enumerate(x)]
         loc_feats = [self.lconv(level, item) for level, item in enumerate(x)]
         if self.ibn:
-            cls_feats = integrated_bn(cls_feats, self.cbn)
-            loc_feats = integrated_bn(loc_feats, self.lbn)
+            cls_feats = integrated_bn(cls_feats, self.cnorm)
+            loc_feats = integrated_bn(loc_feats, self.lnorm)
         outs = [[self.relu(cls_feat), self.relu(loc_feat)]
                 for cls_feat, loc_feat in zip(cls_feats, loc_feats)]
         return tuple(outs)
@@ -91,10 +109,12 @@ class PConvModule(nn.Module):
                  dilation=[1, 1, 1],
                  groups=[1, 1, 1],
                  ibn=False,
+                 norm_cfg=dict(type='BN', requires_grad=True),
                  part_deform=False):
         super(PConvModule, self).__init__()
 
         self.ibn = ibn
+        self.norm_cfg = norm_cfg
         self.pconv = nn.ModuleList()
         self.pconv.append(
             SEPCConv(
@@ -126,7 +146,8 @@ class PConvModule(nn.Module):
                 part_deform=part_deform))
 
         if self.ibn:
-            self.bn = nn.BatchNorm2d(256)
+            self.inorm_name, inorm = build_norm_layer(self.norm_cfg, 256)
+            self.add_module(self.inorm_name, inorm)
 
         self.relu = nn.ReLU()
         self.init_weights()
@@ -136,6 +157,11 @@ class PConvModule(nn.Module):
             nn.init.normal_(m.weight.data, 0, 0.01)
             if m.bias is not None:
                 m.bias.data.zero_()
+
+    @property
+    def inorm(self):
+        """nn.Module: integrated normalization layer"""
+        return getattr(self, self.inorm_name)
 
     def forward(self, x):
         next_x = []
@@ -151,7 +177,7 @@ class PConvModule(nn.Module):
                     align_corners=True)
             next_x.append(temp_fea)
         if self.ibn:
-            next_x = integrated_bn(next_x, self.bn)
+            next_x = integrated_bn(next_x, self.inorm)
         next_x = [self.relu(item) for item in next_x]
         return next_x
 
@@ -159,9 +185,7 @@ class PConvModule(nn.Module):
 def integrated_bn(fms, bn):
     sizes = [p.shape[2:] for p in fms]
     n, c = fms[0].shape[0], fms[0].shape[1]
-    print('integrated_bn a', flush=True)
     fm = torch.cat([p.view(n, c, 1, -1) for p in fms], dim=-1)
     fm = bn(fm)
     fm = torch.split(fm, [s[0] * s[1] for s in sizes], dim=-1)
-    print('integrated_bn b', flush=True)
     return [p.view(n, c, s[0], s[1]) for p, s in zip(fm, sizes)]
