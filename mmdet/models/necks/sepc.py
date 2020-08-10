@@ -20,7 +20,8 @@ class SEPC(nn.Module):
                  pconv_deform=False,
                  lcconv_deform=False,
                  ibn=False,
-                 norm_cfg=dict(type='BN', requires_grad=True),
+                 pnorm_cfg=dict(type='BN', requires_grad=True),
+                 lcnorm_cfg=dict(type='BN', requires_grad=True),
                  lcconv_padding=0):
         super(SEPC, self).__init__()
         assert isinstance(in_channels, list)
@@ -31,7 +32,8 @@ class SEPC(nn.Module):
         assert num_outs == 5
         self.fp16_enabled = False
         self.ibn = ibn
-        self.norm_cfg = norm_cfg
+        self.pnorm_cfg = pnorm_cfg
+        self.lcnorm_cfg = lcnorm_cfg
         self.pconvs = nn.ModuleList()
 
         for i in range(stacked_convs):
@@ -40,7 +42,7 @@ class SEPC(nn.Module):
                     in_channels[i],
                     out_channels,
                     ibn=self.ibn,
-                    norm_cfg=self.norm_cfg,
+                    norm_cfg=self.pnorm_cfg,
                     part_deform=pconv_deform))
 
         self.lconv = SEPCConv(
@@ -59,9 +61,9 @@ class SEPC(nn.Module):
             part_deform=lcconv_deform)
         if self.ibn:
             self.lnorm_name, lnorm = build_norm_layer(
-                self.norm_cfg, 256, postfix='_loc')
+                self.lcnorm_cfg, 256, postfix='_loc')
             self.cnorm_name, cnorm = build_norm_layer(
-                self.norm_cfg, 256, postfix='_cls')
+                self.lcnorm_cfg, 256, postfix='_cls')
             self.add_module(self.lnorm_name, lnorm)
             self.add_module(self.cnorm_name, cnorm)
         self.relu = nn.ReLU()
@@ -146,8 +148,8 @@ class PConvModule(nn.Module):
                 part_deform=part_deform))
 
         if self.ibn:
-            self.inorm_name, inorm = build_norm_layer(self.norm_cfg, 256)
-            self.add_module(self.inorm_name, inorm)
+            self.pnorm_name, pnorm = build_norm_layer(self.norm_cfg, 256)
+            self.add_module(self.pnorm_name, pnorm)
 
         self.relu = nn.ReLU()
         self.init_weights()
@@ -159,9 +161,10 @@ class PConvModule(nn.Module):
                 m.bias.data.zero_()
 
     @property
-    def inorm(self):
-        """nn.Module: integrated normalization layer"""
-        return getattr(self, self.inorm_name)
+    def pnorm(self):
+        """nn.Module: integrated normalization layer after pyramid conv layer
+        """
+        return getattr(self, self.pnorm_name)
 
     def forward(self, x):
         next_x = []
@@ -177,7 +180,7 @@ class PConvModule(nn.Module):
                     align_corners=True)
             next_x.append(temp_fea)
         if self.ibn:
-            next_x = integrated_bn(next_x, self.inorm)
+            next_x = integrated_bn(next_x, self.pnorm)
         next_x = [self.relu(item) for item in next_x]
         return next_x
 
