@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import build_norm_layer
+from torch.nn.modules.batchnorm import _BatchNorm
 
 from mmdet.core import auto_fp16
 from mmdet.ops.dcn.sepc_dconv import SEPCConv
@@ -22,6 +23,8 @@ class SEPC(nn.Module):
                  ibn=False,
                  pnorm_cfg=dict(type='BN', requires_grad=True),
                  lcnorm_cfg=dict(type='BN', requires_grad=True),
+                 pnorm_eval=True,
+                 lcnorm_eval=True,
                  lcconv_padding=0):
         super(SEPC, self).__init__()
         assert isinstance(in_channels, list)
@@ -34,6 +37,8 @@ class SEPC(nn.Module):
         self.ibn = ibn
         self.pnorm_cfg = pnorm_cfg
         self.lcnorm_cfg = lcnorm_cfg
+        self.pnorm_eval = pnorm_eval
+        self.lcnorm_eval = lcnorm_eval
         self.pconvs = nn.ModuleList()
 
         for i in range(stacked_convs):
@@ -43,6 +48,7 @@ class SEPC(nn.Module):
                     out_channels,
                     ibn=self.ibn,
                     norm_cfg=self.pnorm_cfg,
+                    norm_eval=self.pnorm_eval,
                     part_deform=pconv_deform))
 
         self.lconv = SEPCConv(
@@ -101,6 +107,16 @@ class SEPC(nn.Module):
                 for cls_feat, loc_feat in zip(cls_feats, loc_feats)]
         return tuple(outs)
 
+    def train(self, mode=True):
+        """Convert the model into training mode while keep normalization layer
+        freezed."""
+        super(SEPC, self).train(mode)
+        if mode and self.lcnorm_eval:
+            for m in self.modules():
+                # trick: eval have effect on BatchNorm only
+                if isinstance(m, _BatchNorm):
+                    m.eval()
+
 
 class PConvModule(nn.Module):
 
@@ -112,11 +128,13 @@ class PConvModule(nn.Module):
                  groups=[1, 1, 1],
                  ibn=False,
                  norm_cfg=dict(type='BN', requires_grad=True),
+                 norm_eval=True,
                  part_deform=False):
         super(PConvModule, self).__init__()
 
         self.ibn = ibn
         self.norm_cfg = norm_cfg
+        self.norm_eval = norm_eval
         self.pconv = nn.ModuleList()
         self.pconv.append(
             SEPCConv(
@@ -183,6 +201,16 @@ class PConvModule(nn.Module):
             next_x = integrated_bn(next_x, self.pnorm)
         next_x = [self.relu(item) for item in next_x]
         return next_x
+
+    def train(self, mode=True):
+        """Convert the model into training mode while keep normalization layer
+        freezed."""
+        super(PConvModule, self).train(mode)
+        if mode and self.norm_eval:
+            for m in self.modules():
+                # trick: eval have effect on BatchNorm only
+                if isinstance(m, _BatchNorm):
+                    m.eval()
 
 
 def integrated_bn(fms, bn):
