@@ -5,6 +5,9 @@ from mmcv.ops.modulated_deform_conv import (ModulatedDeformConv2d,
                                             modulated_deform_conv2d)
 from torch.nn.modules.utils import _pair
 
+# from mmdet.ops.dcn import (DeformConv2d, ModulatedDeformConv2d,
+#                            deform_conv2d, modulated_deform_conv2d)
+
 
 class SEPCConv(DeformConv2d):
 
