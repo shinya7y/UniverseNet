@@ -12,19 +12,22 @@ UniverseNet is the SOTA single-stage detector on the Waymo Open Dataset 2D detec
 
 ### Main results
 
-|     Method      | Backbone | Lr schd | Mem (GB) | Inf time (fps) | box AP |                                                                          Download                                                                           |
-| :-------------: | :------: | :-----: | :------: | :------------: | :----: | :---------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|    ATSS+SEPC    |   R-50   |   1x    |    -     |       -        |  42.1  |                                                                              -                                                                              |
-|   UniverseNet   |  R2-50   |   1x    |   5.1    |      15.8      |  46.7  |                                                                              -                                                                              |
-|   UniverseNet   |  R2-50   |   2x    |   5.1    |      15.8      |  48.9  |   [model](https://github.com/shinya7y/UniverseNet/releases/download/20.06/universenet50_fp16_8x2_mstrain_480_960_2x_coco_20200523_epoch_23-f9f426a3.pth)    |
-| UniverseNet+GFL |  R2-50   |   1x    |   5.3    |      17.4      |  47.5  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.07/universenet50_gfl_fp16_4x4_mstrain_480_960_1x_coco_20200708_epoch_12-68bb73b9.pth)  |
-| UniverseNet+GFL |  R2-50   |   2x    |   5.3    |      17.4      |  49.4  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.07/universenet50_gfl_fp16_4x4_mstrain_480_960_2x_coco_20200729_epoch_24-c9308e66.pth)  |
-| UniverseNet+GFL |  R2-101  |   2x    |   8.5    |      11.7      |  50.8  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.07/universenet101_gfl_fp16_4x4_mstrain_480_960_2x_coco_20200716_epoch_24-1b9a1241.pth) |
+|      Method       | Backbone | Lr schd | Mem (GB) | Inf time (fps) | box AP |                                                                          Download                                                                           |
+| :---------------: | :------: | :-----: | :------: | :------------: | :----: | :---------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|     ATSS+SEPC     |   R-50   |   1x    |    -     |       -        |  42.1  |                                                                              -                                                                              |
+|    UniverseNet    |  R2-50   |   1x    |   5.1    |      16.1      |  46.7  |                                                                              -                                                                              |
+|    UniverseNet    |  R2-50   |   2x    |   5.1    |      16.1      |  48.9  |   [model](https://github.com/shinya7y/UniverseNet/releases/download/20.06/universenet50_fp16_8x2_mstrain_480_960_2x_coco_20200523_epoch_23-f9f426a3.pth)    |
+|  UniverseNet+GFL  |  R2-50   |   1x    |   5.3    |      16.9      |  47.5  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.07/universenet50_gfl_fp16_4x4_mstrain_480_960_1x_coco_20200708_epoch_12-68bb73b9.pth)  |
+|  UniverseNet+GFL  |  R2-50   |   2x    |   5.3    |      16.9      |  49.4  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.07/universenet50_gfl_fp16_4x4_mstrain_480_960_2x_coco_20200729_epoch_24-c9308e66.pth)  |
+|  UniverseNet+GFL  |  R2-101  |   2x    |   8.5    |      11.7      |  50.8  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.07/universenet101_gfl_fp16_4x4_mstrain_480_960_2x_coco_20200716_epoch_24-1b9a1241.pth) |
+| UniverseNet 20.08 |  R2-50   |   1x    |   5.5    |      23.6      |  47.5  |                                                                              -                                                                              |
+| UniverseNet 20.08 |  R2-50   |   2x    |   5.5    |      23.6      |  48.5  |                                                                              -                                                                              |
 
 - In addition to ATSS+SEPC, UniverseNet uses Res2Net-v1b-50, DCN, and multi-scale training (480-960).
-- iBN of SEPC is set to False to allow for batch sizes less than 4.
+- The settings for normalization layers (including whether to use iBN of SEPC) depend on the config files.
 - All models except for ATSS+SEPC were trained and evaluated using fp16 (mixed precision).
 - The above UniverseNet (2x) model is a checkpoint at epoch 23. The AP of [a checkpoint at epoch 24](https://github.com/shinya7y/UniverseNet/releases/download/20.06/universenet50_fp16_8x2_mstrain_480_960_2x_coco_20200523_epoch_24-726c5c93.pth) is quite similar (48.9) but slightly worse.
+- Inference time (fps) is measured using the DCN ops in mmdet/ops (not mmcv/ops).
 
 
 ### Test scale and test-dev AP
