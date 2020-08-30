@@ -4,24 +4,36 @@ UniverseNet is the state-of-the-art detector that can be trained in 24 epochs.
 
 ![COCO AP](docs/imgs/coco_ap_time_epoch.png)
 
-UniverseNet+GFL (Res2Net-101) is further accurate (val AP: 50.8).
+UniverseNet+GFL (Res2Net-101) is further accurate (**val AP: 50.8**).
 
 Concepts:
 1. Universal scale detection
 2. Universal training settings (standard hyperparameters)
 3. Universal Background Model (base model to be transferred)
 
+## Changelog
+
+- 20.08 (Aug. 2020): **UniverseNet 20.08**
+  - Improve usage of batchnorm
+  - Use DCN modestly by default for faster training and inference
+- 20.07 (July 2020): **UniverseNet+GFL**
+  - Add GFL to improve accuracy and speed
+  - Provide stronger pre-trained model (backbone: Res2Net-101)
+- 20.06 (June 2020): **UniverseNet**
+  - Achieve SOTA single-stage detector on Waymo Open Dataset 2D detection
+  - Win 1st place in NightOwls Detection Challenge 2020 all objects track
+
 ## Features not in the original MMDetection
 
-- [x] [Waymo Open Dataset](mmdet/datasets/waymo_open.py)
-- [x] [Waymo Open Dataset configs (SOTA single-stage detector)](configs/waymo_open/)
-- [x] [NightOwls Dataset](mmdet/datasets/nightowls.py)
-- [x] [NightOwls Dataset configs (1st place all-objects detector)](configs/nightowls/)
 - [x] [UniverseNet](configs/universenet/)
 - [x] SEPC
 - [x] ATSS+SEPC, GFL+SEPC
 - [x] Test-time augmentation for ATSS and GFL
 - [x] [Classification weights rearrangement](tools/rearrange_weights.py)
+- [x] [Waymo Open Dataset](mmdet/datasets/waymo_open.py)
+- [x] [Waymo Open Dataset configs](configs/waymo_open/)
+- [x] [NightOwls Dataset](mmdet/datasets/nightowls.py)
+- [x] [NightOwls Dataset configs](configs/nightowls/)
 
 ## Acknowledgements
 

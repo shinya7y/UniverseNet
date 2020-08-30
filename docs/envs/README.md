@@ -1,5 +1,14 @@
 ## Testing environment
 
+### UniverseNet 20.08 (Aug. 2020)
+
+- Ubuntu 18.04
+- Python 3.7
+- PyTorch 1.5.0
+- CUDA 10.1
+- GCC 7.5
+- mmcv-full 1.0.4
+
 ### UniverseNet 20.06 (June 2020)
 
 - Ubuntu 18.04

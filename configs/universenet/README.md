@@ -8,6 +8,11 @@ UniverseNet is a single-stage detector for universal scale detection. Unlike Eff
 UniverseNet is the SOTA single-stage detector on the Waymo Open Dataset 2D detection, and achieves the 1st place in the NightOwls Detection Challenge 2020 all objects track.
 
 
+## Example for fine-tuning
+
+For fine-tuning from a COCO pre-trained model, please see [this example](universenet50_2008_fp16_4x2_mstrain_480_960_1x_smallbatch_finetuning_example.py).
+
+
 ## Results and Models
 
 ### Main results
@@ -20,8 +25,8 @@ UniverseNet is the SOTA single-stage detector on the Waymo Open Dataset 2D detec
 |  UniverseNet+GFL  |  R2-50   |   1x    |   5.3    |      16.9      |  47.5  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.07/universenet50_gfl_fp16_4x4_mstrain_480_960_1x_coco_20200708_epoch_12-68bb73b9.pth)  |
 |  UniverseNet+GFL  |  R2-50   |   2x    |   5.3    |      16.9      |  49.4  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.07/universenet50_gfl_fp16_4x4_mstrain_480_960_2x_coco_20200729_epoch_24-c9308e66.pth)  |
 |  UniverseNet+GFL  |  R2-101  |   2x    |   8.5    |      11.7      |  50.8  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.07/universenet101_gfl_fp16_4x4_mstrain_480_960_2x_coco_20200716_epoch_24-1b9a1241.pth) |
-| UniverseNet 20.08 |  R2-50   |   1x    |   5.5    |      23.6      |  47.5  |                                                                              -                                                                              |
-| UniverseNet 20.08 |  R2-50   |   2x    |   5.5    |      23.6      |  48.5  |                                                                              -                                                                              |
+| UniverseNet 20.08 |  R2-50   |   1x    |   5.5    |      23.6      |  47.5  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.08/universenet50_2008_fp16_4x4_mstrain_480_960_1x_coco_20200812_epoch_12-f522ede5.pth) |
+| UniverseNet 20.08 |  R2-50   |   2x    |   5.5    |      23.6      |  48.5  | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.08/universenet50_2008_fp16_4x4_mstrain_480_960_2x_coco_20200815_epoch_24-81356447.pth) |
 
 - In addition to ATSS+SEPC, UniverseNet uses Res2Net-v1b-50, DCN, and multi-scale training (480-960).
 - The settings for normalization layers (including whether to use iBN of SEPC) depend on the config files.
