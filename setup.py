@@ -202,7 +202,7 @@ if __name__ == '__main__':
         keywords='computer vision, object detection',
         url='https://github.com/open-mmlab/mmdetection',
         packages=find_packages(exclude=('configs', 'tools', 'demo')),
-        package_data={'mmdet.ops': ['*/*.so']},
+        # package_data={'mmdet.ops': ['*/*.so']},
         classifiers=[
             'Development Status :: 4 - Beta',
             'License :: OSI Approved :: Apache Software License',
@@ -222,15 +222,16 @@ if __name__ == '__main__':
             'build': parse_requirements('requirements/build.txt'),
             'optional': parse_requirements('requirements/optional.txt'),
         },
-        ext_modules=[
-            make_cuda_ext(
-                name='deform_conv_ext',
-                module='mmdet.ops.dcn',
-                sources=['src/deform_conv_ext.cpp'],
-                sources_cuda=[
-                    'src/cuda/deform_conv_cuda.cpp',
-                    'src/cuda/deform_conv_cuda_kernel.cu'
-                ]),
-        ],
+        ext_modules=[],
+        # ext_modules=[
+        #     make_cuda_ext(
+        #         name='deform_conv_ext',
+        #         module='mmdet.ops.dcn',
+        #         sources=['src/deform_conv_ext.cpp'],
+        #         sources_cuda=[
+        #             'src/cuda/deform_conv_cuda.cpp',
+        #             'src/cuda/deform_conv_cuda_kernel.cu'
+        #         ]),
+        # ],
         cmdclass={'build_ext': BuildExtension},
         zip_safe=False)
