@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from mmcv.ops.deform_conv import DeformConv2d, deform_conv2d
 from mmcv.ops.modulated_deform_conv import (ModulatedDeformConv2d,
                                             modulated_deform_conv2d)
@@ -45,10 +46,23 @@ class SEPCConv(DeformConv2d):
                 groups=self.groups)
 
         offset = self.conv_offset(x)
-        return deform_conv2d(x, offset, self.weight, self.stride, self.padding,
-                             self.dilation, self.groups,
-                             self.deform_groups) + self.bias.unsqueeze(
-                                 0).unsqueeze(-1).unsqueeze(-1)
+
+        # padding is needed to avoid error `input image is smaller than kernel`
+        input_pad = (x.size(2) < self.kernel_size[0]) or (x.size(3) <
+                                                          self.kernel_size[1])
+        if input_pad:
+            pad_h = max(self.kernel_size[0] - x.size(2), 0)
+            pad_w = max(self.kernel_size[1] - x.size(3), 0)
+            x = F.pad(x, (0, pad_w, 0, pad_h), 'constant', 0).contiguous()
+            offset = F.pad(offset, (0, pad_w, 0, pad_h), 'constant', 0)
+            offset = offset.contiguous()
+
+        out = deform_conv2d(x, offset, self.weight, self.stride, self.padding,
+                            self.dilation, self.groups, self.deform_groups)
+        if input_pad:
+            out = out[:, :, :out.size(2) - pad_h, :out.size(3) -
+                      pad_w].contiguous()
+        return out + self.bias.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
 
 
 class ModulatedSEPCConv(ModulatedDeformConv2d):
