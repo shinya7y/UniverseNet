@@ -15,7 +15,7 @@ from .anchor_head import AnchorHead
 def reduce_mean(tensor):
     if not (dist.is_available() and dist.is_initialized()):
         return tensor
-    tensor = tensor.clone()
+    tensor = tensor.float().clone()
     dist.all_reduce(tensor.div_(dist.get_world_size()), op=dist.ReduceOp.SUM)
     return tensor
 
