@@ -9,6 +9,7 @@ from mmcv.ops import CornerPool, batched_nms
 from mmdet.core import multi_apply
 from ..builder import HEADS, build_loss
 from ..utils import gaussian_radius, gen_gaussian_target
+from .base_dense_head import BaseDenseHead
 
 
 class BiCornerPool(nn.Module):
@@ -72,7 +73,7 @@ class BiCornerPool(nn.Module):
 
 
 @HEADS.register_module()
-class CornerHead(nn.Module):
+class CornerHead(BaseDenseHead):
     """Head of CornerNet: Detecting Objects as Paired Keypoints.
 
     Code is modified from the `official github repo
@@ -147,9 +148,10 @@ class CornerHead(nn.Module):
                 feat_channels, out_channels, 1, norm_cfg=None, act_cfg=None))
 
     def _init_corner_kpt_layers(self):
-        """Initialize corner keypoint layers. Including corner heatmap branch
-        and corner offset branch. Each branch has two parts: prefix `tl_` for
-        top-left and `br_` for bottom-right.
+        """Initialize corner keypoint layers.
+
+        Including corner heatmap branch and corner offset branch. Each branch
+        has two parts: prefix `tl_` for top-left and `br_` for bottom-right.
         """
         self.tl_pool, self.br_pool = nn.ModuleList(), nn.ModuleList()
         self.tl_heat, self.br_heat = nn.ModuleList(), nn.ModuleList()
@@ -184,9 +186,10 @@ class CornerHead(nn.Module):
                     in_channels=self.in_channels))
 
     def _init_corner_emb_layers(self):
-        """Initialize corner embedding layers. Only include corner embedding
-        branch with two parts: prefix `tl_` for top-left and `br_` for
-        bottom-right.
+        """Initialize corner embedding layers.
+
+        Only include corner embedding branch with two parts: prefix `tl_` for
+        top-left and `br_` for bottom-right.
         """
         self.tl_emb, self.br_emb = nn.ModuleList(), nn.ModuleList()
 
@@ -202,6 +205,7 @@ class CornerHead(nn.Module):
 
     def _init_layers(self):
         """Initialize layers for CornerHead.
+
         Including two parts: corner keypoint layers and corner embedding layers
         """
         self._init_corner_kpt_layers()
@@ -212,8 +216,18 @@ class CornerHead(nn.Module):
         """Initialize weights of the head."""
         bias_init = bias_init_with_prob(0.1)
         for i in range(self.num_feat_levels):
-            self.tl_heat[i][-1].bias.data.fill_(bias_init)
-            self.br_heat[i][-1].bias.data.fill_(bias_init)
+            # The initialization of parameters are different between nn.Conv2d
+            # and ConvModule. Our experiments show that using the original
+            # initialization of nn.Conv2d increases the final mAP by about 0.2%
+            self.tl_heat[i][-1].conv.reset_parameters()
+            self.tl_heat[i][-1].conv.bias.data.fill_(bias_init)
+            self.br_heat[i][-1].conv.reset_parameters()
+            self.br_heat[i][-1].conv.bias.data.fill_(bias_init)
+            self.tl_off[i][-1].conv.reset_parameters()
+            self.br_off[i][-1].conv.reset_parameters()
+            if self.with_corner_emb:
+                self.tl_emb[i][-1].conv.reset_parameters()
+                self.br_emb[i][-1].conv.reset_parameters()
 
     def forward(self, feats):
         """Forward features from the upstream network.
@@ -764,7 +778,7 @@ class CornerHead(nn.Module):
             feat (Tensor): Gathered feature.
         """
         dim = feat.size(2)
-        ind = ind.unsqueeze(2).expand(ind.size(0), ind.size(1), dim)
+        ind = ind.unsqueeze(2).repeat(1, 1, dim)
         feat = feat.gather(1, ind)
         if mask is not None:
             mask = mask.unsqueeze(2).expand_as(feat)
@@ -823,9 +837,9 @@ class CornerHead(nn.Module):
         """
         batch, _, height, width = scores.size()
         topk_scores, topk_inds = torch.topk(scores.view(batch, -1), k)
-        topk_clses = (topk_inds / (height * width)).int()
+        topk_clses = topk_inds // (height * width)
         topk_inds = topk_inds % (height * width)
-        topk_ys = (topk_inds / width).int().float()
+        topk_ys = topk_inds // width
         topk_xs = (topk_inds % width).int().float()
         return topk_scores, topk_inds, topk_clses, topk_ys, topk_xs
 
@@ -894,10 +908,14 @@ class CornerHead(nn.Module):
         tl_scores, tl_inds, tl_clses, tl_ys, tl_xs = self._topk(tl_heat, k=k)
         br_scores, br_inds, br_clses, br_ys, br_xs = self._topk(br_heat, k=k)
 
-        tl_ys = tl_ys.view(batch, k, 1).expand(batch, k, k)
-        tl_xs = tl_xs.view(batch, k, 1).expand(batch, k, k)
-        br_ys = br_ys.view(batch, 1, k).expand(batch, k, k)
-        br_xs = br_xs.view(batch, 1, k).expand(batch, k, k)
+        # We use repeat instead of expand here because expand is a
+        # shallow-copy function. Thus it could cause unexpected testing result
+        # sometimes. Using expand will decrease about 10% mAP during testing
+        # compared to repeat.
+        tl_ys = tl_ys.view(batch, k, 1).repeat(1, 1, k)
+        tl_xs = tl_xs.view(batch, k, 1).repeat(1, 1, k)
+        br_ys = br_ys.view(batch, 1, k).repeat(1, k, 1)
+        br_xs = br_xs.view(batch, 1, k).repeat(1, k, 1)
 
         tl_off = self._transpose_and_gather_feat(tl_off, tl_inds)
         tl_off = tl_off.view(batch, k, 1, 2)
@@ -998,14 +1016,14 @@ class CornerHead(nn.Module):
             br_emb = br_emb.view(batch, 1, k)
             dists = torch.abs(tl_emb - br_emb)
 
-        tl_scores = tl_scores.view(batch, k, 1).expand(batch, k, k)
-        br_scores = br_scores.view(batch, 1, k).expand(batch, k, k)
+        tl_scores = tl_scores.view(batch, k, 1).repeat(1, 1, k)
+        br_scores = br_scores.view(batch, 1, k).repeat(1, k, 1)
 
         scores = (tl_scores + br_scores) / 2  # scores for all possible boxes
 
         # tl and br should have same class
-        tl_clses = tl_clses.view(batch, k, 1).expand(batch, k, k)
-        br_clses = br_clses.view(batch, 1, k).expand(batch, k, k)
+        tl_clses = tl_clses.view(batch, k, 1).repeat(1, 1, k)
+        br_clses = br_clses.view(batch, 1, k).repeat(1, k, 1)
         cls_inds = (tl_clses != br_clses)
 
         # reject boxes based on distances

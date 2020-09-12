@@ -311,7 +311,20 @@ class Res2Net(ResNet):
         super(Res2Net, self).__init__(
             style='pytorch', deep_stem=True, avg_down=True, **kwargs)
 
+    def make_res_layer(self, **kwargs):
+        return Res2Layer(
+            scales=self.scales,
+            base_width=self.base_width,
+            base_channels=self.base_channels,
+            **kwargs)
+
     def init_weights(self, pretrained=None):
+        """Initialize the weights in backbone.
+
+        Args:
+            pretrained (str, optional): Path to pre-trained weights.
+                Defaults to None.
+        """
         if isinstance(pretrained, str):
             logger = get_root_logger()
             load_checkpoint(self, pretrained, strict=False, logger=logger)
@@ -324,21 +337,15 @@ class Res2Net(ResNet):
 
             if self.dcn is not None:
                 for m in self.modules():
-                    if isinstance(m, _Bottleneck):
-                        for conv2 in m.convs:
-                            if hasattr(conv2, 'conv_offset'):
-                                constant_init(conv2.conv_offset, 0)
+                    if isinstance(m, Bottle2neck):
+                        # dcn in Res2Net bottle2neck is in ModuleList
+                        for n in m.convs:
+                            if hasattr(n, 'conv_offset'):
+                                constant_init(n.conv_offset, 0)
 
             if self.zero_init_residual:
                 for m in self.modules():
-                    if isinstance(m, _Bottleneck):
+                    if isinstance(m, Bottle2neck):
                         constant_init(m.norm3, 0)
         else:
             raise TypeError('pretrained must be a str or None')
-
-    def make_res_layer(self, **kwargs):
-        return Res2Layer(
-            scales=self.scales,
-            base_width=self.base_width,
-            base_channels=self.base_channels,
-            **kwargs)
