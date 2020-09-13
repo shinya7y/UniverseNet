@@ -252,7 +252,8 @@ class GFLHead(AnchorHead):
         # FG cat_id: [0, num_classes -1], BG cat_id: num_classes
         bg_class_ind = self.num_classes
         pos_inds = ((labels >= 0)
-                    & (labels < bg_class_ind)).nonzero().squeeze(1)
+                    &
+                    (labels < bg_class_ind)).nonzero(as_tuple=False).squeeze(1)
         score = label_weights.new_zeros(labels.shape)
 
         if len(pos_inds) > 0:
