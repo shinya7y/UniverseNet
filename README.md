@@ -13,6 +13,8 @@ Concepts:
 
 ## Changelog
 
+- master
+  - Update and fix codes for PyTorch 1.6.0, mmdet 2.4.0, mmcv-full 1.1.2
 - 20.08 (Aug. 2020): **UniverseNet 20.08**
   - Improve usage of batchnorm
   - Use DCN modestly by default for faster training and inference

@@ -1,5 +1,14 @@
 ## Testing environment
 
+### master
+
+- Ubuntu 18.04
+- Python 3.7
+- PyTorch 1.6.0
+- CUDA 10.1
+- GCC 7.5
+- mmcv-full 1.1.2
+
 ### UniverseNet 20.08 (Aug. 2020)
 
 - Ubuntu 18.04
