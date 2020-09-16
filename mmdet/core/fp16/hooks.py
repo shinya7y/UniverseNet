@@ -43,8 +43,7 @@ class Fp16OptimizerHook(OptimizerHook):
         2. Convert the main model from fp32 to fp16.
         """
         # keep a copy of fp32 weights
-        runner.optimizer.param_groups = copy.deepcopy(
-            runner.optimizer.param_groups)
+        runner.model = copy.deepcopy(runner.model)
         # convert model to fp16
         wrap_fp16_model(runner.model)
 
