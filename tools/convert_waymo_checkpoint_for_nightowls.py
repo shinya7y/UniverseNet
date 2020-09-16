@@ -5,8 +5,7 @@ import torch
 
 
 def convert(in_file, out_file):
-    """Convert values in checkpoints.
-    """
+    """Convert values in checkpoints."""
     # to ('pedestrian', 'bicycledriver', 'motorbikedriver')
     # from ('TYPE_VEHICLE', 'TYPE_PEDESTRIAN', 'TYPE_CYCLIST')
     indices = [1, 2, 2]

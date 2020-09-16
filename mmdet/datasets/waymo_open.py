@@ -553,8 +553,8 @@ class WaymoOpenDataset(CustomDataset):
                             results_per_category.append(
                                 (f'{nm["name"]}', f'{float(ap):0.4f}'))
 
-                            if self.CLASSWISE_IOU[nm["name"]] == iouThr:
-                                waymo_iou_metrics[nm["name"]] = ap
+                            if self.CLASSWISE_IOU[nm['name']] == iouThr:
+                                waymo_iou_metrics[nm['name']] = ap
 
                         num_columns = min(6, len(results_per_category) * 2)
                         results_flatten = list(

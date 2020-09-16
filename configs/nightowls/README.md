@@ -51,4 +51,4 @@ UniverseNet achieves the 1st place in the NightOwls Detection Challenge 2020 all
 - MR is Miss Rate (%) at Reasonable setting. The values are from the organizer's presentation.
 - The DeepBlueAI team used Cascade R-CNN, CBNet, Double-Head, DCN, and soft-NMS according to their presentation.
 - Considering the method and test scale, UniverseNet should be faster than the runner-up.
-- The above-mentioned approach of UniverseNet seems remarkably powerful for motorbikedriver. 
+- The above-mentioned approach of UniverseNet seems remarkably powerful for motorbikedriver.

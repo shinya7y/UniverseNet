@@ -5,8 +5,7 @@ import torch
 
 
 def convert(in_file, out_file):
-    """Convert keys in checkpoints.
-    """
+    """Convert keys in checkpoints."""
     in_state_dict = torch.load(in_file)
     out_state_dict = OrderedDict()
 
