@@ -27,6 +27,23 @@ class ATSSHead(AnchorHead):
     and assign label by Adaptive Training Sample Selection instead max-iou.
 
     https://arxiv.org/abs/1912.02424
+
+    Args:
+        num_classes (int): Number of categories excluding the background
+            category.
+        in_channels (int): Number of channels in the input feature map.
+        stacked_convs (int): Number of conv layers in cls and reg tower.
+            Default: 4.
+        conv_cfg (dict): dictionary to construct and config conv layer.
+            Default: None.
+        norm_cfg (dict): dictionary to construct and config norm layer.
+            Default: dict(type='GN', num_groups=32, requires_grad=True).
+        loss_centerness (dict): Config of centerness loss.
+            Default: dict(type='CrossEntropyLoss', use_sigmoid=True,
+            loss_weight=1.0).
+        avg_samples_to_int (bool): Whether to integerize average numbers of
+            samples. True for compatibility with old MMDetection versions.
+            False for following original ATSS. Default: True.
     """
 
     def __init__(self,
@@ -39,10 +56,12 @@ class ATSSHead(AnchorHead):
                      type='CrossEntropyLoss',
                      use_sigmoid=True,
                      loss_weight=1.0),
+                 avg_samples_to_int=True,
                  **kwargs):
         self.stacked_convs = stacked_convs
         self.conv_cfg = conv_cfg
         self.norm_cfg = norm_cfg
+        self.avg_samples_to_int = avg_samples_to_int
         super(ATSSHead, self).__init__(num_classes, in_channels, **kwargs)
 
         self.sampling = False
@@ -277,6 +296,8 @@ class ATSSHead(AnchorHead):
 
         num_total_samples = reduce_mean(
             torch.tensor(num_total_pos).cuda()).item()
+        if self.avg_samples_to_int:
+            num_total_samples = int(num_total_samples)
         num_total_samples = max(num_total_samples, 1.0)
 
         losses_cls, losses_bbox, loss_centerness,\

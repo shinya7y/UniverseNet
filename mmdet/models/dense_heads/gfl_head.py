@@ -82,6 +82,9 @@ class GFLHead(AnchorHead):
         loss_qfl (dict): Config of Quality Focal Loss (QFL).
         reg_max (int): Max value of integral set :math: `{0, ..., reg_max}`
             in QFL setting. Default: 16.
+        avg_samples_to_int (bool): Whether to integerize average numbers of
+            samples. True for compatibility with old MMDetection versions.
+            False for following original ATSS. Default: True.
     Example:
         >>> self = GFLHead(11, 7)
         >>> feats = [torch.rand(1, 7, s, s) for s in [4, 8, 16, 32, 64]]
@@ -97,11 +100,13 @@ class GFLHead(AnchorHead):
                  norm_cfg=dict(type='GN', num_groups=32, requires_grad=True),
                  loss_dfl=dict(type='DistributionFocalLoss', loss_weight=0.25),
                  reg_max=16,
+                 avg_samples_to_int=True,
                  **kwargs):
         self.stacked_convs = stacked_convs
         self.conv_cfg = conv_cfg
         self.norm_cfg = norm_cfg
         self.reg_max = reg_max
+        self.avg_samples_to_int = avg_samples_to_int
         super(GFLHead, self).__init__(num_classes, in_channels, **kwargs)
 
         self.sampling = False
@@ -355,6 +360,8 @@ class GFLHead(AnchorHead):
 
         num_total_samples = reduce_mean(
             torch.tensor(num_total_pos).cuda()).item()
+        if self.avg_samples_to_int:
+            num_total_samples = int(num_total_samples)
         num_total_samples = max(num_total_samples, 1.0)
 
         losses_cls, losses_bbox, losses_dfl,\
