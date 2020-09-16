@@ -272,7 +272,9 @@ class IoULoss(nn.Module):
             reduction_override if reduction_override else self.reduction)
         if (weight is not None) and (not torch.any(weight > 0)) and (
                 reduction != 'none'):
-            return (pred * weight.reshape(weight.shape[0], -1)).sum()  # 0
+            if pred.dim() == weight.dim() + 1:
+                weight = weight.unsqueeze(1)
+            return (pred * weight).sum()  # 0
         if weight is not None and weight.dim() > 1:
             # TODO: remove this in the future
             # reduce the weight of shape (n, 4) to (n,) to match the
@@ -308,7 +310,9 @@ class BoundedIoULoss(nn.Module):
                 reduction_override=None,
                 **kwargs):
         if weight is not None and not torch.any(weight > 0):
-            return (pred * weight.reshape(weight.shape[0], -1)).sum()  # 0
+            if pred.dim() == weight.dim() + 1:
+                weight = weight.unsqueeze(1)
+            return (pred * weight).sum()  # 0
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (
             reduction_override if reduction_override else self.reduction)
@@ -341,7 +345,9 @@ class GIoULoss(nn.Module):
                 reduction_override=None,
                 **kwargs):
         if weight is not None and not torch.any(weight > 0):
-            return (pred * weight.reshape(weight.shape[0], -1)).sum()  # 0
+            if pred.dim() == weight.dim() + 1:
+                weight = weight.unsqueeze(1)
+            return (pred * weight).sum()  # 0
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (
             reduction_override if reduction_override else self.reduction)
@@ -379,7 +385,9 @@ class DIoULoss(nn.Module):
                 reduction_override=None,
                 **kwargs):
         if weight is not None and not torch.any(weight > 0):
-            return (pred * weight.reshape(weight.shape[0], -1)).sum()  # 0
+            if pred.dim() == weight.dim() + 1:
+                weight = weight.unsqueeze(1)
+            return (pred * weight).sum()  # 0
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (
             reduction_override if reduction_override else self.reduction)
@@ -417,7 +425,9 @@ class CIoULoss(nn.Module):
                 reduction_override=None,
                 **kwargs):
         if weight is not None and not torch.any(weight > 0):
-            return (pred * weight.reshape(weight.shape[0], -1)).sum()  # 0
+            if pred.dim() == weight.dim() + 1:
+                weight = weight.unsqueeze(1)
+            return (pred * weight).sum()  # 0
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (
             reduction_override if reduction_override else self.reduction)
