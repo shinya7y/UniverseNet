@@ -1,3 +1,4 @@
+import functools
 import inspect
 
 import mmcv
@@ -19,6 +20,26 @@ try:
 except ImportError:
     albumentations = None
     Compose = None
+
+
+def imwrite_denormalized_debug_img(func):
+    """Write denormalized debug image to file."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        """Write denormalized debug image to file."""
+        results = func(*args, **kwargs)
+        vis_img = mmcv.imdenormalize(
+            results['img'],
+            mean=np.array([123.675, 116.28, 103.53], dtype=np.float32),
+            std=np.array([58.395, 57.12, 57.375], dtype=np.float32),
+            to_bgr=True)
+        random_img_id = random.randint(10)
+        filename = f'debug_img_{random_img_id}.png'
+        mmcv.imwrite(vis_img, filename)
+        return results
+
+    return wrapper
 
 
 @PIPELINES.register_module()
@@ -1671,4 +1692,118 @@ class CutOut(object):
         repr_str += (f'cutout_ratio={self.candidates}, ' if self.with_ratio
                      else f'cutout_shape={self.candidates}, ')
         repr_str += f'fill_in={self.fill_in})'
+        return repr_str
+
+
+@PIPELINES.register_module()
+class SoftGridMask(object):
+    """SoftGridMask augmentation.
+
+    This augmentation is an extension of
+    `GridMask Data Augmentation <https://arxiv.org/abs/2001.04086>`_.
+    Unlike the hard (bool value) mask of the original GridMask,
+    various soft (float value) mask patterns can be specified by mask_pattern.
+
+    References:
+        https://github.com/Jia-Research-Lab/GridMask/blob/master/detection_grid/maskrcnn_benchmark/data/transforms/grid.py
+        https://github.com/albumentations-team/albumentations/blob/master/albumentations/augmentations/transforms.py
+    """
+
+    def __init__(self,
+                 ratio=0.5,
+                 ratio_h=None,
+                 ratio_w=None,
+                 unit_range=(2, 100000),
+                 unit_h_range=None,
+                 unit_w_range=None,
+                 mask_pattern=((1.0, 1.0), (1.0, 0.0)),
+                 square_unit=True,
+                 prob=0.7):
+        assert (ratio is None) ^ (ratio_h is None)
+        assert (ratio is None) ^ (ratio_w is None)
+        if ratio:
+            ratio_h = ratio_w = ratio
+        assert 0.0 <= ratio_h <= 1.0
+        assert 0.0 <= ratio_w <= 1.0
+        assert (unit_range is None) ^ (unit_h_range is None)
+        assert (unit_range is None) ^ (unit_w_range is None)
+        if unit_range:
+            unit_h_range = unit_w_range = unit_range
+        assert isinstance(unit_h_range, tuple) and len(unit_h_range) == 2
+        assert isinstance(unit_w_range, tuple) and len(unit_w_range) == 2
+        assert len(mask_pattern) == 2
+        assert len(mask_pattern[0]) == len(mask_pattern[1]) == 2
+        assert 0.0 <= prob <= 1.0
+
+        self.ratio_h = ratio_h
+        self.ratio_w = ratio_w
+        self.unit_h_range = unit_h_range
+        self.unit_w_range = unit_w_range
+        self.unit_h_min, self.unit_h_max = unit_h_range
+        self.unit_w_min, self.unit_w_max = unit_w_range
+        assert 2 <= self.unit_h_min <= self.unit_h_max
+        assert 2 <= self.unit_w_min <= self.unit_w_max
+        self.mask_pattern = mask_pattern
+        self.square_unit = square_unit
+        self.prob = prob
+
+    # @imwrite_denormalized_debug_img
+    def __call__(self, results):
+        """Call function to perform SoftGridMask augmentation on images.
+
+        Args:
+            results (dict): Result dict from loading pipeline.
+
+        Returns:
+            dict: Result dict with grid-masked images.
+        """
+
+        if random.uniform(0, 1) > self.prob:
+            return results
+        if len(results.get('mask_fields', [])) > 0:
+            raise NotImplementedError
+
+        img_h, img_w = results['img'].shape[:2]
+        unit_h_max = min(img_h, img_w, self.unit_h_max)
+        unit_h = random.randint(self.unit_h_min, unit_h_max + 1)
+        if self.square_unit:
+            unit_w = unit_h
+        else:
+            unit_w_max = min(img_h, img_w, self.unit_w_max)
+            unit_w = random.randint(self.unit_w_min, unit_w_max + 1)
+        shift_y = random.randint(unit_h)
+        shift_x = random.randint(unit_w)
+
+        # calculate border position
+        # each grid should be at least 1 pixel
+        border_h = int(unit_h * self.ratio_h + 0.5)
+        border_w = int(unit_w * self.ratio_w + 0.5)
+        border_h = min(max(border_h, 1), unit_h - 1)
+        border_w = min(max(border_w, 1), unit_w - 1)
+
+        # prepare mask by tiling unit
+        unit_mask = np.ones((unit_h, unit_w), dtype=np.float32)
+        unit_mask[:border_h, :border_w] = self.mask_pattern[0][0]
+        unit_mask[:border_h, border_w:] = self.mask_pattern[0][1]
+        unit_mask[border_h:, :border_w] = self.mask_pattern[1][0]
+        unit_mask[border_h:, border_w:] = self.mask_pattern[1][1]
+        repeat_h = img_h // unit_h + 2  # +1 for ceil, +1 for shift
+        repeat_w = img_w // unit_w + 2  # +1 for ceil, +1 for shift
+        mask = np.tile(unit_mask, (repeat_h, repeat_w))
+
+        # crop mask with shift
+        mask = mask[shift_y:shift_y + img_h, shift_x:shift_x + img_w]
+
+        results['img'] *= mask[:, :, np.newaxis]
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(ratio_h={self.ratio_h}, '
+        repr_str += f'ratio_w={self.ratio_w}, '
+        repr_str += f'unit_h_range={self.unit_h_range}, '
+        repr_str += f'unit_w_range={self.unit_w_range}, '
+        repr_str += f'mask_pattern={self.mask_pattern}, '
+        repr_str += f'square_unit={self.square_unit}, '
+        repr_str += f'prob={self.prob})'
         return repr_str
