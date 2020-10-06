@@ -1717,6 +1717,7 @@ class SoftGridMask(object):
                  unit_h_range=None,
                  unit_w_range=None,
                  mask_pattern=((1.0, 1.0), (1.0, 0.0)),
+                 mask_pattern_max=None,
                  square_unit=True,
                  prob=0.7):
         assert (ratio is None) ^ (ratio_h is None)
@@ -1725,25 +1726,33 @@ class SoftGridMask(object):
             ratio_h = ratio_w = ratio
         assert 0.0 <= ratio_h <= 1.0
         assert 0.0 <= ratio_w <= 1.0
+        self.ratio_h = ratio_h
+        self.ratio_w = ratio_w
+
         assert (unit_range is None) ^ (unit_h_range is None)
         assert (unit_range is None) ^ (unit_w_range is None)
         if unit_range:
             unit_h_range = unit_w_range = unit_range
         assert isinstance(unit_h_range, tuple) and len(unit_h_range) == 2
         assert isinstance(unit_w_range, tuple) and len(unit_w_range) == 2
-        assert len(mask_pattern) == 2
-        assert len(mask_pattern[0]) == len(mask_pattern[1]) == 2
-        assert 0.0 <= prob <= 1.0
-
-        self.ratio_h = ratio_h
-        self.ratio_w = ratio_w
         self.unit_h_range = unit_h_range
         self.unit_w_range = unit_w_range
         self.unit_h_min, self.unit_h_max = unit_h_range
         self.unit_w_min, self.unit_w_max = unit_w_range
         assert 2 <= self.unit_h_min <= self.unit_h_max
         assert 2 <= self.unit_w_min <= self.unit_w_max
+
+        mask_pattern = np.array(mask_pattern)
+        assert mask_pattern.shape == (2, 2), \
+            'Only 2x2 pattern is supported currently.'
+        if mask_pattern_max is not None:
+            mask_pattern_max = np.array(mask_pattern_max)
+            assert mask_pattern_max.shape == (2, 2), \
+                'Only 2x2 pattern is supported currently.'
         self.mask_pattern = mask_pattern
+        self.mask_pattern_max = mask_pattern_max
+
+        assert 0.0 <= prob <= 1.0
         self.square_unit = square_unit
         self.prob = prob
 
@@ -1781,12 +1790,18 @@ class SoftGridMask(object):
         border_h = min(max(border_h, 1), unit_h - 1)
         border_w = min(max(border_w, 1), unit_w - 1)
 
+        if self.mask_pattern_max is not None:
+            mask_pattern = random.uniform(self.mask_pattern,
+                                          self.mask_pattern_max)
+        else:
+            mask_pattern = self.mask_pattern
+
         # prepare mask by tiling unit
         unit_mask = np.ones((unit_h, unit_w), dtype=np.float32)
-        unit_mask[:border_h, :border_w] = self.mask_pattern[0][0]
-        unit_mask[:border_h, border_w:] = self.mask_pattern[0][1]
-        unit_mask[border_h:, :border_w] = self.mask_pattern[1][0]
-        unit_mask[border_h:, border_w:] = self.mask_pattern[1][1]
+        unit_mask[:border_h, :border_w] = mask_pattern[0, 0]
+        unit_mask[:border_h, border_w:] = mask_pattern[0, 1]
+        unit_mask[border_h:, :border_w] = mask_pattern[1, 0]
+        unit_mask[border_h:, border_w:] = mask_pattern[1, 1]
         repeat_h = img_h // unit_h + 2  # +1 for ceil, +1 for shift
         repeat_w = img_w // unit_w + 2  # +1 for ceil, +1 for shift
         mask = np.tile(unit_mask, (repeat_h, repeat_w))
@@ -1804,6 +1819,7 @@ class SoftGridMask(object):
         repr_str += f'unit_h_range={self.unit_h_range}, '
         repr_str += f'unit_w_range={self.unit_w_range}, '
         repr_str += f'mask_pattern={self.mask_pattern}, '
+        repr_str += f'mask_pattern_max={self.mask_pattern_max}, '
         repr_str += f'square_unit={self.square_unit}, '
         repr_str += f'prob={self.prob})'
         return repr_str
