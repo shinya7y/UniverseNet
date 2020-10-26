@@ -1,6 +1,6 @@
 ## Testing environment
 
-### master
+### UniverseNet 20.10 (Oct. 2020)
 
 - Ubuntu 18.04
 - Python 3.7
