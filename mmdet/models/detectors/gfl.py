@@ -86,4 +86,4 @@ class GFL(SingleStageDetector):
                 img_metas[0][0]['scale_factor'])
         bbox_results = bbox2result(_det_bboxes, det_labels,
                                    self.bbox_head.num_classes)
-        return bbox_results
+        return [bbox_results]
