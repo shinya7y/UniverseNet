@@ -3,6 +3,7 @@ _base_ = [
     '../_base_/datasets/waymo_open_2d_detection_mstrain_640_1280.py',
     '../_base_/schedules/schedule_7e.py', '../_base_/default_runtime.py'
 ]
+
 model = dict(bbox_head=dict(num_classes=3))
 
 data = dict(samples_per_gpu=2)
