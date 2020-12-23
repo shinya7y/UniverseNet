@@ -30,7 +30,7 @@ Using 1/10 size subsets is useful when you would like to:
 | UniverseNet 20.08 |  R2-50   |   1x    |  0.397  |  0.430   |  0.442   |  0.446   |  0.5539  |  0.5957   |  0.6119   |  0.6180   |
 
 - Test scales are shown after @ by shorter side pixels.
-- KAP denotes KITTI-like mAP (IoU thresholds: 0.7 for vehicles, 0.5 for pedestrians and cyclists).
+- KAP denotes KITTI-style mAP (IoU thresholds: 0.7 for vehicles, 0.5 for pedestrians and cyclists).
 - In addition to ATSS+SEPC, UniverseNet uses Res2Net-v1b-50, DCN, and multi-scale training (640-1280).
 - The settings for normalization layers (including whether to use iBN of SEPC) depend on the config files.
 - All models were trained and evaluated using fp16 (mixed precision).
@@ -74,7 +74,7 @@ Using 1/10 size subsets is useful when you would like to:
 ## Notes
 
 - Models trained on the Waymo Open Dataset cannot be published due to [the dataset license](https://waymo.com/open/terms/).
-  If you need pre-trained UniverseNet models, please take a screenshot of the confirmation mail of the dataset registration, and send it to shinya7y via [Twitter](https://twitter.com/shinya7y), [LinkedIn](https://www.linkedin.com/in/yosukeshinya), or other media.
+  If you need pre-trained UniverseNet models, please send a evidence for Waymo Open Dataset registration to shinya7y via [Twitter](https://twitter.com/shinya7y), [LinkedIn](https://www.linkedin.com/in/yosukeshinya), or other media.
 - In the tables above, test scales are shown by shorter side pixels. Longer side pixels are 1.5x.
   The number of maximum total pixels of (1248, 832) for Waymo Open is almost the same as that of (1333, 800) for COCO.
 

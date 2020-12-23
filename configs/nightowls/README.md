@@ -52,3 +52,9 @@ UniverseNet achieves the 1st place in the NightOwls Detection Challenge 2020 all
 - The DeepBlueAI team used Cascade R-CNN, CBNet, Double-Head, DCN, and soft-NMS according to their presentation.
 - Considering the method and test scale, UniverseNet should be faster than the runner-up.
 - The above-mentioned approach of UniverseNet seems remarkably powerful for motorbikedriver.
+
+
+## Notes
+
+- Models pre-trained on the Waymo Open Dataset cannot be published due to its [license](https://waymo.com/open/terms/).
+  If you need pre-trained UniverseNet models, please send a evidence for Waymo Open Dataset registration to shinya7y via [Twitter](https://twitter.com/shinya7y), [LinkedIn](https://www.linkedin.com/in/yosukeshinya), or other media.

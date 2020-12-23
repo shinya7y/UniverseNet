@@ -4,7 +4,7 @@ UniverseNet is the state-of-the-art detector that can be trained in 24 epochs.
 
 ![COCO AP](docs/imgs/coco_ap_time_epoch.png)
 
-UniverseNet+GFL (Res2Net-101) is further accurate (**val AP: 50.8**).
+UniverseNet 20.08d (Res2Net-101) is further accurate (**54.1** with TTA, **51.3** without TTA).
 
 Concepts:
 1. Universal scale detection
@@ -13,6 +13,10 @@ Concepts:
 
 ## Changelog
 
+- 20.12 (Dec. 2020):
+  - Add configs for Manga109-s dataset
+  - Add ATSS-style TTA for SOTA accuracy (COCO test-dev AP 54.1)
+  - Add UniverseNet 20.08s for realtime speed (> 30 fps)
 - 20.10 (Oct. 2020):
   - Add variants of UniverseNet 20.08
   - Update and fix codes for PyTorch 1.6.0, mmdet 2.4.0, mmcv-full 1.1.2
@@ -35,8 +39,9 @@ Concepts:
 - [x] [Classification weights rearrangement](tools/rearrange_weights.py)
 - [x] [Waymo Open Dataset](mmdet/datasets/waymo_open.py)
 - [x] [Waymo Open Dataset configs](configs/waymo_open/)
-- [x] [NightOwls Dataset](mmdet/datasets/nightowls.py)
-- [x] [NightOwls Dataset configs](configs/nightowls/)
+- [x] [Manga109-s dataset configs](configs/manga109/)
+- [x] [NightOwls dataset](mmdet/datasets/nightowls.py)
+- [x] [NightOwls dataset configs](configs/nightowls/)
 
 ## Acknowledgements
 

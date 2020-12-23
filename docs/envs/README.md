@@ -32,3 +32,6 @@
 More details can be found in the conda environment file in this directory.
 Installation via `conda env create --file conda_env.yaml` is not supported.
 Some modifications (e.g., CUDA version, cocoapi from github) will be needed to do that.
+
+Versions used for measuring inference time may differ.
+Some values are new and others are outdated.
