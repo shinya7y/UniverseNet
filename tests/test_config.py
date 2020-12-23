@@ -1,3 +1,4 @@
+import warnings
 from os.path import dirname, exists, join, relpath
 
 import torch
@@ -56,8 +57,11 @@ def test_config_build_detector():
             test_cfg=config_mod.test_cfg)
         assert detector is not None
 
-        optimizer = build_optimizer(detector, config_mod.optimizer)
-        assert isinstance(optimizer, torch.optim.Optimizer)
+        if 'optimizer' in config_mod:
+            optimizer = build_optimizer(detector, config_mod.optimizer)
+            assert isinstance(optimizer, torch.optim.Optimizer)
+        else:
+            warnings.warn(f'optimizer not found in {config_fpath}')
 
         if 'roi_head' in config_mod.model.keys():
             # for two stage detector
