@@ -35,7 +35,6 @@ For fine-tuning from a COCO pre-trained model, please see [this example](univers
 - The settings for normalization layers (including whether to use iBN of SEPC) depend on the config files.
 - All models except for ATSS+SEPC were trained and evaluated using fp16 (mixed precision).
 - The above UniverseNet (2x) model is a checkpoint at epoch 23. The AP of [a checkpoint at epoch 24](https://github.com/shinya7y/UniverseNet/releases/download/20.06/universenet50_fp16_8x2_mstrain_480_960_2x_coco_20200523_epoch_24-726c5c93.pth) is quite similar (48.9) but slightly worse.
-- Inference time (fps) is measured using the DCN ops in mmdet/ops (not mmcv/ops).
 
 
 ### Faster models

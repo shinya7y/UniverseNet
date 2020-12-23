@@ -12,6 +12,10 @@ from ..builder import NECKS
 
 @NECKS.register_module()
 class SEPC(nn.Module):
+    """SEPC (Scale-Equalizing Pyramid Convolution).
+
+    https://arxiv.org/abs/2005.03101 https://github.com/jshilong/SEPC
+    """
 
     def __init__(self,
                  in_channels=[256] * 5,
@@ -76,6 +80,7 @@ class SEPC(nn.Module):
         self.init_weights()
 
     def init_weights(self):
+        """Initialize the weights of module."""
         for str in ['l', 'c']:
             m = getattr(self, str + 'conv')
             nn.init.normal_(m.weight.data, 0, 0.01)
@@ -94,6 +99,7 @@ class SEPC(nn.Module):
 
     @auto_fp16()
     def forward(self, inputs):
+        """Forward function."""
         assert len(inputs) == len(self.in_channels)
         x = inputs
         for pconv in self.pconvs:
@@ -119,6 +125,7 @@ class SEPC(nn.Module):
 
 
 class PConvModule(nn.Module):
+    """PConv (Pyramid Convolution) module of SEPC."""
 
     def __init__(self,
                  in_channels=256,
@@ -173,6 +180,7 @@ class PConvModule(nn.Module):
         self.init_weights()
 
     def init_weights(self):
+        """Initialize the weights of module."""
         for m in self.pconv:
             nn.init.normal_(m.weight.data, 0, 0.01)
             if m.bias is not None:
@@ -185,6 +193,7 @@ class PConvModule(nn.Module):
         return getattr(self, self.pnorm_name)
 
     def forward(self, x):
+        """Forward function."""
         next_x = []
         for level, feature in enumerate(x):
             temp_fea = self.pconv[1](level, feature)
@@ -214,6 +223,7 @@ class PConvModule(nn.Module):
 
 
 def integrated_bn(fms, bn):
+    """iBN (integrated Batch Normalization) layer of SEPC."""
     sizes = [p.shape[2:] for p in fms]
     n, c = fms[0].shape[0], fms[0].shape[1]
     fm = torch.cat([p.view(n, c, 1, -1) for p in fms], dim=-1)

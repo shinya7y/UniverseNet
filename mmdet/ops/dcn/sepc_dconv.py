@@ -11,6 +11,7 @@ from torch.nn.modules.utils import _pair
 
 
 class SEPCConv(DeformConv2d):
+    """DCNv1-based scale-equalizing module of SEPC."""
 
     def __init__(self, *args, part_deform=False, **kwargs):
         super(SEPCConv, self).__init__(*args, **kwargs)
@@ -31,10 +32,12 @@ class SEPCConv(DeformConv2d):
         self.start_level = 1
 
     def init_offset(self):
+        """Initialize the weights of conv_offset for DCN."""
         self.conv_offset.weight.data.zero_()
         self.conv_offset.bias.data.zero_()
 
     def forward(self, i, x):
+        """Forward function."""
         if i < self.start_level or not self.part_deform:
             return torch.nn.functional.conv2d(
                 x,
@@ -66,6 +69,7 @@ class SEPCConv(DeformConv2d):
 
 
 class ModulatedSEPCConv(ModulatedDeformConv2d):
+    """DCNv2-based scale-equalizing module of SEPC."""
 
     _version = 2
 
@@ -88,10 +92,12 @@ class ModulatedSEPCConv(ModulatedDeformConv2d):
         self.start_level = 1
 
     def init_offset(self):
+        """Initialize the weights of conv_offset for DCN."""
         self.conv_offset.weight.data.zero_()
         self.conv_offset.bias.data.zero_()
 
     def forward(self, i, x):
+        """Forward function."""
         if i < self.start_level or not self.part_deform:
             return torch.nn.functional.conv2d(
                 x,
