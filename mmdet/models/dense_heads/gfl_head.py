@@ -11,6 +11,8 @@ from mmdet.core import (anchor_inside_flags, bbox2distance, bbox_overlaps,
 from ..builder import HEADS, build_loss
 from .anchor_head import AnchorHead
 
+EPS = 1e-12
+
 
 def reduce_mean(tensor):
     if not (dist.is_available() and dist.is_initialized()):
@@ -298,7 +300,7 @@ class GFLHead(AnchorHead):
         else:
             loss_bbox = bbox_pred.sum() * 0
             loss_dfl = bbox_pred.sum() * 0
-            weight_targets = torch.tensor(0).cuda()
+            weight_targets = bbox_pred.new_tensor(0)
 
         # cls (qfl) loss
         loss_cls = self.loss_cls(
@@ -378,6 +380,8 @@ class GFLHead(AnchorHead):
 
         avg_factor = sum(avg_factor)
         avg_factor = reduce_mean(avg_factor).item()
+        if avg_factor < EPS:
+            avg_factor = 1
         losses_bbox = list(map(lambda x: x / avg_factor, losses_bbox))
         losses_dfl = list(map(lambda x: x / avg_factor, losses_dfl))
         return dict(
