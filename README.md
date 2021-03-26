@@ -2,14 +2,19 @@
 
 UniverseNet is the state-of-the-art detector that can be trained in 24 epochs.
 
-![COCO AP](docs/imgs/coco_ap_time_epoch.png)
+![COCO AP](https://user-images.githubusercontent.com/42844407/112571346-317dd480-8e2b-11eb-8b1e-a97ba2e97997.png)
 
-UniverseNet 20.08d (Res2Net-101) is further accurate (**54.1** with TTA, **51.3** without TTA).
+https://arxiv.org/abs/2103.14027
 
-Concepts:
-1. Universal scale detection
-2. Universal training settings (standard hyperparameters)
-3. Universal Background Model (base model to be transferred)
+```
+@article{USB_shinya_2021,
+  title={{USB}: Universal-Scale Object Detection Benchmark},
+  author={Shinya, Yosuke},
+  journal={arXiv:2103.14027},
+  year={2021}
+}
+```
+
 
 ## Changelog
 
