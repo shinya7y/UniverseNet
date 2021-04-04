@@ -116,3 +116,15 @@ Using 1/10 size subsets is useful when you would like to:
   year = {2019}
 }
 ```
+
+Please cite the following paper for the benchmark results.
+https://arxiv.org/abs/2103.14027
+
+```
+@article{USB_shinya_2021,
+  title={{USB}: Universal-Scale Object Detection Benchmark},
+  author={Shinya, Yosuke},
+  journal={arXiv:2103.14027},
+  year={2021}
+}
+```

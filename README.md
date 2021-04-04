@@ -1,20 +1,11 @@
 # UniverseNet
 
-UniverseNet is the state-of-the-art detector that can be trained in 24 epochs.
-
-![COCO AP](https://user-images.githubusercontent.com/42844407/112571346-317dd480-8e2b-11eb-8b1e-a97ba2e97997.png)
-
+UniverseNets are state-of-the-art detectors for universal-scale object detection.
+Please refer to our paper for details.
 https://arxiv.org/abs/2103.14027
 
-```
-@article{USB_shinya_2021,
-  title={{USB}: Universal-Scale Object Detection Benchmark},
-  author={Shinya, Yosuke},
-  journal={arXiv:2103.14027},
-  year={2021}
-}
-```
-
+![universal-scale object detection](https://user-images.githubusercontent.com/42844407/113513063-b5aa2780-95a2-11eb-8413-2fb470256a1a.png)
+![COCO AP](https://user-images.githubusercontent.com/42844407/112571346-317dd480-8e2b-11eb-8b1e-a97ba2e97997.png)
 
 ## Changelog
 
@@ -41,12 +32,22 @@ https://arxiv.org/abs/2103.14027
 - [x] SEPC
 - [x] ATSS+SEPC, GFL+SEPC
 - [x] ~~Test-time augmentation for ATSS and GFL~~ [merged](https://github.com/open-mmlab/mmdetection/commits?author=shinya7y)
-- [x] [Classification weights rearrangement](tools/rearrange_weights.py)
 - [x] [Waymo Open Dataset](mmdet/datasets/waymo_open.py)
 - [x] [Waymo Open Dataset configs](configs/waymo_open/)
 - [x] [Manga109-s dataset configs](configs/manga109/)
 - [x] [NightOwls dataset](mmdet/datasets/nightowls.py)
 - [x] [NightOwls dataset configs](configs/nightowls/)
+
+## Citation
+
+```
+@article{USB_shinya_2021,
+  title={{USB}: Universal-Scale Object Detection Benchmark},
+  author={Shinya, Yosuke},
+  journal={arXiv:2103.14027},
+  year={2021}
+}
+```
 
 ## Acknowledgements
 

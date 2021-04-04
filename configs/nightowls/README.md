@@ -5,17 +5,6 @@
 The NightOwls dataset is a dataset for pedestrian detection at night.
 It contains three classes ('pedestrian', 'bicycledriver', 'motorbikedriver') except for ignore areas.
 
-```
-@inproceedings{Nightowls,
-  title={NightOwls: A pedestrians at night dataset},
-  author={Neumann, Luk{\'a}{\v{s}} and Karg, Michelle and Zhang, Shanshan and Scharfenberger, Christian and Piegert, Eric and Mistr, Sarah and Prokofyeva, Olga and Thiel, Robert and Vedaldi, Andrea and Zisserman, Andrew and Schiele, Bernt},
-  booktitle={Asian Conference on Computer Vision},
-  pages={691--705},
-  year={2018},
-  organization={Springer}
-}
-```
-
 ## Results
 
 ### UniverseNet
@@ -58,3 +47,26 @@ UniverseNet achieves the 1st place in the NightOwls Detection Challenge 2020 all
 
 - Models pre-trained on the Waymo Open Dataset cannot be published due to its [license](https://waymo.com/open/terms/).
   If you need pre-trained UniverseNet models, please send a evidence for Waymo Open Dataset registration to shinya7y via [Twitter](https://twitter.com/shinya7y), [LinkedIn](https://www.linkedin.com/in/yosukeshinya), or other media.
+
+
+## Citations
+
+```
+@inproceedings{Nightowls,
+  title={NightOwls: A pedestrians at night dataset},
+  author={Neumann, Luk{\'a}{\v{s}} and Karg, Michelle and Zhang, Shanshan and Scharfenberger, Christian and Piegert, Eric and Mistr, Sarah and Prokofyeva, Olga and Thiel, Robert and Vedaldi, Andrea and Zisserman, Andrew and Schiele, Bernt},
+  booktitle={Asian Conference on Computer Vision},
+  pages={691--705},
+  year={2018},
+  organization={Springer}
+}
+```
+
+```
+@article{USB_shinya_2021,
+  title={{USB}: Universal-Scale Object Detection Benchmark},
+  author={Shinya, Yosuke},
+  journal={arXiv:2103.14027},
+  year={2021}
+}
+```
