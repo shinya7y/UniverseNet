@@ -76,6 +76,16 @@ def parse_args():
         help='custom options for evaluation, the key-value pair in xxx=yyy '
         'format will be kwargs for dataset.evaluate() function')
     parser.add_argument(
+        '--img-scale-short',
+        type=int,
+        nargs='+',
+        help='override shorter scales of test images')
+    parser.add_argument(
+        '--img-aspect-ratio',
+        type=float,
+        default=1.6667,
+        help='aspect ratio of images when overriding test image scales')
+    parser.add_argument(
         '--launcher',
         choices=['none', 'pytorch', 'slurm', 'mpi'],
         default='none',
@@ -137,6 +147,13 @@ def main():
     elif isinstance(cfg.data.test, list):
         for ds_cfg in cfg.data.test:
             ds_cfg.test_mode = True
+
+    # override img_scale
+    if args.img_scale_short is not None:
+        img_scale = [(round(short * args.img_aspect_ratio), short)
+                     for short in args.img_scale_short]
+        cfg.data.test.pipeline[1].img_scale = img_scale
+        print('test img_scale:', cfg.data.test.pipeline[1].img_scale)
 
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
@@ -204,6 +221,8 @@ def main():
                 eval_kwargs.pop(key, None)
             eval_kwargs.update(dict(metric=args.eval, **kwargs))
             print(dataset.evaluate(outputs, **eval_kwargs))
+        if args.img_scale_short is not None:
+            print('test img_scale:', cfg.data.test.pipeline[1].img_scale)
 
 
 if __name__ == '__main__':
