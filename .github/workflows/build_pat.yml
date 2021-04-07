@@ -1,6 +1,9 @@
 name: build_pat
 
-on: push
+on:
+  push:
+    branches:
+      - non_existent_branch
 
 jobs:
   build_parrots:

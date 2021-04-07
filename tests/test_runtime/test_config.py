@@ -91,7 +91,8 @@ def test_config_build_detector():
         detector = build_detector(config_mod.model)
         assert detector is not None
 
-        _check_numclasscheckhook(detector, config_mod)
+        if 'data' in config_mod:
+            _check_numclasscheckhook(detector, config_mod)
 
         if 'optimizer' in config_mod:
             optimizer = build_optimizer(detector, config_mod.optimizer)
