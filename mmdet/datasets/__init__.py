@@ -8,7 +8,8 @@ from .deepfashion import DeepFashionDataset
 from .lvis import LVISDataset, LVISV1Dataset, LVISV05Dataset
 from .nightowls import NightOwlsDataset
 from .samplers import DistributedGroupSampler, DistributedSampler, GroupSampler
-from .utils import replace_ImageToTensor
+from .utils import (NumClassCheckHook, get_loading_pipeline,
+                    replace_ImageToTensor)
 from .voc import VOCDataset
 from .waymo_open import WaymoOpenDataset
 from .wider_face import WIDERFaceDataset
@@ -20,7 +21,8 @@ __all__ = [
     'LVISV1Dataset', 'GroupSampler', 'DistributedGroupSampler',
     'DistributedSampler', 'build_dataloader', 'ConcatDataset', 'RepeatDataset',
     'ClassBalancedDataset', 'WIDERFaceDataset', 'DATASETS', 'PIPELINES',
-    'build_dataset', 'replace_ImageToTensor'
+    'build_dataset', 'replace_ImageToTensor', 'get_loading_pipeline',
+    'NumClassCheckHook'
 ]
 
 __all__ += ['WaymoOpenDataset', 'NightOwlsDataset']

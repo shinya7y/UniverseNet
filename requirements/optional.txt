@@ -3,3 +3,5 @@ cityscapesscripts
 imagecorruptions
 mmlvis
 pandas
+scipy
+sklearn

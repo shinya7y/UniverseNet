@@ -2,12 +2,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.cnn import ConvModule, build_upsample_layer
-from mmcv.ops import Conv2d
+from mmcv.cnn import Conv2d, ConvModule, build_upsample_layer
 from mmcv.ops.carafe import CARAFEPack
+from mmcv.runner import auto_fp16, force_fp32
 from torch.nn.modules.utils import _pair
 
-from mmdet.core import auto_fp16, force_fp32, mask_target
+from mmdet.core import mask_target
 from mmdet.models.builder import HEADS, build_loss
 
 BYTES_PER_FLOAT = 4
@@ -136,9 +136,27 @@ class FCNMaskHead(nn.Module):
 
     @force_fp32(apply_to=('mask_pred', ))
     def loss(self, mask_pred, mask_targets, labels):
+        """
+        Example:
+            >>> from mmdet.models.roi_heads.mask_heads.fcn_mask_head import *  # NOQA
+            >>> N = 7  # N = number of extracted ROIs
+            >>> C, H, W = 11, 32, 32
+            >>> # Create example instance of FCN Mask Head.
+            >>> # There are lots of variations depending on the configuration
+            >>> self = FCNMaskHead(num_classes=C, num_convs=1)
+            >>> inputs = torch.rand(N, self.in_channels, H, W)
+            >>> mask_pred = self.forward(inputs)
+            >>> sf = self.scale_factor
+            >>> labels = torch.randint(0, C, size=(N,))
+            >>> # With the default properties the mask targets should indicate
+            >>> # a (potentially soft) single-class label
+            >>> mask_targets = torch.rand(N, H * sf, W * sf)
+            >>> loss = self.loss(mask_pred, mask_targets, labels)
+            >>> print('loss = {!r}'.format(loss))
+        """
         loss = dict()
         if mask_pred.size(0) == 0:
-            loss_mask = mask_pred.sum() * 0
+            loss_mask = mask_pred.sum()
         else:
             if self.class_agnostic:
                 loss_mask = self.loss_mask(mask_pred, mask_targets,
@@ -159,12 +177,43 @@ class FCNMaskHead(nn.Module):
                 it will be converted to numpy array outside of this method.
             det_bboxes (Tensor): shape (n, 4/5)
             det_labels (Tensor): shape (n, )
-            img_shape (Tensor): shape (3, )
             rcnn_test_cfg (dict): rcnn testing config
-            ori_shape: original image size
+            ori_shape (Tuple): original image height and width, shape (2,)
+            scale_factor(float | Tensor): If ``rescale is True``, box
+                coordinates are divided by this scale factor to fit
+                ``ori_shape``.
+            rescale (bool): If True, the resulting masks will be rescaled to
+                ``ori_shape``.
 
         Returns:
-            list[list]: encoded masks
+            list[list]: encoded masks. The c-th item in the outer list
+                corresponds to the c-th class. Given the c-th outer list, the
+                i-th item in that inner list is the mask for the i-th box with
+                class label c.
+
+        Example:
+            >>> import mmcv
+            >>> from mmdet.models.roi_heads.mask_heads.fcn_mask_head import *  # NOQA
+            >>> N = 7  # N = number of extracted ROIs
+            >>> C, H, W = 11, 32, 32
+            >>> # Create example instance of FCN Mask Head.
+            >>> self = FCNMaskHead(num_classes=C, num_convs=0)
+            >>> inputs = torch.rand(N, self.in_channels, H, W)
+            >>> mask_pred = self.forward(inputs)
+            >>> # Each input is associated with some bounding box
+            >>> det_bboxes = torch.Tensor([[1, 1, 42, 42 ]] * N)
+            >>> det_labels = torch.randint(0, C, size=(N,))
+            >>> rcnn_test_cfg = mmcv.Config({'mask_thr_binary': 0, })
+            >>> ori_shape = (H * 4, W * 4)
+            >>> scale_factor = torch.FloatTensor((1, 1))
+            >>> rescale = False
+            >>> # Encoded masks are a list for each category.
+            >>> encoded_masks = self.get_seg_masks(
+            >>>     mask_pred, det_bboxes, det_labels, rcnn_test_cfg, ori_shape,
+            >>>     scale_factor, rescale
+            >>> )
+            >>> assert len(encoded_masks) == C
+            >>> assert sum(list(map(len, encoded_masks))) == N
         """
         if isinstance(mask_pred, torch.Tensor):
             mask_pred = mask_pred.sigmoid()
@@ -194,6 +243,16 @@ class FCNMaskHead(nn.Module):
         if not isinstance(scale_factor, (float, torch.Tensor)):
             scale_factor = bboxes.new_tensor(scale_factor)
         bboxes = bboxes / scale_factor
+
+        if torch.onnx.is_in_onnx_export():
+            # TODO: Remove after F.grid_sample is supported.
+            from torchvision.models.detection.roi_heads \
+                import paste_masks_in_image
+            masks = paste_masks_in_image(mask_pred, bboxes, ori_shape[:2])
+            thr = rcnn_test_cfg.get('mask_thr_binary', 0)
+            if thr > 0:
+                masks = masks >= thr
+            return masks
 
         N = len(mask_pred)
         # The actual implementation split the input into chunks,
@@ -240,12 +299,12 @@ class FCNMaskHead(nn.Module):
             im_mask[(inds, ) + spatial_inds] = masks_chunk
 
         for i in range(N):
-            cls_segms[labels[i]].append(im_mask[i].cpu().numpy())
+            cls_segms[labels[i]].append(im_mask[i].detach().cpu().numpy())
         return cls_segms
 
 
 def _do_paste_mask(masks, boxes, img_h, img_w, skip_empty=True):
-    """Paste instance masks acoording to boxes.
+    """Paste instance masks according to boxes.
 
     This implementation is modified from
     https://github.com/facebookresearch/detectron2/
@@ -306,6 +365,9 @@ def _do_paste_mask(masks, boxes, img_h, img_w, skip_empty=True):
     gy = img_y[:, :, None].expand(N, img_y.size(1), img_x.size(1))
     grid = torch.stack([gx, gy], dim=3)
 
+    if torch.onnx.is_in_onnx_export():
+        raise RuntimeError(
+            'Exporting F.grid_sample from Pytorch to ONNX is not supported.')
     img_masks = F.grid_sample(
         masks.to(dtype=torch.float32), grid, align_corners=False)
 

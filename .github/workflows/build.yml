@@ -31,13 +31,13 @@ jobs:
         include:
           - torch: 1.3.1
             torchvision: 0.4.2
-            mmcv: "1.1.2+torch1.3.0+cpu"
+            mmcv: "latest+torch1.3.0+cpu"
           - torch: 1.5.1
             torchvision: 0.6.1
-            mmcv: "1.1.2+torch1.5.0+cpu"
+            mmcv: "latest+torch1.5.0+cpu"
           - torch: 1.6.0
             torchvision: 0.7.0
-            mmcv: "1.1.2+torch1.6.0+cpu"
+            mmcv: "latest+torch1.6.0+cpu"
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
