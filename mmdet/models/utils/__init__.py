@@ -3,6 +3,7 @@ from .gaussian_target import gaussian_radius, gen_gaussian_target
 from .positional_encoding import (LearnedPositionalEncoding,
                                   SinePositionalEncoding)
 from .res_layer import ResLayer, SimplifiedBasicBlock
+from .sepc_dconv import ModulatedSEPCConv, SEPCConv
 from .transformer import (FFN, DynamicConv, MultiheadAttention, Transformer,
                           TransformerDecoder, TransformerDecoderLayer,
                           TransformerEncoder, TransformerEncoderLayer)
@@ -14,3 +15,5 @@ __all__ = [
     'build_transformer', 'build_positional_encoding', 'SinePositionalEncoding',
     'LearnedPositionalEncoding', 'DynamicConv', 'SimplifiedBasicBlock'
 ]
+
+__all__ += ['SEPCConv', 'ModulatedSEPCConv']

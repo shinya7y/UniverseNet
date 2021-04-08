@@ -5,8 +5,7 @@ from mmcv.cnn import build_norm_layer
 from mmcv.runner import auto_fp16
 from torch.nn.modules.batchnorm import _BatchNorm
 
-from mmdet.ops.dcn.sepc_dconv import SEPCConv
-# from mmdet.ops.dcn.sepc_dconv import ModulatedSEPCConv as SEPCConv
+from mmdet.models.utils import SEPCConv
 from ..builder import NECKS
 
 
