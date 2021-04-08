@@ -59,38 +59,38 @@ model = dict(
             gamma=2.0,
             alpha=0.25,
             loss_weight=1.0),
-        loss_bbox=dict(type='SmoothL1Loss', beta=0.04, loss_weight=1.0)))
-# training and testing settings
-train_cfg = dict(
-    ga_assigner=dict(
-        type='ApproxMaxIoUAssigner',
-        pos_iou_thr=0.5,
-        neg_iou_thr=0.4,
-        min_pos_iou=0.4,
-        ignore_iof_thr=-1),
-    ga_sampler=dict(
-        type='RandomSampler',
-        num=256,
-        pos_fraction=0.5,
-        neg_pos_ub=-1,
-        add_gt_as_proposals=False),
-    assigner=dict(
-        type='MaxIoUAssigner',
-        pos_iou_thr=0.5,
-        neg_iou_thr=0.5,
-        min_pos_iou=0.0,
-        ignore_iof_thr=-1),
-    allowed_border=-1,
-    pos_weight=-1,
-    center_ratio=0.2,
-    ignore_ratio=0.5,
-    debug=False)
-test_cfg = dict(
-    nms_pre=1000,
-    min_bbox_size=0,
-    score_thr=0.05,
-    nms=dict(type='nms', iou_threshold=0.5),
-    max_per_img=100)
+        loss_bbox=dict(type='SmoothL1Loss', beta=0.04, loss_weight=1.0)),
+    # training and testing settings
+    train_cfg=dict(
+        ga_assigner=dict(
+            type='ApproxMaxIoUAssigner',
+            pos_iou_thr=0.5,
+            neg_iou_thr=0.4,
+            min_pos_iou=0.4,
+            ignore_iof_thr=-1),
+        ga_sampler=dict(
+            type='RandomSampler',
+            num=256,
+            pos_fraction=0.5,
+            neg_pos_ub=-1,
+            add_gt_as_proposals=False),
+        assigner=dict(
+            type='MaxIoUAssigner',
+            pos_iou_thr=0.5,
+            neg_iou_thr=0.5,
+            min_pos_iou=0.0,
+            ignore_iof_thr=-1),
+        allowed_border=-1,
+        pos_weight=-1,
+        center_ratio=0.2,
+        ignore_ratio=0.5,
+        debug=False),
+    test_cfg=dict(
+        nms_pre=1000,
+        min_bbox_size=0,
+        score_thr=0.05,
+        nms=dict(type='nms', iou_threshold=0.5),
+        max_per_img=100))
 # dataset settings
 dataset_type = 'CocoDataset'
 data_root = 'data/coco/'

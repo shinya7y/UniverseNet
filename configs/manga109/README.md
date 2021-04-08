@@ -2,6 +2,8 @@
 
 ## Introduction
 
+[DATASET]
+
 [The Manga109 dataset](http://www.manga109.org/en/index.html) contains artificial images of manga (Japanese comics) and annotations for four categories (body, face, frame, and text).
 Many characteristics are different from natural images.
 
