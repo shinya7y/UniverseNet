@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/universenet50.py',
+    '../universenet/models/universenet50.py',
     '../_base_/datasets/nightowls_mstrain_640_1280.py',
     '../_base_/schedules/schedule_7e.py', '../_base_/default_runtime.py'
 ]

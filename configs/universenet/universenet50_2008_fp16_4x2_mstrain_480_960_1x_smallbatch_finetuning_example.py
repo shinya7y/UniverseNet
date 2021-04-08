@@ -3,7 +3,7 @@
 # https://github.com/shinya7y/UniverseNet/blob/master/docs/tutorials/finetune.md
 
 _base_ = [
-    '../_base_/models/universenet50_2008.py',
+    '../universenet/models/universenet50_2008.py',
     # Please change to your dataset config.
     '../_base_/datasets/coco_detection_mstrain_480_960.py',
     '../_base_/schedules/schedule_1x.py',

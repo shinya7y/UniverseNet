@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/universenet50_2008.py',
+    '../universenet/models/universenet50_2008.py',
     '../_base_/datasets/waymo_open_2d_detection_f0_mstrain_640_1280.py',
     '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
