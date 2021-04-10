@@ -14,7 +14,8 @@ scale_ranges = [(96, 10000), (64, 10000), (0, 10000), (0, 10000), (0, 256)]
 #                 (64, 10000), (0, 10000), (0, 10000), (0, 10000), (0, 256),
 #                 (0, 256), (0, 192), (0, 192), (0, 96)]
 
-test_cfg = dict(fusion_cfg=dict(type='soft_vote', scale_ranges=scale_ranges))
+fusion_cfg = dict(type='soft_vote', scale_ranges=scale_ranges)
+model = dict(test_cfg=dict(fusion_cfg=fusion_cfg))
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)

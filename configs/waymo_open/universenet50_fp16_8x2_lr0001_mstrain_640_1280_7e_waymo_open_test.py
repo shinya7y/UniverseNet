@@ -1,10 +1,4 @@
-_base_ = [
-    '../universenet/models/universenet50.py',
-    '../_base_/datasets/waymo_open_2d_detection_mstrain_640_1280.py',
-    '../_base_/schedules/schedule_7e.py', '../_base_/default_runtime.py'
-]
-
-model = dict(bbox_head=dict(num_classes=3))
+_base_ = './universenet50_fp16_8x2_lr0001_mstrain_640_1280_7e_waymo_open.py'
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -28,19 +22,12 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=2,
-    val=dict(pipeline=test_pipeline),
-    test=dict(pipeline=test_pipeline))
+    val=dict(pipeline=test_pipeline), test=dict(pipeline=test_pipeline))
 
-optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0001)
-
-test_cfg = dict(
-    nms_pre=1000,
-    min_bbox_size=0,
-    score_thr=0.05,
-    nms=dict(type='soft_nms', iou_threshold=0.6, min_score=0.01),
-    max_per_img=1000)
-
-fp16 = dict(loss_scale=512.)
-
-load_from = '../data/checkpoints/universenet50_fp16_8x2_lr0001_mstrain_640_1280_7e_waymo_open_20200526_080330/epoch_7.pth'  # noqa
+model = dict(
+    test_cfg=dict(
+        nms_pre=1000,
+        min_bbox_size=0,
+        score_thr=0.05,
+        nms=dict(type='soft_nms', iou_threshold=0.6, min_score=0.01),
+        max_per_img=1000))
