@@ -12,6 +12,7 @@ from .fsaf_head import FSAFHead
 from .ga_retina_head import GARetinaHead
 from .ga_rpn_head import GARPNHead
 from .gfl_head import GFLHead, GFLSEPCHead
+from .gfocal_head import GFocalHead
 from .guided_anchor_head import FeatureAdaption, GuidedAnchorHead
 from .ld_head import LDHead
 from .nasfcos_head import NASFCOSHead
@@ -40,4 +41,4 @@ __all__ = [
     'StageCascadeRPNHead', 'CascadeRPNHead', 'EmbeddingRPNHead', 'LDHead'
 ]
 
-__all__ += ['ATSSSEPCHead', 'GFLSEPCHead']
+__all__ += ['ATSSSEPCHead', 'GFLSEPCHead', 'GFocalHead']
