@@ -22,7 +22,7 @@ model = dict(
         add_extra_convs='on_output',
         num_outs=5),
     bbox_head=dict(
-        type='GFocalHead',
+        type='GFLHead',
         num_classes=80,
         in_channels=256,
         stacked_convs=4,
@@ -40,6 +40,7 @@ model = dict(
             loss_weight=1.0),
         loss_dfl=dict(type='DistributionFocalLoss', loss_weight=0.25),
         reg_max=16,
+        use_dgqp=True,
         reg_topk=4,
         reg_channels=64,
         add_mean=True,
