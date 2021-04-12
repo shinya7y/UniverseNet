@@ -13,6 +13,11 @@ from mmdet.core import DistEvalHook, EvalHook
 from mmdet.datasets import (build_dataloader, build_dataset,
                             replace_ImageToTensor)
 from mmdet.utils import get_root_logger
+from mmcv_custom.runner import EpochBasedRunnerAmp
+try:
+    import apex
+except:
+    print('apex is not installed')
 
 
 def set_random_seed(seed, deterministic=False):
@@ -70,6 +75,20 @@ def train_detector(model,
             seed=cfg.seed) for ds in dataset
     ]
 
+    # build optimizer
+    optimizer = build_optimizer(model, cfg.optimizer)
+
+    # use apex fp16 optimizer
+    use_amp = False
+    if cfg.optimizer_config.get("type", None) and cfg.optimizer_config["type"] == "DistOptimizerHook":
+        if cfg.optimizer_config.get("use_fp16", False):
+            model, optimizer = apex.amp.initialize(
+                model.cuda(), optimizer, opt_level="O1")
+            for m in model.modules():
+                if hasattr(m, "fp16_enabled"):
+                    m.fp16_enabled = True
+            use_amp = True
+
     # put model on gpus
     if distributed:
         find_unused_parameters = cfg.get('find_unused_parameters', False)
@@ -84,9 +103,6 @@ def train_detector(model,
         model = MMDataParallel(
             model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
 
-    # build runner
-    optimizer = build_optimizer(model, cfg.optimizer)
-
     if 'runner' not in cfg:
         cfg.runner = {
             'type': 'EpochBasedRunner',
@@ -99,14 +115,18 @@ def train_detector(model,
         if 'total_epochs' in cfg:
             assert cfg.total_epochs == cfg.runner.max_epochs
 
+    # build runner
+    runner_default_args=dict(
+        model=model,
+        optimizer=optimizer,
+        work_dir=cfg.work_dir,
+        logger=logger,
+        meta=meta)
+    if cfg.runner['type'] == 'EpochBasedRunnerAmp':
+        runner_default_args['amp'] = use_amp
     runner = build_runner(
         cfg.runner,
-        default_args=dict(
-            model=model,
-            optimizer=optimizer,
-            work_dir=cfg.work_dir,
-            logger=logger,
-            meta=meta))
+        default_args=runner_default_args)
 
     # an ugly workaround to make .log and .log.json filenames the same
     runner.timestamp = timestamp
@@ -164,7 +184,10 @@ def train_detector(model,
             runner.register_hook(hook, priority=priority)
 
     if cfg.resume_from:
-        runner.resume(cfg.resume_from)
+        if cfg.runner['type'] == 'EpochBasedRunnerAmp':
+            runner.resume(cfg.resume_from, resume_amp=use_amp)
+        else:
+            runner.resume(cfg.resume_from)
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
     runner.run(data_loaders, cfg.workflow)
