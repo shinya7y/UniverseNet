@@ -9,6 +9,7 @@ from .resnest import ResNeSt
 from .resnet import ResNet, ResNetV1d
 from .resnext import ResNeXt
 from .ssd_vgg import SSDVGG
+from .swin_transformer import SwinTransformer
 from .trident_resnet import TridentResNet
 
 __all__ = [
@@ -16,3 +17,5 @@ __all__ = [
     'HourglassNet', 'DetectoRS_ResNet', 'DetectoRS_ResNeXt', 'Darknet',
     'ResNeSt', 'TridentResNet'
 ]
+
+__all__ += ['SwinTransformer']
