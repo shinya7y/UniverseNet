@@ -44,7 +44,7 @@ This repo contains the supported code and configuration files to reproduce objec
 
 ### Installation
 
-Please refer to [get_started.md](https://github.com/impiga/SwinTransformer-object-detection/blob/main/docs/get_started.md) for installation and dataset preparation.
+Please refer to [get_started.md](https://github.com/open-mmlab/mmdetection/blob/master/docs/get_started.md) for installation and dataset preparation.
 
 ### Inference
 ```
