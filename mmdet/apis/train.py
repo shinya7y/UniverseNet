@@ -79,7 +79,6 @@ def train_detector(model,
     optimizer = build_optimizer(model, cfg.optimizer)
 
     # use apex fp16 optimizer
-    use_amp = False
     if cfg.optimizer_config.get("type", None) and cfg.optimizer_config["type"] == "DistOptimizerHook":
         if cfg.optimizer_config.get("use_fp16", False):
             model, optimizer = apex.amp.initialize(
@@ -87,7 +86,6 @@ def train_detector(model,
             for m in model.modules():
                 if hasattr(m, "fp16_enabled"):
                     m.fp16_enabled = True
-            use_amp = True
 
     # put model on gpus
     if distributed:
@@ -116,17 +114,14 @@ def train_detector(model,
             assert cfg.total_epochs == cfg.runner.max_epochs
 
     # build runner
-    runner_default_args=dict(
-        model=model,
-        optimizer=optimizer,
-        work_dir=cfg.work_dir,
-        logger=logger,
-        meta=meta)
-    if cfg.runner['type'] == 'EpochBasedRunnerAmp':
-        runner_default_args['amp'] = use_amp
     runner = build_runner(
         cfg.runner,
-        default_args=runner_default_args)
+        default_args=dict(
+            model=model,
+            optimizer=optimizer,
+            work_dir=cfg.work_dir,
+            logger=logger,
+            meta=meta))
 
     # an ugly workaround to make .log and .log.json filenames the same
     runner.timestamp = timestamp
@@ -184,10 +179,7 @@ def train_detector(model,
             runner.register_hook(hook, priority=priority)
 
     if cfg.resume_from:
-        if cfg.runner['type'] == 'EpochBasedRunnerAmp':
-            runner.resume(cfg.resume_from, resume_amp=use_amp)
-        else:
-            runner.resume(cfg.resume_from)
+        runner.resume(cfg.resume_from)
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
     runner.run(data_loaders, cfg.workflow)
