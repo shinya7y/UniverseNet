@@ -14,7 +14,7 @@ from torch.optim import Optimizer
 try:
     import apex
 except ImportError:
-    print('apex is not installed')
+    apex = None
 
 
 class BaseRunner(metaclass=ABCMeta):

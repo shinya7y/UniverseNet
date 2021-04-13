@@ -11,10 +11,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
 from mmcv_custom import load_checkpoint
-from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
 from mmdet.utils import get_root_logger
 from ..builder import BACKBONES
+
+try:
+    from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+except ImportError:
+    DropPath = None
 
 
 class Mlp(nn.Module):
@@ -589,6 +593,9 @@ class SwinTransformer(nn.Module):
                  frozen_stages=-1,
                  use_checkpoint=False):
         super().__init__()
+
+        if DropPath is None:
+            raise RuntimeError('timm is not installed')
 
         self.pretrain_img_size = pretrain_img_size
         self.num_layers = len(depths)

@@ -3,4 +3,3 @@ mmpycocotools
 numpy
 six
 terminaltables
-timm

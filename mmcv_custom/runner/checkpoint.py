@@ -23,7 +23,7 @@ from torch.utils import model_zoo
 try:
     import apex
 except ImportError:
-    print('apex is not installed')
+    apex = None
 
 ENV_MMCV_HOME = 'MMCV_HOME'
 ENV_XDG_CACHE_HOME = 'XDG_CACHE_HOME'

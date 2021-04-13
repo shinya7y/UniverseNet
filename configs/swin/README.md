@@ -1,10 +1,10 @@
 # Swin Transformer for Object Detection
 
-This repo contains the supported code and configuration files to reproduce object detection results of [Swin Transformer](https://arxiv.org/pdf/2103.14030.pdf). It is based on [mmdetection](https://github.com/open-mmlab/mmdetection).
+## Introduction
 
-## Updates
+[ALGORITHM]
 
-***04/12/2021*** Initial commits
+This repo contains the supported code and configuration files to reproduce object detection results of [Swin Transformer](https://arxiv.org/pdf/2103.14030.pdf).
 
 ## Results and Models
 
@@ -23,6 +23,9 @@ This repo contains the supported code and configuration files to reproduce objec
 |  Swin-S  | ImageNet-1K |   3x    |  51.9   |   45.0   |  107M   | 838G  | [config](configs/swin/cascade_mask_rcnn_swin_small_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_small_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/17Vyufk85vyocxrBT1AbavQ) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_small_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1Sv9-gP1Qpl6SGOF6DBhUbw) |
 |  Swin-B  | ImageNet-1K |   3x    |  51.9   |   45.0   |  145M   | 982G  | [config](configs/swin/cascade_mask_rcnn_swin_base_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_base_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1UZAR39g-0kE_aGrINwfVHg)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_base_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1tHoC9PMVnldQUAfcF6FT3A)  |
 
+
+<!--
+
 ### RepPoints V2
 
 | Backbone |  Pretrain   | Lr Schd | box mAP | mask mAP | #params | FLOPs |
@@ -35,16 +38,14 @@ This repo contains the supported code and configuration files to reproduce objec
 | :------: | :---------: | :-----: | :-----: | :------: | :-----: | :---: |
 |  Swin-T  | ImageNet-1K |   3x    |  50.3   |   43.6   |   47M   | 292G  |
 
+-->
+
 **Notes**:
 
 - **Pre-trained models can be downloaded from [Swin Transformer for ImageNet Classification](https://github.com/microsoft/Swin-Transformer)**.
 - Access code for `baidu` is `swin`.
 
 ## Usage
-
-### Installation
-
-Please refer to [get_started.md](https://github.com/open-mmlab/mmdetection/blob/master/docs/get_started.md) for installation and dataset preparation.
 
 ### Inference
 ```
@@ -94,8 +95,9 @@ optimizer_config = dict(
 )
 ```
 
-## Citing Swin Transformer
-```
+## Citation
+
+```latex
 @article{liu2021Swin,
   title={Swin Transformer: Hierarchical Vision Transformer using Shifted Windows},
   author={Liu, Ze and Lin, Yutong and Cao, Yue and Hu, Han and Wei, Yixuan and Zhang, Zheng and Lin, Stephen and Guo, Baining},

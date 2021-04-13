@@ -19,7 +19,7 @@ from mmdet.utils import get_root_logger
 try:
     import apex
 except ImportError:
-    print('apex is not installed')
+    apex = None
 
 
 def set_random_seed(seed, deterministic=False):
@@ -49,6 +49,7 @@ def train_detector(model,
                    timestamp=None,
                    meta=None):
     logger = get_root_logger(cfg.log_level)
+    use_apex = cfg.optimizer_config.get('type', None) == 'ApexOptimizerHook'
 
     # prepare data loaders
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
@@ -77,14 +78,12 @@ def train_detector(model,
             seed=cfg.seed) for ds in dataset
     ]
 
-    # build optimizer
-    optimizer = build_optimizer(model, cfg.optimizer)
-
     # use apex fp16 optimizer
     use_amp = False
-    if cfg.optimizer_config.get(
-            'type',
-            None) and cfg.optimizer_config['type'] == 'ApexOptimizerHook':
+    if use_apex:
+        if apex is None:
+            raise RuntimeError('apex is not installed')
+        optimizer = build_optimizer(model, cfg.optimizer)
         if cfg.optimizer_config.get('use_fp16', False):
             model, optimizer = apex.amp.initialize(
                 model.cuda(), optimizer, opt_level='O1')
@@ -106,6 +105,9 @@ def train_detector(model,
     else:
         model = MMDataParallel(
             model.cuda(cfg.gpu_ids[0]), device_ids=cfg.gpu_ids)
+
+    if not use_apex:
+        optimizer = build_optimizer(model, cfg.optimizer)
 
     if 'runner' not in cfg:
         cfg.runner = {
