@@ -81,10 +81,6 @@ jobs:
           - torch: 1.6.0+cu101
             torchvision: 0.7.0+cu101
             mmcv: "latest+torch1.6.0+cu101"
-            python-version: 3.6
-          - torch: 1.6.0+cu101
-            torchvision: 0.7.0+cu101
-            mmcv: "latest+torch1.6.0+cu101"
             python-version: 3.8
 
     steps:

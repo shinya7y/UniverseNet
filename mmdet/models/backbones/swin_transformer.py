@@ -595,7 +595,9 @@ class SwinTransformer(nn.Module):
         super().__init__()
 
         if DropPath is None:
-            raise RuntimeError('timm is not installed')
+            raise RuntimeError(
+                'Failed to import timm. Please run "pip install timm". '
+                '"pip install dataclasses" may also be needed for Python 3.6.')
 
         self.pretrain_img_size = pretrain_img_size
         self.num_layers = len(depths)
