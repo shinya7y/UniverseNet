@@ -9,6 +9,10 @@ https://arxiv.org/abs/2103.14027
 
 ## Changelog
 
+- master
+  - Propose [Universal-Scale object detection Benchmark (USB)](https://arxiv.org/abs/2103.14027)
+  - Add codes for Swin Transformer, GFLv2
+  - Update and fix codes for PyTorch 1.7.1, mmdet 2.11.0, mmcv-full 1.3.0
 - 20.12 (Dec. 2020):
   - Add configs for Manga109-s dataset
   - Add ATSS-style TTA for SOTA accuracy (COCO test-dev AP 54.1)
@@ -28,15 +32,21 @@ https://arxiv.org/abs/2103.14027
 
 ## Features not in the original MMDetection
 
-- [x] [UniverseNet](configs/universenet/)
-- [x] SEPC
-- [x] ATSS+SEPC, GFL+SEPC
+Methods and architectures:
+
+- [x] [UniverseNets (arXiv 2021)](configs/universenet/)
+- [x] [Swin Transformer (arXiv 2021)](configs/swin/)
+- [x] [GFLv2 (CVPR 2021)](configs/gflv2/)
+- [x] SEPC (CVPR 2020)
+- [x] [ATSS-style TTA (CVPR 2020)](configs/universenet/universenet101_2008d_fp16_4x4_mstrain_480_960_20e_coco_test_vote.py)
 - [x] ~~Test-time augmentation for ATSS and GFL~~ [merged](https://github.com/open-mmlab/mmdetection/commits?author=shinya7y)
-- [x] [Waymo Open Dataset](mmdet/datasets/waymo_open.py)
-- [x] [Waymo Open Dataset configs](configs/waymo_open/)
-- [x] [Manga109-s dataset configs](configs/manga109/)
-- [x] [NightOwls dataset](mmdet/datasets/nightowls.py)
-- [x] [NightOwls dataset configs](configs/nightowls/)
+
+Benchmarks and datasets:
+
+- [x] USB (arXiv 2021)
+- [x] [Waymo Open Dataset (CVPR 2020)](configs/waymo_open/)
+- [x] [Manga109-s dataset (MTAP 2017, IEEE MultiMedia 2020)](configs/manga109/)
+- [x] [NightOwls dataset (ACCV 2018)](configs/nightowls/)
 
 ## Citation
 
@@ -49,9 +59,14 @@ https://arxiv.org/abs/2103.14027
 }
 ```
 
+## License
+
+Major parts of the code are released under the [Apache 2.0 license](LICENSE).
+Plsease check [NOTICE](NOTICE) for exceptions.
+
 ## Acknowledgements
 
-Some codes are modified from the repositories of [SEPC](https://github.com/jshilong/SEPC), [GFLv2](https://github.com/implus/GFocalV2), and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
+Some codes are modified from the repositories of [Swin Transformer](https://github.com/SwinTransformer/Swin-Transformer-Object-Detection), [SEPC](https://github.com/jshilong/SEPC), [GFLv2](https://github.com/implus/GFocalV2), and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
 When merging, please note that there are some minor differences from the above repositories and [the original MMDetection repository](https://github.com/open-mmlab/mmdetection).
 
 <br><br>
@@ -96,10 +111,6 @@ The old v1.x branch works with PyTorch 1.1 to 1.4, but v2.0 is strongly recommen
   The toolbox stems from the codebase developed by the *MMDet* team, who won [COCO Detection Challenge](http://cocodataset.org/#detection-leaderboard) in 2018, and we keep pushing it forward.
 
 Apart from MMDetection, we also released a library [mmcv](https://github.com/open-mmlab/mmcv) for computer vision research, which is heavily depended on by this toolbox.
-
-## License
-
-This project is released under the [Apache 2.0 license](LICENSE).
 
 ## Changelog
 

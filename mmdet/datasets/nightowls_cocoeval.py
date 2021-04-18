@@ -1,29 +1,5 @@
-"""Modified from https://gitlab.com/vgg/nightowlsapi.
+# Modified from https://gitlab.com/vgg/nightowlsapi
 
-License:
-This dataset is made freely available to academic and non-academic entities
-for non-commercial purposes such as academic research, teaching, scientific
-publications, or personal experimentation. Permission is granted to use the
-data given that you agree:
-
-1. That the dataset comes “AS IS”, without express or implied warranty.
-Although every effort has been made to ensure accuracy, we (University of
-Oxford) do not accept any responsibility for errors or omissions.
-2. That you include a reference to the Nightowls Dataset in any work that
-makes use of the dataset.
-3. That you do not distribute this dataset or modified versions. It is
-permissible to distribute derivative works in as far as they are abstract
-representations of this dataset (such as models trained on it or additional
-annotations that do not directly include any of our data) and do not allow
-to recover the dataset or something similar in character.
-4. You may not use the dataset or any derivative work for commercial purposes
-such as, for example, licensing or selling the data, or using the data with a
-purpose to procure a commercial gain.
-5. That all rights not expressly granted to you are reserved by us (University
-of Oxford).
-"""
-
-# from . import mask as maskUtils
 import copy
 import datetime
 import time
