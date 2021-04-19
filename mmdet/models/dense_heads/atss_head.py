@@ -28,6 +28,8 @@ class ATSSHead(AnchorHead):
         in_channels (int): Number of channels in the input feature map.
         stacked_convs (int): Number of conv layers in cls and reg tower.
             Default: 4.
+        dcn_on_last_conv (bool): If true, use dcn in the last layer of
+            towers. Default: False.
         conv_cfg (dict): dictionary to construct and config conv layer.
             Default: None.
         norm_cfg (dict): dictionary to construct and config norm layer.
@@ -44,6 +46,7 @@ class ATSSHead(AnchorHead):
                  num_classes,
                  in_channels,
                  stacked_convs=4,
+                 dcn_on_last_conv=False,
                  conv_cfg=None,
                  norm_cfg=dict(type='GN', num_groups=32, requires_grad=True),
                  loss_centerness=dict(
@@ -53,6 +56,7 @@ class ATSSHead(AnchorHead):
                  avg_samples_to_int=True,
                  **kwargs):
         self.stacked_convs = stacked_convs
+        self.dcn_on_last_conv = dcn_on_last_conv
         self.conv_cfg = conv_cfg
         self.norm_cfg = norm_cfg
         self.avg_samples_to_int = avg_samples_to_int
@@ -73,6 +77,10 @@ class ATSSHead(AnchorHead):
         self.reg_convs = nn.ModuleList()
         for i in range(self.stacked_convs):
             chn = self.in_channels if i == 0 else self.feat_channels
+            if self.dcn_on_last_conv and i == self.stacked_convs - 1:
+                conv_cfg = dict(type='DCNv2')
+            else:
+                conv_cfg = self.conv_cfg
             self.cls_convs.append(
                 ConvModule(
                     chn,
@@ -80,7 +88,7 @@ class ATSSHead(AnchorHead):
                     3,
                     stride=1,
                     padding=1,
-                    conv_cfg=self.conv_cfg,
+                    conv_cfg=conv_cfg,
                     norm_cfg=self.norm_cfg))
             self.reg_convs.append(
                 ConvModule(
@@ -89,7 +97,7 @@ class ATSSHead(AnchorHead):
                     3,
                     stride=1,
                     padding=1,
-                    conv_cfg=self.conv_cfg,
+                    conv_cfg=conv_cfg,
                     norm_cfg=self.norm_cfg))
         self.atss_cls = nn.Conv2d(
             self.feat_channels,

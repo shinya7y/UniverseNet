@@ -7,6 +7,7 @@ from .grid_assigner import GridAssigner
 from .hungarian_assigner import HungarianAssigner
 from .max_iou_assigner import MaxIoUAssigner
 from .point_assigner import PointAssigner
+from .point_kpt_assigner import PointKptAssigner
 from .region_assigner import RegionAssigner
 
 __all__ = [
@@ -14,3 +15,5 @@ __all__ = [
     'PointAssigner', 'ATSSAssigner', 'CenterRegionAssigner', 'GridAssigner',
     'HungarianAssigner', 'RegionAssigner'
 ]
+
+__all__ += ['PointKptAssigner']

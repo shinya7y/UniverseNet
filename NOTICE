@@ -2,8 +2,17 @@
 MIT License
 ===============================================================================
 
+Copyright (c) 2021 Microsoft
 - mmdet/models/backbones/swin_transformer.py
-  Copyright (c) 2021 Microsoft
+
+Copyright (c) Microsoft Corporation.
+- configs/bvr
+- mmdet/core/bbox/assigners/point_kpt_assigner.py
+- mmdet/models/dense_heads/bvr_head.py
+- mmdet/models/dense_heads/keypoint_head.py
+- mmdet/models/utils/bvr_transformer
+- mmdet/models/utils/bvr_utils.py
+- mmdet/models/utils/corner_pool.py
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,9 +36,8 @@ SOFTWARE.
 2-Clause BSD License (Simplified BSD License)
 ===============================================================================
 
+Copyright (c) 2014, Piotr Dollar and Tsung-Yi Lin All rights reserved.
 - mmdet/datasets/nightowls_cocoeval.py
-  Copyright (c) 2014, Piotr Dollar and Tsung-Yi Lin
-  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:

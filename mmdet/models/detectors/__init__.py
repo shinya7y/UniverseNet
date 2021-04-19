@@ -1,5 +1,6 @@
 from .atss import ATSS
 from .base import BaseDetector
+from .bvr import BVR
 from .cascade_rcnn import CascadeRCNN
 from .cornernet import CornerNet
 from .detr import DETR
@@ -38,3 +39,5 @@ __all__ = [
     'YOLOV3', 'YOLACT', 'VFNet', 'DETR', 'TridentFasterRCNN', 'SparseRCNN',
     'SCNet'
 ]
+
+__all__ += ['BVR']
