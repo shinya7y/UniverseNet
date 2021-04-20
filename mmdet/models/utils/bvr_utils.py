@@ -5,12 +5,9 @@ from torch import nn
 from torch.nn import functional as F
 
 from mmdet.core import multi_apply
-from mmdet.models.dense_heads.anchor_free_head import AnchorFreeHead
 from mmdet.models.dense_heads.atss_head import ATSSHead
 from mmdet.models.dense_heads.fcos_head import FCOSHead
 from mmdet.models.dense_heads.retina_head import RetinaHead
-
-# modify the structure of original box head without rewriting code.
 
 
 def anchorfree_forward_features(self, feats):
@@ -20,14 +17,16 @@ def anchorfree_forward_features(self, feats):
 def anchorfree_forward_feature_single(self, x):
     cls_feat = x
     reg_feat = x
-
     for cls_layer in self.cls_convs:
         cls_feat = cls_layer(cls_feat)
-
     for reg_layer in self.reg_convs:
         reg_feat = reg_layer(reg_feat)
-
     return cls_feat, reg_feat
+
+
+def atss_forward_predictions(self, cls_feats, reg_feats):
+    return multi_apply(self.forward_prediction_single, cls_feats, reg_feats,
+                       self.scales)
 
 
 def atss_forward_prediction_single(self, cls_feat, reg_feat, scale):
@@ -37,9 +36,9 @@ def atss_forward_prediction_single(self, cls_feat, reg_feat, scale):
     return cls_score, bbox_pred, centerness
 
 
-def atss_forward_predictions(self, cls_feats, reg_feats):
+def fcos_forward_predictions(self, cls_feats, reg_feats):
     return multi_apply(self.forward_prediction_single, cls_feats, reg_feats,
-                       self.scales)
+                       self.scales, self.strides)
 
 
 def fcos_forward_prediction_single(self, cls_feat, reg_feat, scale, stride):
@@ -61,11 +60,6 @@ def fcos_forward_prediction_single(self, cls_feat, reg_feat, scale, stride):
     return cls_score, bbox_pred, centerness
 
 
-def fcos_forward_predictions(self, cls_feats, reg_feats):
-    return multi_apply(self.forward_prediction_single, cls_feats, reg_feats,
-                       self.scales, self.strides)
-
-
 def retina_forward_predictions(self, cls_feats, reg_feats):
     return multi_apply(self.forward_prediction_single, cls_feats, reg_feats)
 
@@ -76,51 +70,52 @@ def retina_forward_prediction_single(self, cls_feat, reg_feat):
     return cls_score, bbox_pred
 
 
-def assign_required_method(module: nn.Module):
-    """
+def assign_methods_for_bvr(module: nn.Module):
+    """Modify the structure of bbox_head by assigning methods.
+
     Args:
-        module: BoxHead
-    Return:
-        assigned_status Bool: Whether the methods are assigned to module
-            successfully.
+        module: bbox_head
     """
+    # check whether the bbox_head already has required methods
     if hasattr(module, 'forward_features') and hasattr(module,
                                                        'forward_predictions'):
-        return 1
+        return
 
-    if isinstance(module, AnchorFreeHead) or isinstance(
-            module, (RetinaHead, ATSSHead)):
-        if hasattr(module, 'cls_convs') and hasattr(module, 'reg_convs'):
-            warnings.warn(
-                'You are trying to assign a [forward_features,'
-                'forward_feature_single] methods to {}. If the head prediction'
-                ' is maintained by other branch. The action may damage your '
-                'box head.')
-            module.forward_features = types.MethodType(
-                anchorfree_forward_features, module)
-            module.forward_feature_single = types.MethodType(
-                anchorfree_forward_feature_single, module)
-        else:
-            return -1
-    else:
-        return -1
+    # check whether BVR supports the bbox_head
+    supported_heads = ('ATSSHead', 'FCOSHead', 'RetinaHead')
+    module_name = module.__class__.__name__
+    assert module_name in supported_heads, 'not supported bbox_head'
+    assert hasattr(module, 'cls_convs'), 'not found cls_convs'
+    assert hasattr(module, 'reg_convs'), 'not found reg_convs'
 
-    if isinstance(module, FCOSHead):
-        module.forward_predictions = types.MethodType(fcos_forward_predictions,
-                                                      module)
-        module.forward_prediction_single = types.MethodType(
-            fcos_forward_prediction_single, module)
-    elif isinstance(module, ATSSHead):
+    # warning
+    warnings.warn(f'Methods for BVR will be assigned to {module_name}.'
+                  ' The bbox_head may break if the prediction'
+                  ' is maintained by other branches.')
+
+    # assign forward_features, forward_feature_single
+    module.forward_features = types.MethodType(anchorfree_forward_features,
+                                               module)
+    module.forward_feature_single = types.MethodType(
+        anchorfree_forward_feature_single, module)
+
+    # assign forward_predictions, forward_prediction_single
+    if isinstance(module, ATSSHead):
         module.forward_predictions = types.MethodType(atss_forward_predictions,
                                                       module)
         module.forward_prediction_single = types.MethodType(
             atss_forward_prediction_single, module)
+    elif isinstance(module, FCOSHead):
+        module.forward_predictions = types.MethodType(fcos_forward_predictions,
+                                                      module)
+        module.forward_prediction_single = types.MethodType(
+            fcos_forward_prediction_single, module)
     elif isinstance(module, RetinaHead):
         module.forward_predictions = types.MethodType(
             retina_forward_predictions, module)
         module.forward_prediction_single = types.MethodType(
             retina_forward_prediction_single, module)
     else:
-        return -1
+        assert False, 'this line should be unreachable'
 
-    return 1
+    return

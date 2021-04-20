@@ -12,6 +12,8 @@ from .builder import BVR_ATTENTION
 
 Tensor = torch.Tensor
 
+# TODO: check difference from other implementation
+
 
 @BVR_ATTENTION.register_module()
 class MultiheadAttention(Module):

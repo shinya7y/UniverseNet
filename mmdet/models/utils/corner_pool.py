@@ -5,17 +5,15 @@ from torch import nn
 
 class CornerPoolPack(nn.Module):
 
-    def __init__(
-        self,
-        dim,
-        pool1,
-        pool2,
-        conv_cfg=None,
-        norm_cfg=None,
-        first_kernel_size=3,
-        kernel_size=3,
-        corner_dim=128,
-    ):
+    def __init__(self,
+                 dim,
+                 pool1,
+                 pool2,
+                 conv_cfg=None,
+                 norm_cfg=None,
+                 first_kernel_size=3,
+                 kernel_size=3,
+                 corner_dim=128):
         super(CornerPoolPack, self).__init__()
         self.p1_conv1 = ConvModule(
             dim,
@@ -24,8 +22,7 @@ class CornerPoolPack(nn.Module):
             stride=1,
             padding=(first_kernel_size - 1) // 2,
             conv_cfg=conv_cfg,
-            norm_cfg=norm_cfg,
-        )
+            norm_cfg=norm_cfg)
         self.p2_conv1 = ConvModule(
             dim,
             corner_dim,
@@ -33,8 +30,7 @@ class CornerPoolPack(nn.Module):
             stride=1,
             padding=(first_kernel_size - 1) // 2,
             conv_cfg=conv_cfg,
-            norm_cfg=norm_cfg,
-        )
+            norm_cfg=norm_cfg)
 
         self.p_conv1 = nn.Conv2d(corner_dim, dim, 3, padding=1, bias=False)
         self.p_gn1 = nn.GroupNorm(num_groups=32, num_channels=dim)
@@ -50,8 +46,7 @@ class CornerPoolPack(nn.Module):
             stride=1,
             padding=(kernel_size - 1) // 2,
             conv_cfg=conv_cfg,
-            norm_cfg=norm_cfg,
-        )
+            norm_cfg=norm_cfg)
 
         self.pool1 = pool1
         self.pool2 = pool2
@@ -79,15 +74,13 @@ class CornerPoolPack(nn.Module):
 
 class TLPool(CornerPoolPack):
 
-    def __init__(
-        self,
-        dim,
-        conv_cfg=None,
-        norm_cfg=None,
-        first_kernel_size=3,
-        kernel_size=3,
-        corner_dim=128,
-    ):
+    def __init__(self,
+                 dim,
+                 conv_cfg=None,
+                 norm_cfg=None,
+                 first_kernel_size=3,
+                 kernel_size=3,
+                 corner_dim=128):
         super(TLPool, self).__init__(
             dim,
             CornerPool('top'),
@@ -102,15 +95,13 @@ class TLPool(CornerPoolPack):
 
 class BRPool(CornerPoolPack):
 
-    def __init__(
-        self,
-        dim,
-        conv_cfg=None,
-        norm_cfg=None,
-        first_kernel_size=3,
-        kernel_size=3,
-        corner_dim=128,
-    ):
+    def __init__(self,
+                 dim,
+                 conv_cfg=None,
+                 norm_cfg=None,
+                 first_kernel_size=3,
+                 kernel_size=3,
+                 corner_dim=128):
         super(BRPool, self).__init__(
             dim,
             CornerPool('bottom'),

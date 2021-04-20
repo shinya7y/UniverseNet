@@ -44,11 +44,12 @@ class PointKptAssigner(BaseAssigner):
             Tuple[torch.Tensor,torch.Tensor]: offset targets [num_points,2]
                 and score_targets [num_points,num_gts]
         """
-        num_gts, num_points = gt_bboxes.shape[0], points.shape[0]
+        num_points = points.shape[0]
+        num_gts = gt_bboxes.shape[0]
 
-        if num_points == 0 or num_gts == 0:
-            return points.new_zeros(num_points,
-                                    0), points.new_zeros(num_points, 0)
+        if num_gts == 0 or num_points == 0:
+            return points.new_zeros(num_points, 0), \
+                   points.new_zeros(num_points, 0)
 
         points_xy = points[:, :2]
         points_stride = points[:, 2]
@@ -57,7 +58,8 @@ class PointKptAssigner(BaseAssigner):
 
         gt_bboxes_w = gt_bboxes[:, 2] - gt_bboxes[:, 0]
         gt_bboxes_h = gt_bboxes[:, 3] - gt_bboxes[:, 1]
-        radius = gaussian_radius((gt_bboxes_h, gt_bboxes_w), self.gaussian_iou)
+        radius = gaussian_radius_torch((gt_bboxes_h, gt_bboxes_w),
+                                       self.gaussian_iou)
         diameter = 2 * radius + 1
         sigma = diameter / 6
         sigma_square = sigma[None, :]**2
@@ -102,7 +104,7 @@ class PointKptAssigner(BaseAssigner):
         return offset_targets, score_target, pos_mask
 
 
-def gaussian_radius(det_size, min_overlap):
+def gaussian_radius_torch(det_size, min_overlap):
     height, width = det_size
 
     a1 = 1
