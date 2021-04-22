@@ -88,7 +88,7 @@ class GFLHead(AnchorHead):
             Default: True.
         avg_samples_to_int (bool): Whether to integerize average numbers of
             samples. True for compatibility with old MMDetection versions.
-            False for following original ATSS. Default: True.
+            False for following original ATSS. Default: False.
     Example:
         >>> self = GFLHead(11, 7)
         >>> feats = [torch.rand(1, 7, s, s) for s in [4, 8, 16, 32, 64]]
@@ -108,7 +108,7 @@ class GFLHead(AnchorHead):
                  reg_topk=4,
                  reg_channels=64,
                  add_mean=True,
-                 avg_samples_to_int=True,
+                 avg_samples_to_int=False,
                  **kwargs):
         self.stacked_convs = stacked_convs
         self.conv_cfg = conv_cfg

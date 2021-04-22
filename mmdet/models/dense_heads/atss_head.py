@@ -39,7 +39,7 @@ class ATSSHead(AnchorHead):
             loss_weight=1.0).
         avg_samples_to_int (bool): Whether to integerize average numbers of
             samples. True for compatibility with old MMDetection versions.
-            False for following original ATSS. Default: True.
+            False for following original ATSS. Default: False.
     """
 
     def __init__(self,
@@ -53,7 +53,7 @@ class ATSSHead(AnchorHead):
                      type='CrossEntropyLoss',
                      use_sigmoid=True,
                      loss_weight=1.0),
-                 avg_samples_to_int=True,
+                 avg_samples_to_int=False,
                  **kwargs):
         self.stacked_convs = stacked_convs
         self.dcn_on_last_conv = dcn_on_last_conv
