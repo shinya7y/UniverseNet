@@ -11,7 +11,7 @@ https://arxiv.org/abs/2103.14027
 
 - master
   - Propose [Universal-Scale object detection Benchmark (USB)](https://arxiv.org/abs/2103.14027)
-  - Add codes for Swin Transformer, GFLv2
+  - Add codes for Swin Transformer, GFLv2, RelationNet++ (BVR)
   - Update and fix codes for PyTorch 1.7.1, mmdet 2.11.0, mmcv-full 1.3.0
 - 20.12 (Dec. 2020):
   - Add configs for Manga109-s dataset
@@ -37,6 +37,7 @@ Methods and architectures:
 - [x] [UniverseNets (arXiv 2021)](configs/universenet/)
 - [x] [Swin Transformer (arXiv 2021)](configs/swin/)
 - [x] [GFLv2 (CVPR 2021)](configs/gflv2/)
+- [x] [RelationNet++ (BVR) (NeurIPS 2020)](configs/bvr/)
 - [x] SEPC (CVPR 2020)
 - [x] [ATSS-style TTA (CVPR 2020)](configs/universenet/universenet101_2008d_fp16_4x4_mstrain_480_960_20e_coco_test_vote.py)
 - [x] ~~Test-time augmentation for ATSS and GFL~~ [merged](https://github.com/open-mmlab/mmdetection/commits?author=shinya7y)
@@ -66,7 +67,12 @@ Plsease check [NOTICE](NOTICE) for exceptions.
 
 ## Acknowledgements
 
-Some codes are modified from the repositories of [Swin Transformer](https://github.com/SwinTransformer/Swin-Transformer-Object-Detection), [SEPC](https://github.com/jshilong/SEPC), [GFLv2](https://github.com/implus/GFocalV2), and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
+Some codes are modified from the repositories of
+[Swin Transformer](https://github.com/SwinTransformer/Swin-Transformer-Object-Detection),
+[RelationNet++](https://github.com/microsoft/RelationNet2),
+[SEPC](https://github.com/jshilong/SEPC),
+[GFLv2](https://github.com/implus/GFocalV2),
+and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
 When merging, please note that there are some minor differences from the above repositories and [the original MMDetection repository](https://github.com/open-mmlab/mmdetection).
 
 <br><br>
