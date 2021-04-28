@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.cnn import ConvModule, Scale, bias_init_with_prob, normal_init
+from mmcv.cnn import ConvModule, Scale
 from mmcv.runner import force_fp32
 
 from mmdet.core import (anchor_inside_flags, bbox2distance, bbox_overlaps,
@@ -10,8 +10,6 @@ from mmdet.core import (anchor_inside_flags, bbox2distance, bbox_overlaps,
                         reduce_mean, unmap)
 from ..builder import HEADS, build_loss
 from .anchor_head import AnchorHead
-
-EPS = 1e-12
 
 
 class Integral(nn.Module):
@@ -89,6 +87,7 @@ class GFLHead(AnchorHead):
         avg_samples_to_int (bool): Whether to integerize average numbers of
             samples. True for compatibility with old MMDetection versions.
             False for following original ATSS. Default: False.
+        init_cfg (dict or list[dict], optional): Initialization config dict.
     Example:
         >>> self = GFLHead(11, 7)
         >>> feats = [torch.rand(1, 7, s, s) for s in [4, 8, 16, 32, 64]]
@@ -109,6 +108,15 @@ class GFLHead(AnchorHead):
                  reg_channels=64,
                  add_mean=True,
                  avg_samples_to_int=False,
+                 init_cfg=dict(
+                     type='Normal',
+                     layer='Conv2d',
+                     std=0.01,
+                     override=dict(
+                         type='Normal',
+                         name='gfl_cls',
+                         std=0.01,
+                         bias_prob=0.01)),
                  **kwargs):
         self.stacked_convs = stacked_convs
         self.conv_cfg = conv_cfg
@@ -122,7 +130,8 @@ class GFLHead(AnchorHead):
         if add_mean:
             self.total_dim += 1
         self.avg_samples_to_int = avg_samples_to_int
-        super(GFLHead, self).__init__(num_classes, in_channels, **kwargs)
+        super(GFLHead, self).__init__(
+            num_classes, in_channels, init_cfg=init_cfg, **kwargs)
 
         self.sampling = False
         if self.train_cfg:
@@ -172,20 +181,6 @@ class GFLHead(AnchorHead):
             conf_vector += [self.relu]
             conf_vector += [nn.Conv2d(self.reg_channels, 1, 1), nn.Sigmoid()]
             self.reg_conf = nn.Sequential(*conf_vector)
-
-    def init_weights(self):
-        """Initialize weights of the head."""
-        for m in self.cls_convs:
-            normal_init(m.conv, std=0.01)
-        for m in self.reg_convs:
-            normal_init(m.conv, std=0.01)
-        if self.use_dgqp:
-            for m in self.reg_conf:
-                if isinstance(m, nn.Conv2d):
-                    normal_init(m, std=0.01)
-        bias_cls = bias_init_with_prob(0.01)
-        normal_init(self.gfl_cls, std=0.01, bias=bias_cls)
-        normal_init(self.gfl_reg, std=0.01)
 
     def forward(self, feats):
         """Forward features from the upstream network.
@@ -424,9 +419,7 @@ class GFLHead(AnchorHead):
                 num_total_samples=num_total_samples)
 
         avg_factor = sum(avg_factor)
-        avg_factor = reduce_mean(avg_factor).item()
-        if avg_factor < EPS:
-            avg_factor = 1
+        avg_factor = reduce_mean(avg_factor).clamp_(min=1).item()
         losses_bbox = list(map(lambda x: x / avg_factor, losses_bbox))
         losses_dfl = list(map(lambda x: x / avg_factor, losses_dfl))
         return dict(

@@ -114,8 +114,8 @@ class BBoxTestMixin(object):
         cls_score = cls_score.reshape(batch_size, num_proposals_per_img, -1)
 
         if not torch.onnx.is_in_onnx_export():
-            # remove padding
-            supplement_mask = rois[..., -1] == 0
+            # remove padding, ignore batch_index when calculating mask
+            supplement_mask = rois.abs()[..., 1:].sum(dim=-1) == 0
             cls_score[supplement_mask, :] = 0
 
         # bbox_pred would be None in some detector when with_reg is False,
@@ -137,7 +137,7 @@ class BBoxTestMixin(object):
                 det_labels = []
                 for i in range(len(proposals)):
                     # remove padding
-                    supplement_mask = proposals[i][..., -1] == 0
+                    supplement_mask = proposals[i].abs().sum(dim=-1) == 0
                     for bbox in bbox_preds[i]:
                         bbox[supplement_mask] = 0
                     det_bbox, det_label = self.bbox_head.get_bboxes(
@@ -254,6 +254,14 @@ class MaskTestMixin(object):
         ori_shapes = tuple(meta['ori_shape'] for meta in img_metas)
         scale_factors = tuple(meta['scale_factor'] for meta in img_metas)
 
+        if all(det_bbox.shape[0] == 0 for det_bbox in det_bboxes):
+            if torch.onnx.is_in_onnx_export():
+                raise RuntimeError('[ONNX Error] Can not record MaskHead '
+                                   'as it has not been executed this time')
+            segm_results = [[[] for _ in range(self.mask_head.num_classes)]
+                            for _ in range(len(det_bboxes))]
+            return segm_results
+
         # The length of proposals of different batches may be different.
         # In order to form a batch, a padding operation is required.
         if isinstance(det_bboxes, list):
@@ -288,6 +296,18 @@ class MaskTestMixin(object):
         mask_results = self._mask_forward(x, mask_rois)
         mask_pred = mask_results['mask_pred']
 
+        # Support get_seg_masks exporting to ONNX
+        if torch.onnx.is_in_onnx_export():
+            max_shape = img_metas[0]['img_shape_for_onnx']
+            num_det = det_bboxes.shape[1]
+            det_bboxes = det_bboxes.reshape(-1, 4)
+            det_labels = det_labels.reshape(-1)
+            segm_results = self.mask_head.get_seg_masks(
+                mask_pred, det_bboxes, det_labels, self.test_cfg, max_shape,
+                scale_factors[0], rescale)
+            segm_results = segm_results.reshape(batch_size, num_det,
+                                                max_shape[0], max_shape[1])
+            return segm_results
         # Recover the batch dimension
         mask_preds = mask_pred.reshape(batch_size, num_proposals_per_img,
                                        *mask_pred.shape[1:])
@@ -300,7 +320,7 @@ class MaskTestMixin(object):
             det_label = det_labels[i]
 
             # remove padding
-            supplement_mask = det_bbox[..., -1] != 0
+            supplement_mask = det_bbox.abs().sum(dim=-1) != 0
             mask_pred = mask_pred[supplement_mask]
             det_bbox = det_bbox[supplement_mask]
             det_label = det_label[supplement_mask]
