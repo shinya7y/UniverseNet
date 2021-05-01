@@ -1,3 +1,4 @@
+# dataset settings
 dataset_type = 'NightOwlsDataset'
 data_root = 'data/nightowls/'
 img_norm_cfg = dict(

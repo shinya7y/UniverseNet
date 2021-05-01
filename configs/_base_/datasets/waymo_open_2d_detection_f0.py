@@ -1,3 +1,4 @@
+# dataset settings
 dataset_type = 'WaymoOpenDataset'
 data_root = 'data/waymococo_f0/'
 img_norm_cfg = dict(

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import build_norm_layer
-from mmcv.runner import auto_fp16
+from mmcv.runner import BaseModule, ModuleList, auto_fp16
 from torch.nn.modules.batchnorm import _BatchNorm
 
 from mmdet.models.utils import SEPCConv
@@ -10,7 +10,7 @@ from ..builder import NECKS
 
 
 @NECKS.register_module()
-class SEPC(nn.Module):
+class SEPC(BaseModule):
     """SEPC (Scale-Equalizing Pyramid Convolution).
 
     https://arxiv.org/abs/2005.03101 https://github.com/jshilong/SEPC
@@ -28,8 +28,11 @@ class SEPC(nn.Module):
                  lcnorm_cfg=dict(type='BN', requires_grad=True),
                  pnorm_eval=True,
                  lcnorm_eval=True,
-                 lcconv_padding=0):
-        super(SEPC, self).__init__()
+                 lcconv_padding=0,
+                 init_cfg=None):
+        assert init_cfg is None, 'To prevent abnormal initialization ' \
+                                 'behavior, init_cfg is not allowed to be set'
+        super(SEPC, self).__init__(init_cfg=init_cfg)
         assert isinstance(in_channels, list)
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -42,7 +45,7 @@ class SEPC(nn.Module):
         self.lcnorm_cfg = lcnorm_cfg
         self.pnorm_eval = pnorm_eval
         self.lcnorm_eval = lcnorm_eval
-        self.pconvs = nn.ModuleList()
+        self.pconvs = ModuleList()
 
         for i in range(stacked_convs):
             self.pconvs.append(
@@ -76,10 +79,10 @@ class SEPC(nn.Module):
             self.add_module(self.lnorm_name, lnorm)
             self.add_module(self.cnorm_name, cnorm)
         self.relu = nn.ReLU()
-        self.init_weights()
 
     def init_weights(self):
         """Initialize the weights of module."""
+        super(SEPC, self).init_weights()
         for str in ['l', 'c']:
             m = getattr(self, str + 'conv')
             nn.init.normal_(m.weight.data, 0, 0.01)
@@ -123,7 +126,7 @@ class SEPC(nn.Module):
                     m.eval()
 
 
-class PConvModule(nn.Module):
+class PConvModule(BaseModule):
     """PConv (Pyramid Convolution) module of SEPC."""
 
     def __init__(self,
@@ -135,13 +138,16 @@ class PConvModule(nn.Module):
                  ibn=False,
                  norm_cfg=dict(type='BN', requires_grad=True),
                  norm_eval=True,
-                 part_deform=False):
-        super(PConvModule, self).__init__()
+                 part_deform=False,
+                 init_cfg=None):
+        assert init_cfg is None, 'To prevent abnormal initialization ' \
+                                 'behavior, init_cfg is not allowed to be set'
+        super(PConvModule, self).__init__(init_cfg=init_cfg)
 
         self.ibn = ibn
         self.norm_cfg = norm_cfg
         self.norm_eval = norm_eval
-        self.pconv = nn.ModuleList()
+        self.pconv = ModuleList()
         self.pconv.append(
             SEPCConv(
                 in_channels,
@@ -176,10 +182,10 @@ class PConvModule(nn.Module):
             self.add_module(self.pnorm_name, pnorm)
 
         self.relu = nn.ReLU()
-        self.init_weights()
 
     def init_weights(self):
         """Initialize the weights of module."""
+        super(PConvModule, self).init_weights()
         for m in self.pconv:
             nn.init.normal_(m.weight.data, 0, 0.01)
             if m.bias is not None:

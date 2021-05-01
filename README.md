@@ -12,7 +12,7 @@ https://arxiv.org/abs/2103.14027
 - master
   - Propose [Universal-Scale object detection Benchmark (USB)](https://arxiv.org/abs/2103.14027)
   - Add codes for Swin Transformer, GFLv2, RelationNet++ (BVR)
-  - Update and fix codes for PyTorch 1.7.1, mmdet 2.11.0, mmcv-full 1.3.0
+  - Update and fix codes for PyTorch 1.7.1, mmdet 2.11.0, mmcv-full 1.3.2
 - 20.12 (Dec. 2020):
   - Add configs for Manga109-s dataset
   - Add ATSS-style TTA for SOTA accuracy (COCO test-dev AP 54.1)

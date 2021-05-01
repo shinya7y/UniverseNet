@@ -1,3 +1,4 @@
+# model settings
 model = dict(
     type='ATSS',
     pretrained='torchvision://resnet50',

@@ -2,7 +2,7 @@
 
 ## Introduction
 
-[DATASET]
+<!-- [DATASET] -->
 
 The NightOwls dataset is a dataset for pedestrian detection at night.
 It contains three classes ('pedestrian', 'bicycledriver', 'motorbikedriver') except for ignore areas.

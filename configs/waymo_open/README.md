@@ -2,7 +2,7 @@
 
 ## Introduction
 
-[DATASET]
+<!-- [DATASET] -->
 
 The Waymo Open Dataset is a large-scale diverse dataset for autonomous driving.
 Although the KITTI dataset has been popular in this field, it is a small-scale non-diverse dataset.

@@ -1,3 +1,4 @@
+# dataset settings
 dataset_type = 'CocoDataset'
 data_root = 'data/Manga109s/'
 classes = ('body', 'face', 'frame', 'text')

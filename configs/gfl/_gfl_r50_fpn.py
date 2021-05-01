@@ -1,3 +1,4 @@
+# model settings
 model = dict(
     type='GFL',
     pretrained='torchvision://resnet50',

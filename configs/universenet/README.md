@@ -3,7 +3,7 @@
 
 ## Introduction
 
-[ALGORITHM]
+<!-- [ALGORITHM] -->
 
 UniverseNets are state-of-the-art detectors for universal-scale object detection.
 Please refer to our paper for details.
