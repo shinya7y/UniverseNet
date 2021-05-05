@@ -8,6 +8,12 @@ This repo contains the supported code and configuration files to reproduce objec
 
 ## Results and Models
 
+### ATSS
+
+| Backbone |  Pretrain   | Lr schd | box AP |                       config                       |                                                                    model                                                                    |
+| :------: | :---------: | :-----: | :----: | :------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------: |
+|  Swin-T  | ImageNet-1K |   1x    |  43.7  | [config](atss_swint_fpn_fp16_4x4_adamw_1x_coco.py) | [github](https://github.com/shinya7y/weights/releases/download/v1.0.0/atss_swint_fpn_fp16_4x4_adamw_1x_coco_20210502_epoch_12-3c37c44b.pth) |
+
 ### Mask R-CNN
 
 | Backbone |  Pretrain   | Lr Schd | box mAP | mask mAP | #params | FLOPs |                                           config                                            |                                                                                         log                                                                                         |                                                                                     model                                                                                      |
