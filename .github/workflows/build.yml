@@ -127,6 +127,9 @@ jobs:
       - name: Install Pillow
         run: pip install Pillow==6.2.2
         if: ${{matrix.torchvision < 0.5}}
+      - name: Install dataclasses
+        run: pip install dataclasses
+        if: ${{matrix.python-version < 3.7}}
       - name: Install PyTorch
         run: pip install torch==${{matrix.torch}} torchvision==${{matrix.torchvision}} -f https://download.pytorch.org/whl/torch_stable.html
       - name: Install mmdet dependencies

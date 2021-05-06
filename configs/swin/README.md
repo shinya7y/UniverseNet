@@ -4,7 +4,7 @@
 
 <!-- [ALGORITHM] -->
 
-This repo contains the supported code and configuration files to reproduce object detection results of [Swin Transformer](https://arxiv.org/pdf/2103.14030.pdf).
+This directory contains the configs and results of [Swin Transformer](https://arxiv.org/abs/2103.14030).
 
 ## Results and Models
 
@@ -16,33 +16,33 @@ This repo contains the supported code and configuration files to reproduce objec
 
 ### Mask R-CNN
 
-| Backbone |  Pretrain   | Lr Schd | box mAP | mask mAP | #params | FLOPs |                                           config                                            |                                                                                         log                                                                                         |                                                                                     model                                                                                      |
-| :------: | :---------: | :-----: | :-----: | :------: | :-----: | :---: | :-----------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|  Swin-T  | ImageNet-1K |   3x    |  46.0   |   41.6   |   48M   | 267G  | [config](configs/swin/mask_rcnn_swin_tiny_patch4_window7_mstrain_480-800_adamw_3x_coco.py)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/mask_rcnn_swin_tiny_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1Te-Ovk4yaavmE4jcIOPAaw)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/mask_rcnn_swin_tiny_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1YpauXYAFOohyMi3Vkb6DBg)  |
-|  Swin-S  | ImageNet-1K |   3x    |  48.5   |   43.3   |   69M   | 359G  | [config](configs/swin/mask_rcnn_swin_small_patch4_window7_mstrain_480-800_adamw_3x_coco.py) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/mask_rcnn_swin_small_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1ymCK7378QS91yWlxHMf1yw) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/mask_rcnn_swin_small_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1V4w4aaV7HSjXNFTOSA6v6w) |
+| Backbone |  Pretrain   | Lr schd | box AP | mask AP | #params | FLOPs |                                     config                                     |                                                                                         log                                                                                         |                                                                                     model                                                                                      |
+| :------: | :---------: | :-----: | :----: | :-----: | :-----: | :---: | :----------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|  Swin-T  | ImageNet-1K |   3x    |  46.0  |  41.6   |   48M   | 267G  | [config](mask_rcnn_swin_tiny_patch4_window7_mstrain_480-800_adamw_3x_coco.py)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/mask_rcnn_swin_tiny_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1Te-Ovk4yaavmE4jcIOPAaw)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/mask_rcnn_swin_tiny_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1YpauXYAFOohyMi3Vkb6DBg)  |
+|  Swin-S  | ImageNet-1K |   3x    |  48.5  |  43.3   |   69M   | 359G  | [config](mask_rcnn_swin_small_patch4_window7_mstrain_480-800_adamw_3x_coco.py) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/mask_rcnn_swin_small_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1ymCK7378QS91yWlxHMf1yw) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/mask_rcnn_swin_small_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1V4w4aaV7HSjXNFTOSA6v6w) |
 
 ### Cascade Mask R-CNN
 
-| Backbone |  Pretrain   | Lr Schd | box mAP | mask mAP | #params | FLOPs |                                                      config                                                      |                                                                                             log                                                                                             |                                                                                         model                                                                                          |
-| :------: | :---------: | :-----: | :-----: | :------: | :-----: | :---: | :--------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|  Swin-T  | ImageNet-1K |   3x    |  50.4   |   43.7   |   86M   | 745G  | [config](configs/swin/cascade_mask_rcnn_swin_tiny_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_tiny_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1GW_ic617Ak_NpRayOqPSOA)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_tiny_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1i-izBrODgQmMwTv6F6-x3A)  |
-|  Swin-S  | ImageNet-1K |   3x    |  51.9   |   45.0   |  107M   | 838G  | [config](configs/swin/cascade_mask_rcnn_swin_small_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_small_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/17Vyufk85vyocxrBT1AbavQ) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_small_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1Sv9-gP1Qpl6SGOF6DBhUbw) |
-|  Swin-B  | ImageNet-1K |   3x    |  51.9   |   45.0   |  145M   | 982G  | [config](configs/swin/cascade_mask_rcnn_swin_base_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_base_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1UZAR39g-0kE_aGrINwfVHg)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_base_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1tHoC9PMVnldQUAfcF6FT3A)  |
+| Backbone |  Pretrain   | Lr schd | box AP | mask AP | #params | FLOPs |                                               config                                                |                                                                                             log                                                                                             |                                                                                         model                                                                                          |
+| :------: | :---------: | :-----: | :----: | :-----: | :-----: | :---: | :-------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|  Swin-T  | ImageNet-1K |   3x    |  50.4  |  43.7   |   86M   | 745G  | [config](cascade_mask_rcnn_swin_tiny_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_tiny_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1GW_ic617Ak_NpRayOqPSOA)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_tiny_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1i-izBrODgQmMwTv6F6-x3A)  |
+|  Swin-S  | ImageNet-1K |   3x    |  51.9  |  45.0   |  107M   | 838G  | [config](cascade_mask_rcnn_swin_small_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_small_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/17Vyufk85vyocxrBT1AbavQ) | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_small_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1Sv9-gP1Qpl6SGOF6DBhUbw) |
+|  Swin-B  | ImageNet-1K |   3x    |  51.9  |  45.0   |  145M   | 982G  | [config](cascade_mask_rcnn_swin_base_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_base_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1UZAR39g-0kE_aGrINwfVHg)  | [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_base_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1tHoC9PMVnldQUAfcF6FT3A)  |
 
 
 <!--
 
 ### RepPoints V2
 
-| Backbone |  Pretrain   | Lr Schd | box mAP | mask mAP | #params | FLOPs |
-| :------: | :---------: | :-----: | :-----: | :------: | :-----: | :---: |
-|  Swin-T  | ImageNet-1K |   3x    |  50.0   |    -     |   45M   | 283G  |
+| Backbone |  Pretrain   | Lr schd | box AP | mask AP | #params | FLOPs |
+| :------: | :---------: | :-----: | :----: | :-----: | :-----: | :---: |
+|  Swin-T  | ImageNet-1K |   3x    |  50.0  |    -    |   45M   | 283G  |
 
 ### Mask RepPoints V2
 
-| Backbone |  Pretrain   | Lr Schd | box mAP | mask mAP | #params | FLOPs |
-| :------: | :---------: | :-----: | :-----: | :------: | :-----: | :---: |
-|  Swin-T  | ImageNet-1K |   3x    |  50.3   |   43.6   |   47M   | 292G  |
+| Backbone |  Pretrain   | Lr schd | box AP | mask AP | #params | FLOPs |
+| :------: | :---------: | :-----: | :----: | :-----: | :-----: | :---: |
+|  Swin-T  | ImageNet-1K |   3x    |  50.3  |  43.6   |   47M   | 292G  |
 
 -->
 
@@ -80,19 +80,32 @@ tools/dist_train.sh configs/swin/cascade_mask_rcnn_swin_tiny_patch4_window7_mstr
 **Note:** `use_checkpoint` is used to save GPU memory. Please refer to [this page](https://pytorch.org/docs/stable/checkpoint.html) for more details.
 
 
-### Apex (optional):
-We use apex for mixed precision training by default. To install apex, run:
-```
+### Mixed Precision Training
+
+The current configs use mixed precision training via MMCV by default.
+Please install PyTorch >= 1.6.0 to use torch.cuda.amp.
+
+If you find performance difference from apex (used by the original authors), please raise an issue.
+Otherwise, we will clean code for apex.
+
+<details>
+<summary>Click me to use apex</summary>
+
+To install apex, run:
+
+```bash
 git clone https://github.com/NVIDIA/apex
 cd apex
 pip install -v --disable-pip-version-check --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
 ```
-If you would like to disable apex, modify the type of runner as `EpochBasedRunner` and comment out the following code block in the [configuration files](configs/swin):
-```
-# do not use mmdet version fp16
+
+Modify configs with the following code:
+
+```python
+runner = dict(type='EpochBasedRunnerAmp', max_epochs=36)
 fp16 = None
 optimizer_config = dict(
-    type="ApexOptimizerHook",
+    type='ApexOptimizerHook',
     update_interval=1,
     grad_clip=None,
     coalesce=True,
@@ -100,6 +113,8 @@ optimizer_config = dict(
     use_fp16=True,
 )
 ```
+
+</details>
 
 ## Citation
 
