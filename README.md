@@ -120,7 +120,7 @@ Apart from MMDetection, we also released a library [mmcv](https://github.com/ope
 
 ## Changelog
 
-v2.11.0 was released in 01/04/2021.
+v2.12.0 was released in 01/05/2021.
 Please refer to [changelog.md](docs/changelog.md) for details and release history.
 A comparison between v1.x and v2.0 codebases can be found in [compatibility.md](docs/compatibility.md).
 
