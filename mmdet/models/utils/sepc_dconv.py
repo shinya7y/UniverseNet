@@ -65,7 +65,8 @@ class SEPCConv(DeformConv2d):
         if input_pad:
             out = out[:, :, :out.size(2) - pad_h, :out.size(3) -
                       pad_w].contiguous()
-        return out + self.bias.unsqueeze(0).unsqueeze(-1).unsqueeze(-1)
+        bias = self.bias.unsqueeze(0).unsqueeze(-1).unsqueeze(-1).type_as(out)
+        return out + bias
 
 
 class ModulatedSEPCConv(ModulatedDeformConv2d):
