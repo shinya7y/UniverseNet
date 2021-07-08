@@ -9,7 +9,6 @@ from mmcv.runner import (HOOKS, DistSamplerSeedHook, EpochBasedRunner,
                          build_runner)
 from mmcv.utils import build_from_cfg
 from mmcv_custom.runner import EpochBasedRunnerAmp  # noqa
-from tools.rearrange_weights import rearrange_classes
 
 from mmdet.core import DistEvalHook, EvalHook
 from mmdet.datasets import (build_dataloader, build_dataset,
@@ -188,10 +187,4 @@ def train_detector(model,
         runner.resume(cfg.resume_from)
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
-
-    classes_rearrange = cfg.get('classes_rearrange', False)
-    if classes_rearrange:
-        runner.model = rearrange_classes(runner.model, cfg.classes,
-                                         cfg.dataset_type)
-
     runner.run(data_loaders, cfg.workflow)

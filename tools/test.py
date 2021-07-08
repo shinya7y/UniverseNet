@@ -9,7 +9,6 @@ from mmcv.cnn import fuse_conv_bn
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
 from mmcv.runner import (get_dist_info, init_dist, load_checkpoint,
                          wrap_fp16_model)
-from tools.rearrange_weights import rearrange_classes
 
 from mmdet.apis import multi_gpu_test, single_gpu_test
 from mmdet.datasets import (build_dataloader, build_dataset,
@@ -193,10 +192,6 @@ def main():
     if fp16_cfg is not None:
         wrap_fp16_model(model)
     checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
-    # perform model surgery
-    classes_rearrange = cfg.get('classes_rearrange', False)
-    if classes_rearrange:
-        model = rearrange_classes(model, cfg.classes, cfg.dataset_type)
     if args.fuse_conv_bn:
         model = fuse_conv_bn(model)
     # old versions did not save class info in checkpoints, this walkaround is

@@ -7,15 +7,12 @@ import pandas as pd
 
 
 def calc_coco_format_stats(ann_file,
-                           save_pkl=False,
                            verbose=False,
-                           num_print=0):
+                           num_print=0,
+                           ignore_iscrowd=False):
     print('annotation file:', ann_file)
     with open(ann_file) as f:
         anno = json.load(f)
-    if save_pkl:
-        stats_pkl_file = os.path.splitext(ann_file)[0] + '_stats.pkl'
-        print('output pkl file:', stats_pkl_file)
 
     print('keys:', anno.keys())
     if verbose and ('categories' in anno):
@@ -36,6 +33,8 @@ def calc_coco_format_stats(ann_file,
         return
 
     bboxes = anno['annotations']
+    if ignore_iscrowd:
+        bboxes = [box for box in bboxes if not box.get('iscrowd', False)]
     num_bboxes = len(bboxes)
     print('num_bboxes:', num_bboxes)
     df = pd.DataFrame(bboxes)
@@ -60,15 +59,14 @@ def calc_coco_format_stats(ann_file,
 
     if num_print > 0:
         print(df.head(num_print))
-    print(df.describe())
 
-    if save_pkl:
-        df.to_pickle(stats_pkl_file)
+    return df
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('ann_file', help='COCO-format annotation file')
+    parser.add_argument(
+        'ann_files', nargs='+', help='COCO-format annotation file')
     parser.add_argument(
         '--save_pkl',
         action='store_true',
@@ -81,11 +79,25 @@ def main():
         default=0,
         help='number to print the first few examples')
     args = parser.parse_args()
-    calc_coco_format_stats(
-        args.ann_file,
-        save_pkl=args.save_pkl,
-        verbose=args.verbose,
-        num_print=args.num_print)
+
+    ann_basenames = []
+    dfs = []
+    for ann_file in args.ann_files:
+        ann_basename = os.path.splitext(os.path.basename(ann_file))[0]
+        ann_basenames.append(ann_basename)
+        df = calc_coco_format_stats(
+            ann_file, verbose=args.verbose, num_print=args.num_print)
+        dfs.append(df)
+    df_concat = pd.concat(dfs)
+    percentiles = [.01, .05, .1, .25, .5, .75, .9, .95, .99]
+    print(df_concat.describe(percentiles=percentiles))
+
+    pkl_dirname = os.path.dirname(args.ann_files[0])
+    pkl_basename = '_'.join(ann_basenames) + '_stats.pkl'
+    pkl_file = os.path.join(pkl_dirname, pkl_basename)
+    if args.save_pkl:
+        print('output pkl file:', pkl_file)
+        df_concat.to_pickle(pkl_file)
 
 
 if __name__ == '__main__':
