@@ -1,9 +1,8 @@
 # model settings
 model = dict(
     type='ATSS',
-    pretrained=(
-        'https://github.com/shinya7y/UniverseNet/releases/download/20.06/'
-        'res2net50_v1b_26w_4s-3cf99910_mmdetv2.pth'),
+    pretrained=('https://github.com/shinya7y/weights/releases/download/v1.0.2/'
+                'res2net50_v1b_26w_4s-3cf99910_mmdetv2-92ed3313.pth'),
     backbone=dict(
         type='Res2Net',
         depth=50,
