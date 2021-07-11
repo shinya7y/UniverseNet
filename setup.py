@@ -138,6 +138,7 @@ if __name__ == '__main__':
         url='https://github.com/open-mmlab/mmdetection',
         packages=find_packages(exclude=('configs', 'tools', 'demo')),
         # package_data={'mmdet.ops': ['*/*.so']},
+        include_package_data=True,
         classifiers=[
             'Development Status :: 5 - Production/Stable',
             'License :: OSI Approved :: Apache Software License',

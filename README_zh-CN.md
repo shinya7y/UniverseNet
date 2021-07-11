@@ -44,9 +44,9 @@ v1.x 的历史版本支持 PyTorch 1.1 到 1.4，但是我们强烈建议用户�
 
 ## 更新日志
 
-最新的月度版本 v2.12.0 在 2021.05.01 发布。
+最新的月度版本 v2.14.0 在 2021.06.29 发布。
 如果想了解更多版本更新细节和历史信息，请阅读[更新日志](docs/changelog.md)。
-在[兼容性说明文档](docs/compatibility.md)中我们提供了 1.x 和 2.0 版本的详细比较。
+在[兼容性说明文档](docs_zh-CN/compatibility.md)中我们提供了 1.x 和 2.0 版本的详细比较。
 
 ## 基准测试和模型库
 
@@ -114,6 +114,8 @@ v1.x 的历史版本支持 PyTorch 1.1 到 1.4，但是我们强烈建议用户�
 - [x] [SCNet (AAAI'2021)](configs/scnet/README.md)
 - [x] [AutoAssign (ArXix'2020)](configs/autoassign/README.md)
 - [x] [YOLOF (CVPR'2021)](configs/yolof/README.md)
+- [x] [Seasaw Loss (CVPR'2021)](configs/seesaw_loss/README.md)
+- [x] [CenterNet (CVPR'2019)](configs/centernet/README.md)
 
 我们在[基于 MMDetection 的项目](./docs/projects.md)中列举了一些其他的支持的算法。
 
@@ -128,7 +130,7 @@ v1.x 的历史版本支持 PyTorch 1.1 到 1.4，但是我们强烈建议用户�
 
 我们也提供了一些进阶教程，内容覆盖了 [finetune 模型](docs/tutorials/finetune.md)，[增加新数据集支持](docs/tutorials/new_dataset.md)，[设计新的数据预处理流程](docs/tutorials/data_pipeline.md)，[增加自定义模型](ocs/tutorials/customize_models.md)，[增加自定义的运行时配置](docs/tutorials/customize_runtime.md)，[常用工具和脚本](docs/useful_tools.md)。
 
-如果遇到问题，请参考 [FAQ 页面](docs/faq.md)。
+如果遇到问题，请参考 [常见问题解答](docs_zh-CN/faq.md)。
 
 ## 贡献指南
 

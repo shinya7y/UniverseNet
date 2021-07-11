@@ -4,6 +4,7 @@ from .atss_head import ATSSHead, ATSSSEPCHead
 from .autoassign_head import AutoAssignHead
 from .bvr_head import BVRHead
 from .cascade_rpn_head import CascadeRPNHead, StageCascadeRPNHead
+from .centernet_head import CenterNetHead
 from .centripetal_head import CentripetalHead
 from .corner_head import CornerHead
 from .deformable_detr_head import DeformableDETRHead
@@ -43,7 +44,8 @@ __all__ = [
     'YOLACTSegmHead', 'YOLACTProtonet', 'YOLOV3Head', 'PAAHead',
     'SABLRetinaHead', 'CentripetalHead', 'VFNetHead', 'StageCascadeRPNHead',
     'CascadeRPNHead', 'EmbeddingRPNHead', 'LDHead', 'CascadeRPNHead',
-    'AutoAssignHead', 'DETRHead', 'YOLOFHead', 'DeformableDETRHead'
+    'AutoAssignHead', 'DETRHead', 'YOLOFHead', 'DeformableDETRHead',
+    'CenterNetHead'
 ]
 
 __all__ += ['ATSSSEPCHead', 'GFLSEPCHead', 'BVRHead', 'KeypointHead']

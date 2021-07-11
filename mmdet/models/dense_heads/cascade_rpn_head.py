@@ -628,17 +628,14 @@ class StageCascadeRPNHead(RPNHead):
         ids = torch.cat(level_ids)
 
         # Skip nonzero op while exporting to ONNX
-        if cfg.min_bbox_size > 0 and (not torch.onnx.is_in_onnx_export()):
+        if cfg.min_bbox_size >= 0 and (not torch.onnx.is_in_onnx_export()):
             w = proposals[:, 2] - proposals[:, 0]
             h = proposals[:, 3] - proposals[:, 1]
-            valid_inds = torch.nonzero(
-                (w >= cfg.min_bbox_size)
-                & (h >= cfg.min_bbox_size),
-                as_tuple=False).squeeze()
-            if valid_inds.sum().item() != len(proposals):
-                proposals = proposals[valid_inds, :]
-                scores = scores[valid_inds]
-                ids = ids[valid_inds]
+            valid_mask = (w > cfg.min_bbox_size) & (h > cfg.min_bbox_size)
+            if not valid_mask.all():
+                proposals = proposals[valid_mask]
+                scores = scores[valid_mask]
+                ids = ids[valid_mask]
 
         # deprecate arguments warning
         if 'nms' not in cfg or 'max_num' in cfg or 'nms_thr' in cfg:
@@ -782,4 +779,5 @@ class CascadeRPNHead(BaseDenseHead):
 
     def aug_test_rpn(self, x, img_metas):
         """Augmented forward test function."""
-        raise NotImplementedError
+        raise NotImplementedError(
+            'CascadeRPNHead does not support test-time augmentation')

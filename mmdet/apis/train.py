@@ -47,7 +47,7 @@ def train_detector(model,
                    validate=False,
                    timestamp=None,
                    meta=None):
-    logger = get_root_logger(cfg.log_level)
+    logger = get_root_logger(log_level=cfg.log_level)
     use_apex = cfg.optimizer_config.get('type', None) == 'ApexOptimizerHook'
 
     # prepare data loaders

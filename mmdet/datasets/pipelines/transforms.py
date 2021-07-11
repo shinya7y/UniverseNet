@@ -44,7 +44,7 @@ def imwrite_denormalized_debug_img(func):
 
 
 @PIPELINES.register_module()
-class Resize(object):
+class Resize:
     """Resize images & bbox & mask.
 
     This transform resizes the input image to some scale. Bboxes and masks are
@@ -337,7 +337,7 @@ class Resize(object):
 
 
 @PIPELINES.register_module()
-class RandomFlip(object):
+class RandomFlip:
     """Flip the image & bbox & mask.
 
     If the input dict contains the key "flip", then the flag will be used,
@@ -494,7 +494,7 @@ class RandomFlip(object):
 
 
 @PIPELINES.register_module()
-class RandomShift(object):
+class RandomShift:
     """Shift the image and box given shift pixels and probability.
 
     Args:
@@ -584,7 +584,7 @@ class RandomShift(object):
 
 
 @PIPELINES.register_module()
-class Pad(object):
+class Pad:
     """Pad the image & mask.
 
     There are two padding modes: (1) pad to a fixed size and (2) pad to the
@@ -655,7 +655,7 @@ class Pad(object):
 
 
 @PIPELINES.register_module()
-class Normalize(object):
+class Normalize:
     """Normalize the image.
 
     Added key is "img_norm_cfg".
@@ -696,7 +696,7 @@ class Normalize(object):
 
 
 @PIPELINES.register_module()
-class RandomCrop(object):
+class RandomCrop:
     """Random crop the image & bboxes & masks.
 
     The absolute `crop_size` is sampled based on `crop_type` and `image_size`,
@@ -880,7 +880,7 @@ class RandomCrop(object):
 
 
 @PIPELINES.register_module()
-class SegRescale(object):
+class SegRescale:
     """Rescale semantic segmentation maps.
 
     Args:
@@ -918,7 +918,7 @@ class SegRescale(object):
 
 
 @PIPELINES.register_module()
-class PhotoMetricDistortion(object):
+class PhotoMetricDistortion:
     """Apply photometric distortion to image sequentially, every transformation
     is applied with a probability of 0.5. The position of random contrast is in
     second or second to last.
@@ -1024,7 +1024,7 @@ class PhotoMetricDistortion(object):
 
 
 @PIPELINES.register_module()
-class Expand(object):
+class Expand:
     """Random expand the image & bboxes.
 
     Randomly place the original image on a canvas of 'ratio' x original image
@@ -1116,7 +1116,7 @@ class Expand(object):
 
 
 @PIPELINES.register_module()
-class MinIoURandomCrop(object):
+class MinIoURandomCrop:
     """Random crop the image & bboxes, the cropped patches have minimum IoU
     requirement with original image & bboxes, the IoU threshold is randomly
     selected from min_ious.
@@ -1256,7 +1256,7 @@ class MinIoURandomCrop(object):
 
 
 @PIPELINES.register_module()
-class Corrupt(object):
+class Corrupt:
     """Corruption augmentation.
 
     Corruption transforms implemented based on
@@ -1300,7 +1300,7 @@ class Corrupt(object):
 
 
 @PIPELINES.register_module()
-class Albu(object):
+class Albu:
     """Albumentation augmentation.
 
     Adds custom transformations from Albumentations library.
@@ -1504,7 +1504,7 @@ class Albu(object):
 
 
 @PIPELINES.register_module()
-class RandomCenterCropPad(object):
+class RandomCenterCropPad:
     """Random center crop and random around padding for CornerNet.
 
     This operation generates randomly cropped image from the original image and
@@ -1587,6 +1587,7 @@ class RandomCenterCropPad(object):
             - 'logical_or': final_shape = input_shape | padding_shape_value
             - 'size_divisor': final_shape = int(
               ceil(input_shape / padding_shape_value) * padding_shape_value)
+        test_pad_add_pix (int): Extra padding pixel in test mode. Default 0.
         bbox_clip_border (bool, optional): Whether clip the objects outside
             the border of the image. Defaults to True.
     """
@@ -1600,6 +1601,7 @@ class RandomCenterCropPad(object):
                  to_rgb=None,
                  test_mode=False,
                  test_pad_mode=('logical_or', 127),
+                 test_pad_add_pix=0,
                  bbox_clip_border=True):
         if test_mode:
             assert crop_size is None, 'crop_size must be None in test mode'
@@ -1633,6 +1635,7 @@ class RandomCenterCropPad(object):
             self.std = std
         self.test_mode = test_mode
         self.test_pad_mode = test_pad_mode
+        self.test_pad_add_pix = test_pad_add_pix
         self.bbox_clip_border = bbox_clip_border
 
     def _get_border(self, border, size):
@@ -1804,8 +1807,9 @@ class RandomCenterCropPad(object):
         h, w, c = img.shape
         results['img_shape'] = img.shape
         if self.test_pad_mode[0] in ['logical_or']:
-            target_h = h | self.test_pad_mode[1]
-            target_w = w | self.test_pad_mode[1]
+            # self.test_pad_add_pix is only used for centernet
+            target_h = (h | self.test_pad_mode[1]) + self.test_pad_add_pix
+            target_w = (w | self.test_pad_mode[1]) + self.test_pad_add_pix
         elif self.test_pad_mode[0] in ['size_divisor']:
             divisor = self.test_pad_mode[1]
             target_h = int(np.ceil(h / divisor)) * divisor
@@ -1849,7 +1853,7 @@ class RandomCenterCropPad(object):
 
 
 @PIPELINES.register_module()
-class CutOut(object):
+class CutOut:
     """CutOut operation.
 
     Randomly drop some regions of image used in
