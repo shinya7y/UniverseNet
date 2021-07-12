@@ -9,7 +9,9 @@ https://arxiv.org/abs/2103.14027
 
 ## Changelog
 
-- master
+- recent:
+  - Update and fix codes for mmdet 2.14.0, mmcv-full 1.3.9
+- 21.04 (Apr. 2021):
   - Propose [Universal-Scale object detection Benchmark (USB)](https://arxiv.org/abs/2103.14027)
   - Add codes for Swin Transformer, GFLv2, RelationNet++ (BVR)
   - Update and fix codes for PyTorch 1.7.1, mmdet 2.11.0, mmcv-full 1.3.2
