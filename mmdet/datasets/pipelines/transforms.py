@@ -1927,7 +1927,7 @@ class CutOut:
 
 
 @PIPELINES.register_module()
-class SoftGridMask(object):
+class SoftGridMask:
     """SoftGridMask augmentation.
 
     This augmentation is an extension of

@@ -4,7 +4,6 @@ _base_ = [
 ]
 model = dict(
     type='GFL',
-    pretrained='open-mmlab://res2net101_v1d_26w_4s',
     backbone=dict(
         type='Res2Net',
         depth=101,
@@ -17,7 +16,10 @@ model = dict(
         dcn=dict(type='DCN', deform_groups=1, fallback_on_stride=False),
         stage_with_dcn=(False, False, True, True),
         norm_eval=True,
-        style='pytorch'),
+        style='pytorch',
+        init_cfg=dict(
+            type='Pretrained',
+            checkpoint='open-mmlab://res2net101_v1d_26w_4s')),
     neck=dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],

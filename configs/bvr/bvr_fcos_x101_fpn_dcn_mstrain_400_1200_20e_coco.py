@@ -5,7 +5,6 @@ _base_ = [
 
 model = dict(
     type='BVR',
-    pretrained='open-mmlab://resnext101_64x4d',
     backbone=dict(
         type='ResNeXt',
         depth=101,
@@ -19,7 +18,9 @@ model = dict(
         style='pytorch',
         dcn=dict(type='DCNv2', deform_groups=1, fallback_on_stride=False),
         stage_with_dcn=(False, True, True, True),
-        with_cp=True),
+        with_cp=True,
+        init_cfg=dict(
+            type='Pretrained', checkpoint='open-mmlab://resnext101_64x4d')),
     neck=dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],

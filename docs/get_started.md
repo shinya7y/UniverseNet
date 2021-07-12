@@ -75,6 +75,7 @@ If mmcv and mmcv-full are both installed, there will be `ModuleNotFoundError`.
 
 ### Install MMDetection
 
+<!--
 We recommend you to install MMDetection with [MIM](https://github.com/open-mmlab/mim).
 
 ```shell
@@ -85,6 +86,7 @@ mim install mmdet
 MIM can automatically install OpenMMLab projects and their requirements.
 
 Or, you can install MMDetection manually:
+-->
 
 1. Install mmcv-full, we recommend you to install the pre-build package as below.
 
@@ -128,11 +130,13 @@ Or, you can install MMDetection manually:
     pip install -v -e .  # or "python setup.py develop"
     ```
 
+<!--
     Or, you can simply install mmdetection with the following commands:
 
     ```shell
     pip install mmdet
     ```
+-->
 
 **Note:**
 

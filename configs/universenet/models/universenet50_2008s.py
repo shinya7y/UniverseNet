@@ -1,7 +1,6 @@
 # model settings
 model = dict(
     type='GFL',
-    pretrained='open-mmlab://resnet50_v1c',
     backbone=dict(
         type='ResNet',
         depth=50,
@@ -13,7 +12,9 @@ model = dict(
         norm_eval=False,
         style='pytorch',
         dcn=dict(type='DCN', deform_groups=1, fallback_on_stride=False),
-        stage_with_dcn=(False, False, False, True)),
+        stage_with_dcn=(False, False, False, True),
+        init_cfg=dict(
+            type='Pretrained', checkpoint='open-mmlab://resnet50_v1c')),
     neck=[
         dict(
             type='FPN',

@@ -5,7 +5,6 @@ _base_ = [
 ]
 
 model = dict(
-    pretrained='torchvision://resnet50',
     backbone=dict(
         _delete_=True,
         type='ResNet',
@@ -17,7 +16,8 @@ model = dict(
         norm_eval=False,
         style='pytorch',
         dcn=dict(type='DCN', deform_groups=1, fallback_on_stride=False),
-        stage_with_dcn=(False, False, False, True)))
+        stage_with_dcn=(False, False, False, True),
+        init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')))
 
 data = dict(samples_per_gpu=4)
 

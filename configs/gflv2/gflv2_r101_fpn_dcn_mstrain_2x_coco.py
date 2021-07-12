@@ -4,7 +4,6 @@ _base_ = [
 ]
 model = dict(
     type='GFL',
-    pretrained='torchvision://resnet101',
     backbone=dict(
         type='ResNet',
         depth=101,
@@ -15,7 +14,9 @@ model = dict(
         dcn=dict(type='DCN', deform_groups=1, fallback_on_stride=False),
         stage_with_dcn=(False, True, True, True),
         norm_eval=True,
-        style='pytorch'),
+        style='pytorch',
+        init_cfg=dict(type='Pretrained',
+                      checkpoint='torchvision://resnet101')),
     neck=dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],

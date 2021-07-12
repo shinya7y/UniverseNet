@@ -1,8 +1,7 @@
 # model settings
+pretrained_ckpt = 'https://github.com/shinya7y/weights/releases/download/v1.0.2/res2net50_v1b_26w_4s-3cf99910_mmdetv2-92ed3313.pth'  # noqa
 model = dict(
     type='GFL',
-    pretrained=('https://github.com/shinya7y/weights/releases/download/v1.0.2/'
-                'res2net50_v1b_26w_4s-3cf99910_mmdetv2-92ed3313.pth'),
     backbone=dict(
         type='Res2Net',
         depth=50,
@@ -15,7 +14,8 @@ model = dict(
         norm_eval=False,
         style='pytorch',
         dcn=dict(type='DCN', deform_groups=1, fallback_on_stride=False),
-        stage_with_dcn=(False, False, False, True)),
+        stage_with_dcn=(False, False, False, True),
+        init_cfg=dict(type='Pretrained', checkpoint=pretrained_ckpt)),
     neck=[
         dict(
             type='FPN',
