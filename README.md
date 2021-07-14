@@ -74,6 +74,7 @@ Some codes are modified from the repositories of
 [RelationNet++](https://github.com/microsoft/RelationNet2),
 [SEPC](https://github.com/jshilong/SEPC),
 [GFLv2](https://github.com/implus/GFocalV2),
+[DDOD](https://github.com/zehuichen123/DDOD),
 and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
 When merging, please note that there are some minor differences from the above repositories and [the original MMDetection repository](https://github.com/open-mmlab/mmdetection).
 
