@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from mmcv.cnn import ConvModule, Scale, bias_init_with_prob, normal_init
+from mmcv.cnn import ConvModule, Scale
 from mmcv.runner import force_fp32
 
 from mmdet.core import (anchor_inside_flags, build_assigner, build_sampler,
@@ -10,48 +10,67 @@ from mmdet.core.bbox import bbox_overlaps
 from ..builder import HEADS, build_loss
 from .anchor_head import AnchorHead
 
-EPS = 1e-12
-
 
 @HEADS.register_module()
 class ATSSIoUHead(AnchorHead):
-    """Bridging the Gap Between Anchor-based and Anchor-free Detection via
-    Adaptive Training Sample Selection.
+    """ATSS head with IoU-prediction branch instead of centerness branch.
 
-    ATSS head structure is similar with FCOS, however ATSS use anchor boxes
-    and assign label by Adaptive Training Sample Selection instead max-iou.
+    ATSSIoUHead is a variant of ATSSHead used in DDOD as a baseline.
 
-    https://arxiv.org/abs/1912.02424
+    ATSS: https://arxiv.org/abs/1912.02424
+    DDOD: https://arxiv.org/abs/2107.02963
+
+    Args:
+        num_classes (int): Number of categories excluding the background
+            category.
+        in_channels (int): Number of channels in the input feature map.
+        stacked_convs (int): Number of conv layers in cls and reg tower.
+            Default: 4.
+        dcn_on_last_conv (bool): If true, use dcn in the last layer of
+            towers. Default: False.
+        conv_cfg (dict): dictionary to construct and config conv layer.
+            Default: None.
+        norm_cfg (dict): dictionary to construct and config norm layer.
+            Default: dict(type='GN', num_groups=32, requires_grad=True).
+        loss_iou (dict): Config of IoU loss.
+            Default: dict(type='CrossEntropyLoss', use_sigmoid=True,
+            loss_weight=1.0).
     """
 
-    def __init__(
-            self,
-            num_classes,
-            in_channels,
-            stacked_convs=4,
-            conv_cfg=None,
-            norm_cfg=dict(type='GN', num_groups=32, requires_grad=True),
-            #  loss_centerness=dict(
-            #      type='CrossEntropyLoss',
-            #      use_sigmoid=True,
-            #      loss_weight=1.0),
-            loss_iou=dict(
-                type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
-            **kwargs):
+    def __init__(self,
+                 num_classes,
+                 in_channels,
+                 stacked_convs=4,
+                 dcn_on_last_conv=False,
+                 conv_cfg=None,
+                 norm_cfg=dict(type='GN', num_groups=32, requires_grad=True),
+                 loss_iou=dict(
+                     type='CrossEntropyLoss',
+                     use_sigmoid=True,
+                     loss_weight=1.0),
+                 init_cfg=dict(
+                     type='Normal',
+                     layer='Conv2d',
+                     std=0.01,
+                     override=dict(
+                         type='Normal',
+                         name='atss_cls',
+                         std=0.01,
+                         bias_prob=0.01)),
+                 **kwargs):
         self.stacked_convs = stacked_convs
+        self.dcn_on_last_conv = dcn_on_last_conv
         self.conv_cfg = conv_cfg
         self.norm_cfg = norm_cfg
-        super(ATSSIoUHead, self).__init__(num_classes, in_channels, **kwargs)
+        super(ATSSIoUHead, self).__init__(
+            num_classes, in_channels, init_cfg=init_cfg, **kwargs)
 
         self.sampling = False
         if self.train_cfg:
             self.assigner = build_assigner(self.train_cfg.assigner)
-            # self.retina_assigner = build_assigner(
-            #     self.train_cfg.retina_assigner)
             # SSD sampling=False so use PseudoSampler
             sampler_cfg = dict(type='PseudoSampler')
             self.sampler = build_sampler(sampler_cfg, context=self)
-        # self.loss_centerness = build_loss(loss_centerness)
         self.loss_iou = build_loss(loss_iou)
 
     def _init_layers(self):
@@ -61,6 +80,10 @@ class ATSSIoUHead(AnchorHead):
         self.reg_convs = nn.ModuleList()
         for i in range(self.stacked_convs):
             chn = self.in_channels if i == 0 else self.feat_channels
+            if self.dcn_on_last_conv and i == self.stacked_convs - 1:
+                conv_cfg = dict(type='DCNv2')
+            else:
+                conv_cfg = self.conv_cfg
             self.cls_convs.append(
                 ConvModule(
                     chn,
@@ -68,7 +91,7 @@ class ATSSIoUHead(AnchorHead):
                     3,
                     stride=1,
                     padding=1,
-                    conv_cfg=self.conv_cfg,
+                    conv_cfg=conv_cfg,
                     norm_cfg=self.norm_cfg))
             self.reg_convs.append(
                 ConvModule(
@@ -77,7 +100,7 @@ class ATSSIoUHead(AnchorHead):
                     3,
                     stride=1,
                     padding=1,
-                    conv_cfg=self.conv_cfg,
+                    conv_cfg=conv_cfg,
                     norm_cfg=self.norm_cfg))
         self.atss_cls = nn.Conv2d(
             self.feat_channels,
@@ -90,18 +113,6 @@ class ATSSIoUHead(AnchorHead):
             self.feat_channels, self.num_anchors * 1, 3, padding=1)
         self.scales = nn.ModuleList(
             [Scale(1.0) for _ in self.anchor_generator.strides])
-
-    def init_weights(self):
-        """Initialize weights of the head."""
-        for m in self.cls_convs:
-            normal_init(m.conv, std=0.01)
-        for m in self.reg_convs:
-            normal_init(m.conv, std=0.01)
-        bias_cls = bias_init_with_prob(0.01)
-        normal_init(self.atss_cls, std=0.01, bias=bias_cls)
-        normal_init(self.atss_reg, std=0.01)
-        normal_init(self.atss_iou, std=0.01)
-        # normal_init(self.atss_centerness, std=0.01)
 
     def forward(self, feats):
         """Forward features from the upstream network.
@@ -147,7 +158,6 @@ class ATSSIoUHead(AnchorHead):
         cls_score = self.atss_cls(cls_feat)
         # we just follow atss, not apply exp in bbox_pred
         bbox_pred = scale(self.atss_reg(reg_feat)).float()
-        # centerness = self.atss_centerness(reg_feat)
         iou_pred = self.atss_iou(reg_feat)
         return cls_score, bbox_pred, iou_pred
 
@@ -180,7 +190,6 @@ class ATSSIoUHead(AnchorHead):
         cls_score = cls_score.permute(0, 2, 3, 1).reshape(
             -1, self.cls_out_channels).contiguous()
         bbox_pred = bbox_pred.permute(0, 2, 3, 1).reshape(-1, 4)
-        # centerness = centerness.permute(0, 2, 3, 1).reshape(-1)
         iou_pred = iou_pred.permute(0, 2, 3, 1).reshape(-1, )
         bbox_targets = bbox_targets.reshape(-1, 4)
         bbox_weights = bbox_weights.reshape(-1, 4)
@@ -189,7 +198,8 @@ class ATSSIoUHead(AnchorHead):
 
         iou_targets = label_weights.new_zeros(labels.shape)
         iou_weights = label_weights.new_zeros(labels.shape)
-        iou_weights[(bbox_weights.sum(axis=1) > 0).nonzero()] = 1.
+        iou_weights[(bbox_weights.sum(axis=1) > 0).nonzero(
+            as_tuple=False)] = 1.
 
         # classification loss
         loss_cls = self.loss_cls(
@@ -198,16 +208,14 @@ class ATSSIoUHead(AnchorHead):
         # FG cat_id: [0, num_classes -1], BG cat_id: num_classes
         bg_class_ind = self.num_classes
         pos_inds = ((labels >= 0)
-                    & (labels < bg_class_ind)).nonzero().squeeze(1)
+                    &
+                    (labels < bg_class_ind)).nonzero(as_tuple=False).squeeze(1)
 
         if len(pos_inds) > 0:
             pos_bbox_targets = bbox_targets[pos_inds]
             pos_bbox_pred = bbox_pred[pos_inds]
             pos_anchors = anchors[pos_inds]
-            # pos_centerness = centerness[pos_inds]
 
-            # centerness_targets = self.centerness_target(
-            #     pos_anchors, pos_bbox_targets)
             pos_decode_bbox_pred = self.bbox_coder.decode(
                 pos_anchors, pos_bbox_pred)
             pos_decode_bbox_targets = self.bbox_coder.decode(
@@ -217,46 +225,33 @@ class ATSSIoUHead(AnchorHead):
             loss_bbox = self.loss_bbox(
                 pos_decode_bbox_pred,
                 pos_decode_bbox_targets,
-                # weight=centerness_targets,
                 avg_factor=num_total_samples)
 
             iou_targets[pos_inds] = bbox_overlaps(
                 pos_decode_bbox_pred.detach(),
                 pos_decode_bbox_targets,
                 is_aligned=True)
-            # print(iou_weights[pos_inds], iou_pred[pos_inds].sigmoid(),
-            #       iou_targets[pos_inds])
             loss_iou = self.loss_iou(
                 iou_pred,
                 iou_targets,
                 iou_weights,
                 avg_factor=num_total_samples)
 
-            # # centerness loss
-            # loss_centerness = self.loss_centerness(
-            #     pos_centerness,
-            #     centerness_targets,
-            #     avg_factor=num_total_samples)
-
         else:
             loss_bbox = bbox_pred.sum() * 0
             loss_iou = iou_pred.sum() * 0
-            # loss_centerness = centerness.sum() * 0
-            # centerness_targets = bbox_targets.new_tensor(0.)
 
         return loss_cls, loss_bbox, loss_iou
 
     @force_fp32(apply_to=('cls_scores', 'bbox_preds', 'iou_preds'))
-    def loss(
-            self,
-            cls_scores,
-            bbox_preds,
-            #  centernesses,
-            iou_preds,
-            gt_bboxes,
-            gt_labels,
-            img_metas,
-            gt_bboxes_ignore=None):
+    def loss(self,
+             cls_scores,
+             bbox_preds,
+             iou_preds,
+             gt_bboxes,
+             gt_labels,
+             img_metas,
+             gt_bboxes_ignore=None):
         """Compute losses of the head.
 
         Args:
@@ -285,7 +280,7 @@ class ATSSIoUHead(AnchorHead):
             featmap_sizes, img_metas, device=device)
         label_channels = self.cls_out_channels if self.use_sigmoid_cls else 1
 
-        atss_cls_reg_targets = self.get_targets(
+        cls_reg_targets = self.get_targets(
             anchor_list,
             valid_flag_list,
             gt_bboxes,
@@ -293,12 +288,11 @@ class ATSSIoUHead(AnchorHead):
             gt_bboxes_ignore_list=gt_bboxes_ignore,
             gt_labels_list=gt_labels,
             label_channels=label_channels)
-        if atss_cls_reg_targets is None:
+        if cls_reg_targets is None:
             return None
 
         (anchor_list, labels_list, label_weights_list, bbox_targets_list,
-         bbox_weights_list, num_total_pos,
-         num_total_neg) = atss_cls_reg_targets
+         bbox_weights_list, num_total_pos, num_total_neg) = cls_reg_targets
 
         num_total_samples = reduce_mean(
             torch.tensor(num_total_pos, dtype=torch.float,
@@ -311,33 +305,16 @@ class ATSSIoUHead(AnchorHead):
             cls_scores,
             bbox_preds,
             iou_preds,
-            # centernesses,
             labels_list,
             label_weights_list,
             bbox_targets_list,
             bbox_weights_list,
             num_total_samples=num_total_samples)
+
+        # Unlike ATSSHead, bbox_avg_factor (centerness_targets.sum()) is absent
+
         return dict(
             loss_cls=losses_cls, loss_bbox=losses_bbox, loss_iou=losses_iou)
-        # loss_centerness=loss_centerness)
-
-    # def centerness_target(self, anchors, bbox_targets):
-    #     # only calculate pos centerness targets, otherwise there may be nan
-    #     gts = self.bbox_coder.decode(anchors, bbox_targets)
-    #     anchors_cx = (anchors[:, 2] + anchors[:, 0]) / 2
-    #     anchors_cy = (anchors[:, 3] + anchors[:, 1]) / 2
-    #     l_ = anchors_cx - gts[:, 0]
-    #     t_ = anchors_cy - gts[:, 1]
-    #     r_ = gts[:, 2] - anchors_cx
-    #     b_ = gts[:, 3] - anchors_cy
-
-    #     left_right = torch.stack([l_, r_], dim=1)
-    #     top_bottom = torch.stack([t_, b_], dim=1)
-    #     centerness = torch.sqrt(
-    #         (left_right.min(dim=-1)[0] / left_right.max(dim=-1)[0]) *
-    #         (top_bottom.min(dim=-1)[0] / top_bottom.max(dim=-1)[0]))
-    #     assert not torch.isnan(centerness).any()
-    #     return centerness
 
     @force_fp32(apply_to=('cls_scores', 'bbox_preds', 'iou_preds'))
     def get_bboxes(self,
@@ -393,37 +370,25 @@ class ATSSIoUHead(AnchorHead):
             iou_pred_list = [
                 iou_preds[i][img_id].detach() for i in range(num_levels)
             ]
-            # centerness_pred_list = [
-            #     centernesses[i][img_id].detach() for i in range(num_levels)
-            # ]
             img_shape = img_metas[img_id]['img_shape']
             scale_factor = img_metas[img_id]['scale_factor']
-            proposals = self._get_bboxes_single(
-                cls_score_list,
-                bbox_pred_list,
-                iou_pred_list,
-                # centerness_pred_list,
-                mlvl_anchors,
-                img_shape,
-                scale_factor,
-                cfg,
-                rescale,
-                with_nms)
+            proposals = self._get_bboxes_single(cls_score_list, bbox_pred_list,
+                                                iou_pred_list, mlvl_anchors,
+                                                img_shape, scale_factor, cfg,
+                                                rescale, with_nms)
             result_list.append(proposals)
         return result_list
 
-    def _get_bboxes_single(
-            self,
-            cls_scores,
-            bbox_preds,
-            iou_preds,
-            #    centernesses,
-            mlvl_anchors,
-            img_shape,
-            scale_factor,
-            cfg,
-            rescale=False,
-            with_nms=True):
+    def _get_bboxes_single(self,
+                           cls_scores,
+                           bbox_preds,
+                           iou_preds,
+                           mlvl_anchors,
+                           img_shape,
+                           scale_factor,
+                           cfg,
+                           rescale=False,
+                           with_nms=True):
         """Transform outputs for a single batch item into labeled boxes.
 
         Args:
@@ -458,7 +423,6 @@ class ATSSIoUHead(AnchorHead):
         assert len(cls_scores) == len(bbox_preds) == len(mlvl_anchors)
         mlvl_bboxes = []
         mlvl_scores = []
-        # mlvl_centerness = []
         mlvl_ious = []
         for cls_score, bbox_pred, iou_pred, anchors in zip(
                 cls_scores, bbox_preds, iou_preds, mlvl_anchors):
@@ -468,25 +432,21 @@ class ATSSIoUHead(AnchorHead):
                 -1, self.cls_out_channels).sigmoid()
             bbox_pred = bbox_pred.permute(1, 2, 0).reshape(-1, 4)
             iou_pred = iou_pred.permute(1, 2, 0).reshape(-1).sigmoid()
-            # centerness = centerness.permute(1, 2, 0).reshape(-1).sigmoid()
 
             nms_pre = cfg.get('nms_pre', -1)
             if nms_pre > 0 and scores.shape[0] > nms_pre:
-                # max_scores, _ = (scores * centerness[:, None]).max(dim=1)
                 max_scores, _ = scores.max(dim=1)
                 _, topk_inds = max_scores.topk(nms_pre)
                 anchors = anchors[topk_inds, :]
                 bbox_pred = bbox_pred[topk_inds, :]
                 scores = scores[topk_inds, :]
                 iou_pred = iou_pred[topk_inds]
-                # centerness = centerness[topk_inds]
 
             bboxes = self.bbox_coder.decode(
                 anchors, bbox_pred, max_shape=img_shape)
             mlvl_bboxes.append(bboxes)
             mlvl_scores.append(scores)
             mlvl_ious.append(iou_pred)
-            # mlvl_centerness.append(centerness)
 
         mlvl_bboxes = torch.cat(mlvl_bboxes)
         if rescale:
@@ -497,7 +457,6 @@ class ATSSIoUHead(AnchorHead):
         # BG cat_id: num_class
         padding = mlvl_scores.new_zeros(mlvl_scores.shape[0], 1)
         mlvl_scores = torch.cat([mlvl_scores, padding], dim=1)
-        # mlvl_centerness = torch.cat(mlvl_centerness)
         mlvl_ious = torch.cat(mlvl_ious)
 
         if with_nms:
@@ -508,7 +467,6 @@ class ATSSIoUHead(AnchorHead):
                 cfg.nms,
                 cfg.max_per_img,
                 score_factors=mlvl_ious)
-            # score_factors=mlvl_centerness)
             return det_bboxes, det_labels
         else:
             return mlvl_bboxes, mlvl_scores
@@ -618,7 +576,7 @@ class ATSSIoUHead(AnchorHead):
                     image with shape (N, 4).
                 bbox_weights (Tensor): BBox weights of all anchors in the
                     image with shape (N, 4)
-                pos_inds (Tensor): Indices of postive anchor with shape
+                pos_inds (Tensor): Indices of positive anchor with shape
                     (num_pos,).
                 neg_inds (Tensor): Indices of negative anchor with shape
                     (num_neg,).

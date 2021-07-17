@@ -85,16 +85,14 @@ class ATSSCostAssigner(BaseAssigner):
 
     # https://github.com/sfzhang15/ATSS/blob/master/atss_core/modeling/rpn/atss/loss.py
 
-    def assign(
-            self,
-            bboxes,
-            num_level_bboxes,
-            cls_scores,
-            bbox_preds,
-            #    bbox_coder,
-            gt_bboxes,
-            gt_bboxes_ignore=None,
-            gt_labels=None):
+    def assign(self,
+               bboxes,
+               num_level_bboxes,
+               cls_scores,
+               bbox_preds,
+               gt_bboxes,
+               gt_bboxes_ignore=None,
+               gt_labels=None):
         """Assign gt to bboxes.
 
         The assignment is done in following steps
@@ -107,7 +105,7 @@ class ATSSCostAssigner(BaseAssigner):
         4. get corresponding iou for the these candidates, and compute the
            mean and std, set mean + std as the iou threshold
         5. select these candidates whose iou are greater than or equal to
-           the threshold as postive
+           the threshold as positive
         6. limit the positive sample's center in gt
 
 
@@ -123,12 +121,9 @@ class ATSSCostAssigner(BaseAssigner):
             :obj:`AssignResult`: The assign result.
         """
         INF = 100000000
-        # NOTE first convert anchor to prediction bbox
-        bboxes = bboxes[:, :4]  # anchor bbox
+        bboxes = bboxes[:, :4]
         bbox_preds = bbox_preds.detach()
         cls_scores = cls_scores.detach()
-
-        # bbox_preds = bbox_coder.decode(bboxes, bbox_preds)  # prediction bbox
 
         num_gt, num_bboxes = gt_bboxes.size(0), bboxes.size(0)
 
@@ -137,45 +132,10 @@ class ATSSCostAssigner(BaseAssigner):
         overlaps = self.iou_calculator(bbox_preds, gt_bboxes)
         # compute cls cost for bbox and GT
         cls_cost = torch.sigmoid(cls_scores[:, gt_labels])
-
         # make sure that we are in element-wise multiplication
         assert cls_cost.shape == overlaps.shape
-
-        # overlaps is actually is a cost matrix
+        # overlaps is actually a cost matrix
         overlaps = cls_cost**(1 - self.alpha) * overlaps**self.alpha
-        # overlaps = cls_cost + overlaps
-
-        # NOTE Loss style cost function
-        # # compute focal loss
-        # MIN_THRES = 1e-12
-        # gamma = 2.; alpha = 0.25
-        # y_pred = torch.sigmoid(
-        #     cls_scores[:, gt_labels])  # shape = (num_bboxes, num_gt)
-        # cls_cost = -torch.pow(1 - y_pred, gamma) * torch.log(
-        #     torch.clamp(y_pred, MIN_THRES))
-        # cls_cost *= alpha
-        # # compute DIoU loss
-        # # extend pred_bbox to (num_bboxes, num_gt, 4)
-        # extend_bbox_preds = bbox_preds.unsqueeze(1)
-        # extend_bbox_preds = extend_bbox_preds.repeat((1, num_gt, 1))
-        # # extend gt_bbox to (num_bboxes, num_gt, 4)
-        # extend_gt_bboxes = gt_bboxes.unsqueeze(0)
-        # extend_gt_bboxes = extend_gt_bboxes.repeat((num_bboxes, 1, 1))
-
-        # assert extend_bbox_preds.shape == extend_gt_bboxes.shape
-        # extend_bbox_preds = extend_bbox_preds.view(-1, 4)
-        # extend_gt_bboxes = extend_gt_bboxes.view(-1, 4)
-
-        # reg_cost = diou_loss(extend_bbox_preds, extend_gt_bboxes)
-        # reg_cost = reg_cost.view(num_bboxes, num_gt)
-
-        # assert reg_cost.shape == cls_cost.shape
-        # overlaps = - (cls_cost + 2 * reg_cost)
-
-        # NOTE OneNet style cost function
-        # cls_cost = -torch.log(torch.sigmoid(cls_scores[:, gt_labels]))
-        # reg_cost = torch.cdist(bbox_preds, gt_bboxes, p=1)
-        # overlaps = - (cls_cost + reg_cost)
 
         # assign 0 by default
         assigned_gt_inds = overlaps.new_full((num_bboxes, ),
