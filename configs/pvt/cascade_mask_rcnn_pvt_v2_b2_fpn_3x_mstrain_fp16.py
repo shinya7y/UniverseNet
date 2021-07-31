@@ -1,19 +1,14 @@
 _base_ = [
-    '_base_/models/cascade_mask_rcnn_pvtv2_b2_fpn.py',
-    '_base_/datasets/coco_instance.py', '_base_/schedules/schedule_1x.py',
-    '_base_/default_runtime.py'
+    '../_base_/models/cascade_mask_rcnn_swin_fpn.py',
+    '../_base_/datasets/coco_instance_detraug.py',
+    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
 
 pretrained_ckpt = 'https://github.com/whai362/PVT/releases/download/v2/pvt_v2_b2.pth'  # noqa
 model = dict(
-    # pretrained='pretrained/pvt_v2_b2.pth',
     pretrained=pretrained_ckpt,
-    backbone=dict(type='pvt_v2_b2', style='pytorch'),
-    neck=dict(
-        type='FPN',
-        in_channels=[64, 128, 320, 512],
-        out_channels=256,
-        num_outs=5),
+    backbone=dict(_delete_=True, type='pvt_v2_b2'),
+    neck=dict(in_channels=[64, 128, 320, 512]),
     roi_head=dict(bbox_head=[
         dict(
             type='ConvFCBBoxHead',
@@ -74,53 +69,6 @@ model = dict(
             loss_bbox=dict(type='GIoULoss', loss_weight=10.0))
     ]))
 
-img_norm_cfg = dict(
-    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-
-# augmentation strategy originates from DETR / Sparse RCNN
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
-    dict(type='RandomFlip', flip_ratio=0.5),
-    dict(
-        type='AutoAugment',
-        policies=[[
-            dict(
-                type='Resize',
-                img_scale=[(480, 1333), (512, 1333), (544, 1333), (576, 1333),
-                           (608, 1333), (640, 1333), (672, 1333), (704, 1333),
-                           (736, 1333), (768, 1333), (800, 1333)],
-                multiscale_mode='value',
-                keep_ratio=True)
-        ],
-                  [
-                      dict(
-                          type='Resize',
-                          img_scale=[(400, 1333), (500, 1333), (600, 1333)],
-                          multiscale_mode='value',
-                          keep_ratio=True),
-                      dict(
-                          type='RandomCrop',
-                          crop_type='absolute_range',
-                          crop_size=(384, 600),
-                          allow_negative_crop=True),
-                      dict(
-                          type='Resize',
-                          img_scale=[(480, 1333), (512, 1333), (544, 1333),
-                                     (576, 1333), (608, 1333), (640, 1333),
-                                     (672, 1333), (704, 1333), (736, 1333),
-                                     (768, 1333), (800, 1333)],
-                          multiscale_mode='value',
-                          override=True,
-                          keep_ratio=True)
-                  ]]),
-    dict(type='Normalize', **img_norm_cfg),
-    dict(type='Pad', size_divisor=32),
-    dict(type='DefaultFormatBundle'),
-    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
-]
-data = dict(train=dict(pipeline=train_pipeline))
-
 optimizer = dict(
     _delete_=True,
     type='AdamW',
@@ -134,20 +82,6 @@ optimizer = dict(
             'norm': dict(decay_mult=0.)
         }))
 lr_config = dict(step=[27, 33])
+runner = dict(type='EpochBasedRunner', max_epochs=36)
 
-# do not use apex fp16
-# runner = dict(type='EpochBasedRunner', max_epochs=36)
-
-# use apex fp16
-runner = dict(type='EpochBasedRunnerAmp', max_epochs=36)
-fp16 = None
-optimizer_config = dict(
-    type='DistOptimizerHook',
-    update_interval=1,
-    grad_clip=None,
-    coalesce=True,
-    bucket_size_mb=-1,
-    use_fp16=True,
-)
-
-find_unused_parameters = True
+fp16 = dict(loss_scale='dynamic')
