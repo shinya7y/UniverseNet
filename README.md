@@ -10,7 +10,7 @@ https://arxiv.org/abs/2103.14027
 ## Changelog
 
 - recent:
-  - Add codes for DDOD
+  - Add codes for PVT, PVTv2, DDOD
   - Update and fix codes for mmdet 2.14.0, mmcv-full 1.3.9
 - 21.04 (Apr. 2021):
   - Propose [Universal-Scale object detection Benchmark (USB)](https://arxiv.org/abs/2103.14027)
@@ -38,7 +38,8 @@ https://arxiv.org/abs/2103.14027
 Methods and architectures:
 
 - [x] [UniverseNets (arXiv 2021)](configs/universenet/)
-- [x] [Swin Transformer (arXiv 2021)](configs/swin/)
+- [x] [PVT (ICCV 2021), PVTv2 (arXiv 2021)](configs/pvt/)
+- [x] [Swin Transformer (ICCV 2021)](configs/swin/)
 - [x] [DDOD (ACMMM 2021)](configs/ddod/)
 - [x] [GFLv2 (CVPR 2021)](configs/gflv2/)
 - [x] [RelationNet++ (BVR) (NeurIPS 2020)](configs/bvr/)
