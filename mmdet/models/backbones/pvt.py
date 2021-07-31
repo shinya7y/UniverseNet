@@ -3,8 +3,10 @@ from functools import partial
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from mmcv.cnn.bricks import DropPath
+from mmcv.cnn.utils.weight_init import trunc_normal_
 from mmcv.runner import BaseModule, load_checkpoint
-from timm.models.layers import DropPath, to_2tuple, trunc_normal_
+from mmcv.utils import to_2tuple
 
 from mmdet.models.builder import BACKBONES
 from mmdet.utils import get_root_logger

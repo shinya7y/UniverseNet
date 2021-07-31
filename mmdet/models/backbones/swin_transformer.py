@@ -10,16 +10,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
+from mmcv.cnn.bricks import DropPath
+from mmcv.cnn.utils.weight_init import trunc_normal_
 from mmcv.runner import BaseModule
+from mmcv.utils import to_2tuple
 from mmcv_custom import load_checkpoint
 
 from mmdet.utils import get_root_logger
 from ..builder import BACKBONES
-
-try:
-    from timm.models.layers import DropPath, to_2tuple, trunc_normal_
-except ImportError:
-    DropPath = None
 
 
 class Mlp(nn.Module):
@@ -601,12 +599,6 @@ class SwinTransformer(BaseModule):
         assert init_cfg is None, 'To prevent abnormal initialization ' \
                                  'behavior, init_cfg is not allowed to be set'
         super().__init__(init_cfg=init_cfg)
-
-        if DropPath is None:
-            raise RuntimeError(
-                'Failed to import timm. Please run "pip install timm". '
-                '"pip install dataclasses" may also be needed for Python 3.6.')
-
         self.pretrain_img_size = pretrain_img_size
         self.num_layers = len(depths)
         self.embed_dim = embed_dim
