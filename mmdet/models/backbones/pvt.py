@@ -13,6 +13,7 @@ from mmdet.utils import get_root_logger
 
 
 class Mlp(nn.Module):
+    """Multilayer perceptron used in Vision Transformers."""
 
     def __init__(self,
                  in_features,
@@ -29,6 +30,7 @@ class Mlp(nn.Module):
         self.drop = nn.Dropout(drop_rate)
 
     def forward(self, x):
+        """Forward function."""
         x = self.fc1(x)
         x = self.act(x)
         x = self.drop(x)
@@ -38,6 +40,7 @@ class Mlp(nn.Module):
 
 
 class Attention(nn.Module):
+    """Spatial-Reduction Attention (SRA) of PVT."""
 
     def __init__(self,
                  dim,
@@ -69,6 +72,7 @@ class Attention(nn.Module):
             self.norm = nn.LayerNorm(dim)
 
     def forward(self, x, H, W):
+        """Forward function."""
         B, N, C = x.shape
         q = self.q(x).reshape(B, N, self.num_heads, C // self.num_heads)
         q = q.permute(0, 2, 1, 3)
@@ -95,6 +99,7 @@ class Attention(nn.Module):
 
 
 class Block(nn.Module):
+    """PVT Block."""
 
     def __init__(self,
                  dim,
@@ -133,6 +138,7 @@ class Block(nn.Module):
             drop_rate=drop_rate)
 
     def forward(self, x, H, W):
+        """Forward function."""
         x = x + self.drop_path(self.attn(self.norm1(x), H, W))
         x = x + self.drop_path(self.mlp(self.norm2(x)))
         return x
@@ -168,6 +174,7 @@ class PatchEmbed(nn.Module):
         self.norm = nn.LayerNorm(embed_dim)
 
     def forward(self, x):
+        """Forward function."""
         _, _, H, W = x.shape
         H = H // self.patch_size[0]
         W = W // self.patch_size[1]
@@ -179,6 +186,7 @@ class PatchEmbed(nn.Module):
 
 
 class PyramidVisionTransformer(BaseModule):
+    """Pyramid Vision Transformer (v1) backbone."""
 
     def __init__(self,
                  img_size=224,
@@ -258,6 +266,7 @@ class PyramidVisionTransformer(BaseModule):
             nn.init.constant_(m.bias, 0)
 
     def init_weights(self):
+        """Initialize the weights in backbone."""
         self.apply(self._init_weights)
         if isinstance(self.pretrained, str):
             logger = get_root_logger()
@@ -273,6 +282,7 @@ class PyramidVisionTransformer(BaseModule):
             raise TypeError('pretrained must be a str or None')
 
     def _get_pos_embed(self, pos_embed, patch_embed, H, W):
+        """Adjust size of position embedding."""
         if H * W == self.patch_embed1.num_patches:
             return pos_embed
         else:
@@ -283,6 +293,7 @@ class PyramidVisionTransformer(BaseModule):
                 mode='bilinear').reshape(1, -1, H * W).permute(0, 2, 1)
 
     def forward(self, x):
+        """Forward function."""
         B = x.shape[0]
         outs = []
 
@@ -310,6 +321,7 @@ class PyramidVisionTransformer(BaseModule):
 
 @BACKBONES.register_module()
 class pvt_tiny(PyramidVisionTransformer):
+    """PVT-Tiny."""
 
     def __init__(self, **kwargs):
         super(pvt_tiny, self).__init__(
@@ -328,6 +340,7 @@ class pvt_tiny(PyramidVisionTransformer):
 
 @BACKBONES.register_module()
 class pvt_small(PyramidVisionTransformer):
+    """PVT-Small."""
 
     def __init__(self, **kwargs):
         super(pvt_small, self).__init__(
@@ -346,6 +359,7 @@ class pvt_small(PyramidVisionTransformer):
 
 @BACKBONES.register_module()
 class pvt_medium(PyramidVisionTransformer):
+    """PVT-Medium."""
 
     def __init__(self, **kwargs):
         super(pvt_medium, self).__init__(
@@ -362,6 +376,7 @@ class pvt_medium(PyramidVisionTransformer):
 
 @BACKBONES.register_module()
 class pvt_large(PyramidVisionTransformer):
+    """PVT-Large."""
 
     def __init__(self, **kwargs):
         super(pvt_large, self).__init__(

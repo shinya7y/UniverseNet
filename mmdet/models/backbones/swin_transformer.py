@@ -21,7 +21,7 @@ from ..builder import BACKBONES
 
 
 class Mlp(nn.Module):
-    """Multilayer perceptron."""
+    """Multilayer perceptron used in Vision Transformers."""
 
     def __init__(self,
                  in_features,
@@ -38,6 +38,7 @@ class Mlp(nn.Module):
         self.drop = nn.Dropout(drop)
 
     def forward(self, x):
+        """Forward function."""
         x = self.fc1(x)
         x = self.act(x)
         x = self.drop(x)

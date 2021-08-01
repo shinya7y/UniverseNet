@@ -13,12 +13,14 @@ from mmdet.utils import get_root_logger
 
 
 class DWConv(nn.Module):
+    """Depth-wise convolution with reshape for PVTv2."""
 
     def __init__(self, dim=768):
         super(DWConv, self).__init__()
         self.dwconv = nn.Conv2d(dim, dim, 3, 1, 1, bias=True, groups=dim)
 
     def forward(self, x, H, W):
+        """Forward function."""
         B, N, C = x.shape
         x = x.transpose(1, 2).view(B, C, H, W)
         x = self.dwconv(x)
@@ -28,6 +30,7 @@ class DWConv(nn.Module):
 
 
 class Mlp(nn.Module):
+    """Multilayer perceptron used in PVTv2."""
 
     def __init__(self,
                  in_features,
@@ -49,6 +52,7 @@ class Mlp(nn.Module):
             self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x, H, W):
+        """Forward function."""
         x = self.fc1(x)
         if self.linear:
             x = self.relu(x)
@@ -61,6 +65,7 @@ class Mlp(nn.Module):
 
 
 class Attention(nn.Module):
+    """Spatial-Reduction Attention (SRA) of PVTv2."""
 
     def __init__(self,
                  dim,
@@ -100,6 +105,7 @@ class Attention(nn.Module):
                 self.norm = nn.LayerNorm(dim)
 
     def forward(self, x, H, W):
+        """Forward function."""
         B, N, C = x.shape
         q = self.q(x).reshape(B, N, self.num_heads, C // self.num_heads)
         q = q.permute(0, 2, 1, 3)
@@ -132,6 +138,7 @@ class Attention(nn.Module):
 
 
 class Block(nn.Module):
+    """PVTv2 Block."""
 
     def __init__(self,
                  dim,
@@ -173,6 +180,7 @@ class Block(nn.Module):
             linear=linear)
 
     def forward(self, x, H, W):
+        """Forward function."""
         x = x + self.drop_path(self.attn(self.norm1(x), H, W))
         x = x + self.drop_path(self.mlp(self.norm2(x), H, W))
         return x
@@ -195,6 +203,7 @@ class OverlapPatchEmbed(nn.Module):
         self.norm = nn.LayerNorm(embed_dim)
 
     def forward(self, x):
+        """Forward function."""
         x = self.proj(x)
         _, _, H, W = x.shape
 
@@ -205,6 +214,7 @@ class OverlapPatchEmbed(nn.Module):
 
 
 class PyramidVisionTransformerV2(BaseModule):
+    """Pyramid Vision Transformer v2 backbone."""
 
     def __init__(self,
                  patch_sizes=(7, 3, 3, 3),
@@ -286,6 +296,7 @@ class PyramidVisionTransformerV2(BaseModule):
                 m.bias.data.zero_()
 
     def init_weights(self):
+        """Initialize the weights in backbone."""
         self.apply(self._init_weights)
         if isinstance(self.pretrained, str):
             logger = get_root_logger()
@@ -301,9 +312,11 @@ class PyramidVisionTransformerV2(BaseModule):
             raise TypeError('pretrained must be a str or None')
 
     def freeze_patch_emb(self):
+        """Freeze the first patch_embed."""
         self.patch_embed1.requires_grad = False
 
     def forward(self, x):
+        """Forward function."""
         B = x.shape[0]
         outs = []
 
@@ -324,6 +337,7 @@ class PyramidVisionTransformerV2(BaseModule):
 
 @BACKBONES.register_module()
 class pvt_v2_b0(PyramidVisionTransformerV2):
+    """PVTv2-B0."""
 
     def __init__(self, **kwargs):
         super(pvt_v2_b0, self).__init__(
@@ -343,6 +357,7 @@ class pvt_v2_b0(PyramidVisionTransformerV2):
 
 @BACKBONES.register_module()
 class pvt_v2_b1(PyramidVisionTransformerV2):
+    """PVTv2-B1."""
 
     def __init__(self, **kwargs):
         super(pvt_v2_b1, self).__init__(
@@ -362,6 +377,7 @@ class pvt_v2_b1(PyramidVisionTransformerV2):
 
 @BACKBONES.register_module()
 class pvt_v2_b2(PyramidVisionTransformerV2):
+    """PVTv2-B2."""
 
     def __init__(self, **kwargs):
         super(pvt_v2_b2, self).__init__(
@@ -381,6 +397,7 @@ class pvt_v2_b2(PyramidVisionTransformerV2):
 
 @BACKBONES.register_module()
 class pvt_v2_b2_li(PyramidVisionTransformerV2):
+    """PVTv2-B2-Li."""
 
     def __init__(self, **kwargs):
         super(pvt_v2_b2_li, self).__init__(
@@ -401,6 +418,7 @@ class pvt_v2_b2_li(PyramidVisionTransformerV2):
 
 @BACKBONES.register_module()
 class pvt_v2_b3(PyramidVisionTransformerV2):
+    """PVTv2-B3."""
 
     def __init__(self, **kwargs):
         super(pvt_v2_b3, self).__init__(
@@ -420,6 +438,7 @@ class pvt_v2_b3(PyramidVisionTransformerV2):
 
 @BACKBONES.register_module()
 class pvt_v2_b4(PyramidVisionTransformerV2):
+    """PVTv2-B4."""
 
     def __init__(self, **kwargs):
         super(pvt_v2_b4, self).__init__(
@@ -439,6 +458,7 @@ class pvt_v2_b4(PyramidVisionTransformerV2):
 
 @BACKBONES.register_module()
 class pvt_v2_b5(PyramidVisionTransformerV2):
+    """PVTv2-B5."""
 
     def __init__(self, **kwargs):
         super(pvt_v2_b5, self).__init__(
