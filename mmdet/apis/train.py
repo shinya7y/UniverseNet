@@ -13,7 +13,8 @@ from mmcv_custom.runner import EpochBasedRunnerAmp  # noqa
 from mmdet.core import DistEvalHook, EvalHook
 from mmdet.datasets import (build_dataloader, build_dataset,
                             replace_ImageToTensor)
-from mmdet.utils import get_root_logger
+from mmdet.utils import (GradientCumulativeFp16OptimizerHook,
+                         GradientCumulativeOptimizerHook, get_root_logger)
 
 try:
     import apex
@@ -133,13 +134,24 @@ def train_detector(model,
 
     # fp16 setting
     fp16_cfg = cfg.get('fp16', None)
-    if fp16_cfg is not None:
-        optimizer_config = Fp16OptimizerHook(
-            **cfg.optimizer_config, **fp16_cfg, distributed=distributed)
-    elif distributed and 'type' not in cfg.optimizer_config:
-        optimizer_config = OptimizerHook(**cfg.optimizer_config)
+    # gradient accumulation
+    if 'cumulative_iters' in cfg.optimizer_config:
+        if fp16_cfg is not None:
+            optimizer_config = GradientCumulativeFp16OptimizerHook(
+                **cfg.optimizer_config, **fp16_cfg, distributed=distributed)
+        elif distributed and 'type' not in cfg.optimizer_config:
+            optimizer_config = GradientCumulativeOptimizerHook(
+                **cfg.optimizer_config)
+        else:
+            optimizer_config = cfg.optimizer_config
     else:
-        optimizer_config = cfg.optimizer_config
+        if fp16_cfg is not None:
+            optimizer_config = Fp16OptimizerHook(
+                **cfg.optimizer_config, **fp16_cfg, distributed=distributed)
+        elif distributed and 'type' not in cfg.optimizer_config:
+            optimizer_config = OptimizerHook(**cfg.optimizer_config)
+        else:
+            optimizer_config = cfg.optimizer_config
 
     # register hooks
     runner.register_training_hooks(cfg.lr_config, optimizer_config,

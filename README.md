@@ -10,6 +10,7 @@ https://arxiv.org/abs/2103.14027
 ## Changelog
 
 - recent:
+  - Support gradient accumulation to simulate large batch size with few GPUs ([example](configs/manga109/universenet50_2008_fp16_1x4x4_mstrain_480_960_1x_manga109s.py))
   - Add codes for PVT, PVTv2, DDOD
   - Update and fix codes for mmdet 2.14.0, mmcv-full 1.3.9
 - 21.04 (Apr. 2021):
