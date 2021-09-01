@@ -1,4 +1,5 @@
 from .bfp import BFP
+from .cbnet_fpn import CBFPN
 from .channel_mapper import ChannelMapper
 from .ct_resnet_neck import CTResNetNeck
 from .dilated_encoder import DilatedEncoder
@@ -20,4 +21,4 @@ __all__ = [
     'CTResNetNeck', 'SSDNeck'
 ]
 
-__all__ += ['SEPC']
+__all__ += ['SEPC', 'CBFPN']

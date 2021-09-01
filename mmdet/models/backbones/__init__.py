@@ -1,3 +1,4 @@
+from .cbnet import CBRes2Net, CBResNet, CBSwinTransformer
 from .darknet import Darknet
 from .detectors_resnet import DetectoRS_ResNet
 from .detectors_resnext import DetectoRS_ResNeXt
@@ -22,7 +23,7 @@ __all__ = [
     'DetectoRS_ResNeXt', 'Darknet', 'ResNeSt', 'TridentResNet'
 ]
 
-__all__ += ['SwinTransformer']
+__all__ += ['SwinTransformer', 'CBResNet', 'CBRes2Net', 'CBSwinTransformer']
 __all__ += [
     'pvt_tiny', 'pvt_small', 'pvt_medium', 'pvt_large', 'pvt_v2_b0',
     'pvt_v2_b1', 'pvt_v2_b2', 'pvt_v2_b2_li', 'pvt_v2_b3', 'pvt_v2_b4',

@@ -78,6 +78,7 @@ Some codes are modified from the repositories of
 [RelationNet++](https://github.com/microsoft/RelationNet2),
 [SEPC](https://github.com/jshilong/SEPC),
 [PVT](https://github.com/whai362/PVT),
+[CBNetV2](https://github.com/VDIGPKU/CBNetV2),
 [GFLv2](https://github.com/implus/GFocalV2),
 [DDOD](https://github.com/zehuichen123/DDOD),
 and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
