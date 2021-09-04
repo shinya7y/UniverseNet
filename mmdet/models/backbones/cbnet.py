@@ -9,10 +9,17 @@ from .res2net import Res2Net
 from .resnet import ResNet, _BatchNorm, build_norm_layer
 from .swin_transformer import SwinTransformer
 
+# TODO clarify the meaning of tmps
 
-class _CBSubnet(BaseModule):
+
+class CBSubResNetMixin:
+    """Mixin class to modify ResNet for CBNetV2."""
 
     def _freeze_stages(self):
+        """Freeze stages.
+
+        We need to check the presence of layers possibly deleted by del_layers.
+        """
         if self.frozen_stages >= 0:
             if self.deep_stem and hasattr(self, 'stem'):
                 self.stem.eval()
@@ -33,6 +40,7 @@ class _CBSubnet(BaseModule):
                 param.requires_grad = False
 
     def del_layers(self, del_stages):
+        """Delete layers in lower stages."""
         self.del_stages = del_stages
         if self.del_stages >= 0:
             if self.deep_stem:
@@ -78,51 +86,53 @@ class _CBSubnet(BaseModule):
         self._freeze_stages()
 
 
-class _ResNet(_CBSubnet, ResNet):
+class CBSubResNet(CBSubResNetMixin, ResNet):
+    """A ResNet backbone for CBNetV2."""
 
     def __init__(self, **kwargs):
-        _CBSubnet.__init__(self)
         ResNet.__init__(self, **kwargs)
 
 
-class _Res2Net(_CBSubnet, Res2Net):
+class CBSubRes2Net(CBSubResNetMixin, Res2Net):
+    """A Res2Net backbone for CBNetV2."""
 
     def __init__(self, **kwargs):
-        _CBSubnet.__init__(self)
         Res2Net.__init__(self, **kwargs)
 
 
-class _CBNet(BaseModule):
+class CBNetBase(BaseModule):
+    """Base class for CBNetV2."""
 
     def _freeze_stages(self):
+        """Freeze stages."""
         for m in self.cb_modules:
             m._freeze_stages()
 
     def init_cb_weights(self):
+        """Initialize the weights in additional layers for CBNetV2."""
         raise NotImplementedError
 
     def init_weights(self):
+        """Initialize the weights in backbone."""
         self.init_cb_weights()
         for m in self.cb_modules:
             m.init_weights()
 
-    def _get_cb_feats(self, feats, spatial_info):
+    def _forward_cb_feats(self, feats, spatial_info):
+        """Forward function to calculate CBNetV2 features."""
         raise NotImplementedError
 
     def forward(self, x):
+        """Forward function."""
         outs_list = []
         cb_feats = None
+        pre_outs = None
         for i, module in enumerate(self.cb_modules):
-            if i == 0:
-                pre_outs, spatial_info = module(x)
-            else:
-                pre_outs, spatial_info = module(x, cb_feats, pre_outs)
-
-            outs = [pre_outs[i + 1] for i in self.out_indices]
+            pre_outs, spatial_info = module(x, cb_feats, pre_outs)
+            outs = [pre_outs[j + 1] for j in self.out_indices]
             outs_list.append(tuple(outs))
-
             if i < len(self.cb_modules) - 1:
-                cb_feats = self._get_cb_feats(pre_outs, spatial_info)
+                cb_feats = self._forward_cb_feats(pre_outs, spatial_info)
         return tuple(outs_list)
 
     def train(self, mode=True):
@@ -137,21 +147,28 @@ class _CBNet(BaseModule):
                 m.eval()
 
 
-class _CBResNet(_CBNet):
+class CBNet(CBNetBase):
+    """CBNetV2 consisting of multiple backbones.
+
+    Current implementation assumes that subnet is ResNet-like backbone.
+    """
 
     def __init__(self,
-                 net,
+                 subnet,
                  cb_inplanes,
                  cb_zero_init=True,
                  cb_del_stages=0,
+                 cb_num_modules=2,
                  **kwargs):
-        super(_CBResNet, self).__init__()
+        super(CBNet, self).__init__()
         self.cb_zero_init = cb_zero_init
         self.cb_del_stages = cb_del_stages
+        self.cb_num_modules = cb_num_modules
+        assert cb_num_modules >= 2
 
         self.cb_modules = nn.ModuleList()
-        for cb_idx in range(2):
-            cb_module = net(**kwargs)
+        for cb_idx in range(self.cb_num_modules):
+            cb_module = subnet(**kwargs)
             if cb_idx > 0:
                 cb_module.del_layers(self.cb_del_stages)
             self.cb_modules.append(cb_module)
@@ -177,6 +194,7 @@ class _CBResNet(_CBNet):
             self.cb_linears.append(linears)
 
     def init_cb_weights(self):
+        """Initialize the weights in additional layers for CBNetV2."""
         if self.cb_zero_init:
             for ls in self.cb_linears:
                 for m in ls:
@@ -185,7 +203,8 @@ class _CBResNet(_CBNet):
                     else:
                         constant_init(m, 0)
 
-    def _get_cb_feats(self, feats, spatial_info):
+    def _forward_cb_feats(self, feats, spatial_info):
+        """Forward function to calculate CBNetV2 features."""
         cb_feats = []
         for i in range(self.num_layers):
             if i >= self.cb_del_stages:
@@ -205,22 +224,29 @@ class _CBResNet(_CBNet):
 
 
 @BACKBONES.register_module()
-class CBResNet(_CBResNet):
+class CBResNet(CBNet):
+    """CBNetV2 consisting of multiple ResNets."""
 
     def __init__(self, **kwargs):
-        super().__init__(net=_ResNet, **kwargs)
+        super().__init__(subnet=CBSubResNet, **kwargs)
 
 
 @BACKBONES.register_module()
-class CBRes2Net(_CBResNet):
+class CBRes2Net(CBNet):
+    """CBNetV2 consisting of multiple Res2Nets."""
 
     def __init__(self, **kwargs):
-        super().__init__(net=_Res2Net, **kwargs)
+        super().__init__(subnet=CBSubRes2Net, **kwargs)
 
 
-class _SwinTransformer(SwinTransformer):
+class CBSubSwinTransformer(SwinTransformer):
+    """A Swin Transformer backbone for CBNetV2."""
 
     def _freeze_stages(self):
+        """Freeze stages.
+
+        We need to check the presence of layers possibly deleted by del_layers.
+        """
         if self.frozen_stages >= 0 and hasattr(self, 'patch_embed'):
             self.patch_embed.eval()
             for param in self.patch_embed.parameters():
@@ -240,6 +266,7 @@ class _SwinTransformer(SwinTransformer):
                     param.requires_grad = False
 
     def del_layers(self, del_stages):
+        """Delete layers in lower stages."""
         self.del_stages = del_stages
         if self.del_stages >= 0:
             del self.patch_embed
@@ -256,18 +283,14 @@ class _SwinTransformer(SwinTransformer):
         tmps = []
         if hasattr(self, 'patch_embed'):
             x = self.patch_embed(x)
-
             Wh, Ww = x.size(2), x.size(3)
             if self.ape:
                 # interpolate the position embedding to the corresponding size
                 absolute_pos_embed = F.interpolate(
                     self.absolute_pos_embed, size=(Wh, Ww), mode='bicubic')
-                x = (x + absolute_pos_embed).flatten(2).transpose(
-                    1, 2)  # B Wh*Ww C
-            else:
-                x = x.flatten(2).transpose(1, 2)
+                x = x + absolute_pos_embed
+            x = x.flatten(2).transpose(1, 2)  # B Wh*Ww C
             x = self.pos_drop(x)
-
             tmps.append((x, Wh, Ww))
         else:
             x, Wh, Ww = pre_tmps[0]
@@ -285,40 +308,42 @@ class _SwinTransformer(SwinTransformer):
             if i in self.out_indices:
                 norm_layer = getattr(self, f'norm{i}')
                 x_out = norm_layer(x_out)
-
-                out = x_out.view(-1, H, W,
-                                 self.num_features[i]).permute(0, 3, 1,
-                                                               2).contiguous()
+                out = x_out.view(-1, H, W, self.num_features[i])
+                out = out.permute(0, 3, 1, 2).contiguous()
                 outs.append(out)
 
         return tuple(outs), tmps
 
     def train(self, mode=True):
         """Convert the model into training mode while keep layers freezed."""
-        super(_SwinTransformer, self).train(mode)
+        super(CBSubSwinTransformer, self).train(mode)
         self._freeze_stages()
 
 
 @BACKBONES.register_module()
 class CBSwinTransformer(BaseModule):
+    """CBNetV2 consisting of multiple Swin Transformers."""
 
     def __init__(self,
                  embed_dim=96,
                  cb_zero_init=True,
                  cb_del_stages=1,
+                 cb_num_modules=2,
                  **kwargs):
         super(CBSwinTransformer, self).__init__()
         self.cb_zero_init = cb_zero_init
         self.cb_del_stages = cb_del_stages
+        self.cb_num_modules = cb_num_modules
+        assert cb_num_modules >= 2
+
         self.cb_modules = nn.ModuleList()
-        for cb_idx in range(2):
-            cb_module = _SwinTransformer(embed_dim=embed_dim, **kwargs)
+        for cb_idx in range(self.cb_num_modules):
+            cb_module = CBSubSwinTransformer(embed_dim=embed_dim, **kwargs)
             if cb_idx > 0:
                 cb_module.del_layers(cb_del_stages)
             self.cb_modules.append(cb_module)
 
         self.num_layers = self.cb_modules[0].num_layers
-
         cb_inplanes = [embed_dim * 2**i for i in range(self.num_layers)]
 
         self.cb_linears = nn.ModuleList()
@@ -336,16 +361,12 @@ class CBSwinTransformer(BaseModule):
             self.cb_linears.append(linears)
 
     def _freeze_stages(self):
+        """Freeze stages."""
         for m in self.cb_modules:
             m._freeze_stages()
 
     def init_weights(self):
-        """Initialize the weights in backbone.
-
-        Args:
-            pretrained (str, optional): Path to pre-trained weights.
-                Defaults to None.
-        """
+        """Initialize the weights in backbone."""
         # constant_init(self.cb_linears, 0)
         if self.cb_zero_init:
             for ls in self.cb_linears:
@@ -363,7 +384,8 @@ class CBSwinTransformer(BaseModule):
         x = x.view(B, C, -1).permute(0, 2, 1).contiguous()  # B, T, C
         return x
 
-    def _get_cb_feats(self, feats, tmps):
+    def _forward_cb_feats(self, feats, tmps):
+        """Forward function to calculate CBNetV2 features."""
         cb_feats = []
         Wh, Ww = tmps[0][-2:]
         for i in range(self.num_layers):
@@ -380,18 +402,15 @@ class CBSwinTransformer(BaseModule):
         return cb_feats
 
     def forward(self, x):
+        """Forward function."""
         outs = []
         cb_feats = None
+        tmps = None
         for i, module in enumerate(self.cb_modules):
-            if i == 0:
-                feats, tmps = module(x)
-            else:
-                feats, tmps = module(x, cb_feats, tmps)
-
+            feats, tmps = module(x, cb_feats, tmps)
             outs.append(feats)
-
             if i < len(self.cb_modules) - 1:
-                cb_feats = self._get_cb_feats(outs[-1], tmps)
+                cb_feats = self._forward_cb_feats(outs[-1], tmps)
         return tuple(outs)
 
     def train(self, mode=True):

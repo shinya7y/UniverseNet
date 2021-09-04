@@ -1,14 +1,9 @@
-_base_ = [
-    '../swin/cascade_mask_rcnn_swin_small_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py'  # noqa
-]
+_base_ = '../swin/cascade_mask_rcnn_swin_small_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py'  # noqa
 
 model = dict(
-    backbone=dict(type='CBSwinTransformer', ),
-    neck=dict(type='CBFPN', ),
-    test_cfg=dict(rcnn=dict(
-        score_thr=0.001,
-        nms=dict(type='soft_nms'),
-    )))
+    backbone=dict(type='CBSwinTransformer'),
+    neck=dict(type='CBFPN'),
+    test_cfg=dict(rcnn=dict(score_thr=0.001, nms=dict(type='soft_nms'))))
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)

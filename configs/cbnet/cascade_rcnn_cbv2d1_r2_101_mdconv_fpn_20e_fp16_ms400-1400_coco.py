@@ -7,11 +7,8 @@ model = dict(
         cb_inplanes=[64, 256, 512, 1024, 2048],
         dcn=dict(type='DCNv2', deform_groups=1, fallback_on_stride=False),
         stage_with_dcn=(False, True, True, True)),
-    neck=dict(type='CBFPN', ),
-    test_cfg=dict(rcnn=dict(
-        score_thr=0.001,
-        nms=dict(type='soft_nms'),
-    )))
+    neck=dict(type='CBFPN'),
+    test_cfg=dict(rcnn=dict(score_thr=0.001, nms=dict(type='soft_nms'))))
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -52,14 +49,4 @@ data = dict(
     val=dict(pipeline=test_pipeline),
     test=dict(pipeline=test_pipeline))
 
-# do not use mmdet version fp16
-runner = dict(type='EpochBasedRunnerAmp', max_epochs=20)
-fp16 = None
-optimizer_config = dict(
-    type='DistOptimizerHook',
-    update_interval=1,
-    grad_clip=None,
-    coalesce=True,
-    bucket_size_mb=-1,
-    use_fp16=True,
-)
+fp16 = dict(loss_scale=dict(init_scale=512))

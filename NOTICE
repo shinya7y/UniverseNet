@@ -1,3 +1,6 @@
+File names are for reference and might be different from the latest ones.
+Even if files were moved or renamed, licenses are applied for equivalent files.
+
 ===============================================================================
 MIT License
 ===============================================================================
@@ -62,3 +65,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The views and conclusions contained in the software and documentation are those
 of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
+
+===============================================================================
+Other Notes
+===============================================================================
+
+Although the CBNetV2 code is released under the Apache 2.0 license,
+the CBNetV2 authors claim that
+"The project is only free for academic research purposes,
+but needs authorization for commerce. For commerce permission,
+please contact wyt@pku.edu.cn." https://github.com/VDIGPKU/CBNetV2

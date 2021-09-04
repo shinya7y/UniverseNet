@@ -13,4 +13,4 @@ model = dict(
     neck=dict(in_channels=[192, 384, 768, 1536]))
 
 lr_config = dict(step=[8, 11])
-runner = dict(type='EpochBasedRunnerAmp', max_epochs=12)
+runner = dict(type='EpochBasedRunner', max_epochs=12)

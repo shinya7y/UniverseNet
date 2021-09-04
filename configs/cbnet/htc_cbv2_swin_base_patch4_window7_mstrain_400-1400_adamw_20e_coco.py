@@ -1,7 +1,7 @@
 _base_ = [
     '../_base_/models/htc_without_semantic_swin_fpn.py',
     '../_base_/datasets/coco_instance.py',
-    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
+    '../_base_/schedules/schedule_20e.py', '../_base_/default_runtime.py'
 ]
 
 model = dict(
@@ -32,10 +32,7 @@ model = dict(
             num_classes=183,
             ignore_label=255,
             loss_weight=0.2)),
-    test_cfg=dict(rcnn=dict(
-        score_thr=0.001,
-        nms=dict(type='soft_nms'),
-    )))
+    test_cfg=dict(rcnn=dict(score_thr=0.001, nms=dict(type='soft_nms'))))
 
 data_root = 'data/coco/'
 
@@ -98,16 +95,4 @@ optimizer = dict(
             'norm': dict(decay_mult=0.)
         }))
 
-lr_config = dict(step=[16, 19])
-runner = dict(type='EpochBasedRunnerAmp', max_epochs=20)
-
-# do not use mmdet version fp16
-fp16 = None
-optimizer_config = dict(
-    type='DistOptimizerHook',
-    update_interval=1,
-    grad_clip=None,
-    coalesce=True,
-    bucket_size_mb=-1,
-    use_fp16=True,
-)
+fp16 = dict(loss_scale=dict(init_scale=512))
