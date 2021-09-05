@@ -7,13 +7,11 @@
 - GCC 5+
 - [MMCV](https://mmcv.readthedocs.io/en/latest/#installation)
 
-Python 3.7+, PyTorch 1.4+ for Swin Transformer.
-
 The compatible MMDetection and MMCV versions are as below. Please install the correct version of MMCV to avoid installation issues.
 
 | MMDetection version |    MMCV version     |
 |:-------------------:|:-------------------:|
-| master              | mmcv-full>=1.3.8, <1.4.0 |
+| master              | mmcv-full>=1.3.8, <=1.3.11 |
 | 2.14.0              | mmcv-full>=1.3.8, <1.4.0 |
 | 2.13.0              | mmcv-full>=1.3.3, <1.4.0 |
 | 2.12.0              | mmcv-full>=1.3.3, <1.4.0 |
