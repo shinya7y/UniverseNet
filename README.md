@@ -9,9 +9,9 @@ https://arxiv.org/abs/2103.14027
 
 ## Changelog
 
-- recent:
+- 21.09 (Sept. 2021):
   - Support gradient accumulation to simulate large batch size with few GPUs ([example](configs/manga109/universenet50_2008_fp16_1x4x4_mstrain_480_960_1x_manga109s.py))
-  - Add codes for PVT, PVTv2, DDOD
+  - Add codes for CBNetV2, PVT, PVTv2, DDOD
   - Update and fix codes for mmdet 2.14.0, mmcv-full 1.3.9
 - 21.04 (Apr. 2021):
   - Propose [Universal-Scale object detection Benchmark (USB)](https://arxiv.org/abs/2103.14027)
@@ -39,6 +39,7 @@ https://arxiv.org/abs/2103.14027
 Methods and architectures:
 
 - [x] [UniverseNets (arXiv 2021)](configs/universenet/)
+- [x] [CBNetV2 (arXiv 2021)](configs/cbnet/)
 - [x] [PVT (ICCV 2021), PVTv2 (arXiv 2021)](configs/pvt/)
 - [x] [Swin Transformer (ICCV 2021)](configs/swin/)
 - [x] [DDOD (ACMMM 2021)](configs/ddod/)
@@ -54,6 +55,40 @@ Benchmarks and datasets:
 - [x] [Waymo Open Dataset (CVPR 2020)](configs/waymo_open/)
 - [x] [Manga109-s dataset (MTAP 2017, IEEE MultiMedia 2020)](configs/manga109/)
 - [x] [NightOwls dataset (ACCV 2018)](configs/nightowls/)
+
+## Usage
+
+### Installation
+
+See [get_started.md](docs/get_started.md).
+
+### Basic Usage
+
+See [MMDetection documents](#getting-started).
+Especially, see [this document](docs/1_exist_data_model.md) to evaluate and train existing models on COCO.
+
+### Examples
+
+We show examples to evaluate and train UniverseNet-20.08 on COCO with 4 GPUs.
+
+```bash
+# evaluate pre-trained model
+mkdir -p ${HOME}/data/checkpoints/
+wget -P ${HOME}/data/checkpoints/ https://github.com/shinya7y/UniverseNet/releases/download/20.08/universenet50_2008_fp16_4x4_mstrain_480_960_2x_coco_20200815_epoch_24-81356447.pth
+CONFIG_FILE=configs/universenet/universenet50_2008_fp16_4x4_mstrain_480_960_2x_coco.py
+CHECKPOINT_FILE=${HOME}/data/checkpoints/universenet50_2008_fp16_4x4_mstrain_480_960_2x_coco_20200815_epoch_24-81356447.pth
+GPU_NUM=4
+bash tools/dist_test.sh ${CONFIG_FILE} ${CHECKPOINT_FILE} ${GPU_NUM} --eval bbox
+
+# train model
+CONFIG_FILE=configs/universenet/universenet50_2008_fp16_4x4_mstrain_480_960_2x_coco.py
+CONFIG_NAME=$(basename ${CONFIG_FILE} .py)
+WORK_DIR="${HOME}/logs/coco/${CONFIG_NAME}_`date +%Y%m%d_%H%M%S`"
+GPU_NUM=4
+bash tools/dist_train.sh ${CONFIG_FILE} ${GPU_NUM} --work-dir ${WORK_DIR} --seed 0
+```
+
+Even if you have one GPU, we recommend using `tools/dist_train.sh` and `tools/dist_test.sh` to avoid [a SyncBN issue](https://github.com/open-mmlab/mmdetection/issues/847#issuecomment-504421173).
 
 ## Citation
 
