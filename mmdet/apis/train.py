@@ -13,8 +13,14 @@ from mmcv_custom.runner import EpochBasedRunnerAmp  # noqa
 from mmdet.core import DistEvalHook, EvalHook
 from mmdet.datasets import (build_dataloader, build_dataset,
                             replace_ImageToTensor)
-from mmdet.utils import (GradientCumulativeFp16OptimizerHook,
-                         GradientCumulativeOptimizerHook, get_root_logger)
+from mmdet.utils import get_root_logger
+
+try:
+    from mmcv.runner import (GradientCumulativeFp16OptimizerHook,
+                             GradientCumulativeOptimizerHook)
+except ImportError:
+    from mmdet.utils import (GradientCumulativeFp16OptimizerHook,
+                             GradientCumulativeOptimizerHook)
 
 try:
     import apex

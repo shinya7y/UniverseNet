@@ -45,7 +45,6 @@ class ApexOptimizerHook(OptimizerHook):
             runner.optimizer.zero_grad()
 
 
-@HOOKS.register_module()
 class GradientCumulativeOptimizerHook(OptimizerHook):
     """Optimizer Hook implements multi-iters gradient cumulating.
 
@@ -133,7 +132,6 @@ class GradientCumulativeOptimizerHook(OptimizerHook):
 if (TORCH_VERSION != 'parrots'
         and digit_version(TORCH_VERSION) >= digit_version('1.6.0')):
 
-    @HOOKS.register_module()
     class GradientCumulativeFp16OptimizerHook(GradientCumulativeOptimizerHook,
                                               Fp16OptimizerHook):
         """Fp16 optimizer Hook (using PyTorch's implementation) implements
@@ -188,7 +186,6 @@ if (TORCH_VERSION != 'parrots'
 
 else:
 
-    @HOOKS.register_module()
     class GradientCumulativeFp16OptimizerHook(GradientCumulativeOptimizerHook,
                                               Fp16OptimizerHook):
         """Fp16 optimizer Hook (using mmcv implementation) implements multi-
