@@ -41,7 +41,7 @@ Methods and architectures:
 - [x] [UniverseNets (arXiv 2021)](configs/universenet/)
 - [x] [CBNetV2 (arXiv 2021)](configs/cbnet/)
 - [x] [PVT (ICCV 2021), PVTv2 (arXiv 2021)](configs/pvt/)
-- [x] [Swin Transformer (ICCV 2021)](configs/swin/)
+- [x] [Swin Transformer (ICCV 2021)](configs/swin_original/)
 - [x] [DDOD (ACMMM 2021)](configs/ddod/)
 - [x] [GFLv2 (CVPR 2021)](configs/gflv2/)
 - [x] [RelationNet++ (BVR) (NeurIPS 2020)](configs/bvr/)

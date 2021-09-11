@@ -7,7 +7,7 @@ from mmcv.runner import BaseModule
 from ..builder import BACKBONES
 from .res2net import Res2Net
 from .resnet import ResNet, _BatchNorm, build_norm_layer
-from .swin_transformer import SwinTransformer
+from .swin_transformer import SwinTransformerOriginal
 
 # TODO clarify the meaning of tmps
 
@@ -239,7 +239,7 @@ class CBRes2Net(CBNet):
         super().__init__(subnet=CBSubRes2Net, **kwargs)
 
 
-class CBSubSwinTransformer(SwinTransformer):
+class CBSubSwinTransformer(SwinTransformerOriginal):
     """A Swin Transformer backbone for CBNetV2."""
 
     def _freeze_stages(self):

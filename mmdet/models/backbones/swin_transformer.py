@@ -536,7 +536,7 @@ class PatchEmbed(nn.Module):
 
 
 @BACKBONES.register_module()
-class SwinTransformer(BaseModule):
+class SwinTransformerOriginal(BaseModule):
     """Swin Transformer backbone.
 
     A PyTorch impl of : `Swin Transformer: Hierarchical Vision Transformer
@@ -739,5 +739,5 @@ class SwinTransformer(BaseModule):
 
     def train(self, mode=True):
         """Convert the model into training mode while keep layers freezed."""
-        super(SwinTransformer, self).train(mode)
+        super(SwinTransformerOriginal, self).train(mode)
         self._freeze_stages()

@@ -1,6 +1,7 @@
 _base_ = [
-    '../swin/models/atss_swint_fpn.py', '../_base_/datasets/manga109s.py',
-    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
+    '../swin_original/models/atss_swint_fpn.py',
+    '../_base_/datasets/manga109s.py', '../_base_/schedules/schedule_1x.py',
+    '../_base_/default_runtime.py'
 ]
 
 model = dict(bbox_head=dict(num_classes=4))
