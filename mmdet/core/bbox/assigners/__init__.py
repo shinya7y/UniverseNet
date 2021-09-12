@@ -1,3 +1,4 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 from .approx_max_iou_assigner import ApproxMaxIoUAssigner
 from .assign_result import AssignResult
 from .atss_assigner import ATSSAssigner
@@ -10,12 +11,13 @@ from .max_iou_assigner import MaxIoUAssigner
 from .point_assigner import PointAssigner
 from .point_kpt_assigner import PointKptAssigner
 from .region_assigner import RegionAssigner
+from .sim_ota_assigner import SimOTAAssigner
 from .uniform_assigner import UniformAssigner
 
 __all__ = [
     'BaseAssigner', 'MaxIoUAssigner', 'ApproxMaxIoUAssigner', 'AssignResult',
     'PointAssigner', 'ATSSAssigner', 'CenterRegionAssigner', 'GridAssigner',
-    'HungarianAssigner', 'RegionAssigner', 'UniformAssigner'
+    'HungarianAssigner', 'RegionAssigner', 'UniformAssigner', 'SimOTAAssigner'
 ]
 
 __all__ += ['PointKptAssigner', 'ATSSCostAssigner']
