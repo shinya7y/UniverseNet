@@ -539,8 +539,9 @@ class PatchEmbed(nn.Module):
 class SwinTransformerOriginal(BaseModule):
     """Swin Transformer backbone.
 
-    A PyTorch impl of : `Swin Transformer: Hierarchical Vision Transformer
-    using Shifted Windows` - https://arxiv.org/pdf/2103.14030
+    The original implementation of Swin Transformer with minor modifications.
+    Please consider using the mmdet's implementation in swin.py when you train
+    new models.
 
     Args:
         pretrain_img_size (int): Input image size for training the pretrained

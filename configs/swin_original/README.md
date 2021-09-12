@@ -7,6 +7,8 @@
 This directory contains the configs and results of [Swin Transformer](https://arxiv.org/abs/2103.14030).
 Most configs and results are based on the [official repository](https://github.com/SwinTransformer/Swin-Transformer-Object-Detection).
 
+Please consider using the [mmdet's configs](../swin/) when you train new models.
+
 ## Results and Models
 
 ### ATSS

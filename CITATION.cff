@@ -1,8 +1,17 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite it as below."
+message: "If you use this software, please cite the paper from 'preferred-citation' in addition to MMDetection."
 authors:
-  - name: "MMDetection Contributors"
-title: "OpenMMLab Detection Toolbox and Benchmark"
-date-released: 2018-08-22
-url: "https://github.com/open-mmlab/mmdetection"
+  - family-names: "Shinya"
+    given-names: "Yosuke"
+title: "UniverseNet"
+date-released: 2020-06-26
+url: "https://github.com/shinya7y/UniverseNet"
 license: Apache-2.0
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Shinya"
+      given-names: "Yosuke"
+  journal: "arXiv:2103.14027"
+  title: "USB: Universal-Scale Object Detection Benchmark"
+  year: 2021

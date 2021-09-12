@@ -9,6 +9,8 @@ https://arxiv.org/abs/2103.14027
 
 ## Changelog
 
+- recent:
+  - Update codes for PyTorch 1.9.0, mmdet 2.16.0, mmcv-full 1.3.13
 - 21.09 (Sept. 2021):
   - Support gradient accumulation to simulate large batch size with few GPUs ([example](configs/manga109/universenet50_2008_fp16_1x4x4_mstrain_480_960_1x_manga109s.py))
   - Add codes for CBNetV2, PVT, PVTv2, DDOD
