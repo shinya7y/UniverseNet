@@ -33,6 +33,7 @@ from .retina_sepbn_head import RetinaSepBNHead
 from .rpn_head import RPNHead
 from .sabl_retina_head import SABLRetinaHead
 from .ssd_head import SSDHead
+from .tood_head import TOODHead
 from .vfnet_head import VFNetHead
 from .yolact_head import YOLACTHead, YOLACTProtonet, YOLACTSegmHead
 from .yolo_head import YOLOV3Head
@@ -54,5 +55,5 @@ __all__ = [
 
 __all__ += [
     'ATSSSEPCHead', 'GFLSEPCHead', 'BVRHead', 'KeypointHead', 'ATSSIoUHead',
-    'DDODHead'
+    'DDODHead', 'TOODHead'
 ]

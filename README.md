@@ -10,6 +10,7 @@ https://arxiv.org/abs/2103.14027
 ## Changelog
 
 - recent:
+  - Add codes for TOOD
   - Update codes for PyTorch 1.9.0, mmdet 2.16.0, mmcv-full 1.3.13
 - 21.09 (Sept. 2021):
   - Support gradient accumulation to simulate large batch size with few GPUs ([example](configs/manga109/universenet50_2008_fp16_1x4x4_mstrain_480_960_1x_manga109s.py))
@@ -42,6 +43,7 @@ Methods and architectures:
 
 - [x] [UniverseNets (arXiv 2021)](configs/universenet/)
 - [x] [CBNetV2 (arXiv 2021)](configs/cbnet/)
+- [x] [TOOD (ICCV 2021)](configs/tood/)
 - [x] [PVT (ICCV 2021), PVTv2 (arXiv 2021)](configs/pvt/)
 - [x] [Swin Transformer (ICCV 2021)](configs/swin_original/)
 - [x] [DDOD (ACMMM 2021)](configs/ddod/)
@@ -111,6 +113,7 @@ Plsease check [NOTICE](NOTICE) for exceptions.
 ## Acknowledgements
 
 Some codes are modified from the repositories of
+[TOOD](https://github.com/fcjian/TOOD),
 [Swin Transformer](https://github.com/SwinTransformer/Swin-Transformer-Object-Detection),
 [RelationNet++](https://github.com/microsoft/RelationNet2),
 [SEPC](https://github.com/jshilong/SEPC),

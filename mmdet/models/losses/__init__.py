@@ -15,6 +15,7 @@ from .mse_loss import MSELoss, mse_loss
 from .pisa_loss import carl_loss, isr_p
 from .seesaw_loss import SeesawLoss
 from .smooth_l1_loss import L1Loss, SmoothL1Loss, l1_loss, smooth_l1_loss
+from .task_aligned_focal_loss import FocalLossWithProb, TaskAlignedFocalLoss
 from .utils import reduce_loss, weight_reduce_loss, weighted_loss
 from .varifocal_loss import VarifocalLoss
 
@@ -29,3 +30,5 @@ __all__ = [
     'GaussianFocalLoss', 'QualityFocalLoss', 'DistributionFocalLoss',
     'VarifocalLoss', 'KnowledgeDistillationKLDivLoss', 'SeesawLoss'
 ]
+
+__all__ += ['FocalLossWithProb', 'TaskAlignedFocalLoss']
