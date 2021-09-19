@@ -163,30 +163,6 @@ def distance2bbox(points, distance, max_shape=None):
     return bboxes
 
 
-def bbox_limited(bboxes, max_shape=None):
-    """Decode distance prediction to bounding box.
-
-    Args:
-        points (Tensor): Shape (n, 2), [x, y].
-        distance (Tensor): Distance from the given point to 4
-            boundaries (left, top, right, bottom).
-        max_shape (tuple): Shape of the image.
-
-    Returns:
-        Tensor: Decoded bboxes.
-    """
-    x1 = bboxes[:, 0]
-    y1 = bboxes[:, 1]
-    x2 = bboxes[:, 2]
-    y2 = bboxes[:, 3]
-    if max_shape is not None:
-        x1 = x1.clamp(min=0, max=max_shape[1])
-        y1 = y1.clamp(min=0, max=max_shape[0])
-        x2 = x2.clamp(min=0, max=max_shape[1])
-        y2 = y2.clamp(min=0, max=max_shape[0])
-    return torch.stack([x1, y1, x2, y2], -1)
-
-
 def bbox2distance(points, bbox, max_dis=None, eps=0.1):
     """Decode bounding box based on distances.
 
@@ -241,6 +217,28 @@ def bbox_rescale(bboxes, scale_factor=1.0):
     else:
         rescaled_bboxes = torch.stack([x1, y1, x2, y2], dim=-1)
     return rescaled_bboxes
+
+
+def bbox_limit(bboxes, max_shape=None):
+    """Limit bounding box to max_shape.
+
+    Args:
+        bboxes (Tensor): Shape (n, 4).
+        max_shape (tuple[int, int]): Maximum bounds for boxes. specifies (H, W)
+
+    Returns:
+        Tensor: Limited bboxes.
+    """
+    x1 = bboxes[:, 0]
+    y1 = bboxes[:, 1]
+    x2 = bboxes[:, 2]
+    y2 = bboxes[:, 3]
+    if max_shape is not None:
+        x1 = x1.clamp(min=0, max=max_shape[1])
+        y1 = y1.clamp(min=0, max=max_shape[0])
+        x2 = x2.clamp(min=0, max=max_shape[1])
+        y2 = y2.clamp(min=0, max=max_shape[0])
+    return torch.stack([x1, y1, x2, y2], -1)
 
 
 def bbox_cxcywh_to_xyxy(bbox):

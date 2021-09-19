@@ -4,7 +4,7 @@ from .single_stage import SingleStageDetector
 
 @DETECTORS.register_module()
 class TOOD(SingleStageDetector):
-    """Implementation of `TOOD`_."""
+    """Implementation of `TOOD <https://arxiv.org/abs/2108.07755>`_."""
 
     def __init__(self,
                  backbone,
@@ -12,6 +12,7 @@ class TOOD(SingleStageDetector):
                  bbox_head,
                  train_cfg=None,
                  test_cfg=None,
-                 pretrained=None):
+                 pretrained=None,
+                 init_cfg=None):
         super(TOOD, self).__init__(backbone, neck, bbox_head, train_cfg,
-                                   test_cfg, pretrained)
+                                   test_cfg, pretrained, init_cfg)

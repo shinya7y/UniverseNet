@@ -1,6 +1,5 @@
 _base_ = './tood_r50_fpn_mstrain_2x_coco.py'
 model = dict(
-    pretrained='torchvision://resnet101',
     backbone=dict(
         type='ResNet',
         depth=101,
@@ -9,6 +8,8 @@ model = dict(
         frozen_stages=1,
         norm_cfg=dict(type='BN', requires_grad=True),
         norm_eval=True,
-        style='pytorch'))
+        style='pytorch',
+        init_cfg=dict(type='Pretrained',
+                      checkpoint='torchvision://resnet101')))
 
 data = dict(samples_per_gpu=2, workers_per_gpu=2)

@@ -4,7 +4,6 @@ _base_ = [
 ]
 model = dict(
     type='TOOD',
-    pretrained='torchvision://resnet50',
     backbone=dict(
         type='ResNet',
         depth=50,
@@ -13,7 +12,8 @@ model = dict(
         frozen_stages=1,
         norm_cfg=dict(type='BN', requires_grad=True),
         norm_eval=True,
-        style='pytorch'),
+        style='pytorch',
+        init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),
     neck=dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],
@@ -49,28 +49,28 @@ model = dict(
             use_sigmoid=True,
             gamma=2.0,
             loss_weight=1.0),
-        loss_bbox=dict(type='GIoULoss', loss_weight=2.0),
-    ))
-# training and testing settings
-train_cfg = dict(
-    initial_epoch=4,
-    initial_assigner=dict(type='ATSSAssigner', topk=9),
-    assigner=dict(type='TaskAlignedAssigner', topk=13),
-    alpha=1,
-    beta=6,
-    allowed_border=-1,
-    pos_weight=-1,
-    debug=False)
-test_cfg = dict(
-    nms_pre=1000,
-    min_bbox_size=0,
-    score_thr=0.05,
-    nms=dict(type='nms', iou_threshold=0.6),
-    max_per_img=100)
-# optimizer
+        loss_bbox=dict(type='GIoULoss', loss_weight=2.0)),
+    # training and testing settings
+    train_cfg=dict(
+        initial_epoch=4,  # use different settings in the first few epochs
+        initial_assigner=dict(type='ATSSAssigner', topk=9),
+        assigner=dict(type='TaskAlignedAssigner', topk=13, alpha=1, beta=6),
+        allowed_border=-1,
+        pos_weight=-1,
+        debug=False),
+    test_cfg=dict(
+        nms_pre=1000,
+        min_bbox_size=0,
+        score_thr=0.05,
+        nms=dict(type='nms', iou_threshold=0.6),
+        max_per_img=100))
+
 optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
 
-# custon hooks: HeadHook is defined in mmdet/core/utils/head_hook.py
-custom_hooks = [dict(type='HeadHook')]
+custom_hooks = [
+    dict(
+        type='EpochSetterHook',
+        target_vars=['runner.model.module.bbox_head.epoch'])
+]
 
 data = dict(samples_per_gpu=4, workers_per_gpu=4)

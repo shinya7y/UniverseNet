@@ -22,24 +22,15 @@ class TaskAlignedAssigner(BaseAssigner):
 
     def __init__(self,
                  topk,
+                 alpha=1,
+                 beta=6,
                  iou_calculator=dict(type='BboxOverlaps2D'),
                  ignore_iof_thr=-1):
         self.topk = topk
+        self.alpha = alpha
+        self.beta = beta
         self.iou_calculator = build_iou_calculator(iou_calculator)
         self.ignore_iof_thr = ignore_iof_thr
-
-    def anchor_center(self, anchors):
-        """Get anchor centers from anchors.
-
-        Args:
-            anchors (Tensor): Anchor list with shape (N, 4), "xyxy" format.
-
-        Returns:
-            Tensor: Anchor centers with shape (N, 2), "xy" format.
-        """
-        anchors_cx = (anchors[:, 2] + anchors[:, 0]) / 2
-        anchors_cy = (anchors[:, 3] + anchors[:, 1]) / 2
-        return torch.stack([anchors_cx, anchors_cy], dim=-1)
 
     def assign(self,
                scores,
@@ -48,9 +39,7 @@ class TaskAlignedAssigner(BaseAssigner):
                num_level_bboxes,
                gt_bboxes,
                gt_bboxes_ignore=None,
-               gt_labels=None,
-               alpha=1,
-               beta=6):
+               gt_labels=None):
         """Assign gt to bboxes.
 
         The assignment is done in following steps
@@ -82,7 +71,7 @@ class TaskAlignedAssigner(BaseAssigner):
         # compute alignment metric between all bbox and gt
         overlaps = self.iou_calculator(decode_bboxes, gt_bboxes).detach()
         bbox_scores = scores[:, gt_labels].detach()
-        alignment_metrics = bbox_scores**alpha * overlaps**beta
+        alignment_metrics = bbox_scores**self.alpha * overlaps**self.beta
 
         # assign 0 by default
         assigned_gt_inds = alignment_metrics.new_full((num_bboxes, ),
@@ -137,7 +126,7 @@ class TaskAlignedAssigner(BaseAssigner):
         is_pos = is_pos & is_in_gts
 
         # if an anchor box is assigned to multiple gts,
-        # the one with the highest iou will be selected.
+        # the one with the highest IoU will be selected.
         overlaps_inf = torch.full_like(overlaps,
                                        -INF).t().contiguous().view(-1)
         index = candidate_idxs.view(-1)[is_pos.view(-1)]

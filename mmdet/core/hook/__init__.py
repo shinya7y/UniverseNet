@@ -1,7 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from .checkloss_hook import CheckInvalidLossHook
 from .ema import ExpMomentumEMAHook, LinearMomentumEMAHook
-from .head_hook import HeadHook
+from .setter_hook import EpochSetterHook, IterSetterHook
 from .sync_norm_hook import SyncNormHook
 from .sync_random_size_hook import SyncRandomSizeHook
 from .yolox_lrupdater_hook import YOLOXLrUpdaterHook
@@ -13,4 +13,4 @@ __all__ = [
     'CheckInvalidLossHook'
 ]
 
-__all__ += ['HeadHook']
+__all__ += ['EpochSetterHook', 'IterSetterHook']

@@ -6,7 +6,6 @@ from ..builder import LOSSES
 from .utils import weight_reduce_loss
 
 
-# python version no_sigmoid
 def focal_loss_with_prob(prob,
                          target,
                          weight=None,
@@ -14,45 +13,34 @@ def focal_loss_with_prob(prob,
                          alpha=0.25,
                          reduction='mean',
                          avg_factor=None):
-    target_one_hot = prob.new_zeros(len(prob),
-                                    len(prob[0]) + 1).scatter_(
-                                        1, target.unsqueeze(1), 1)[:, :-1]
-
+    """A variant of Focal Loss used in TOOD."""
+    target_one_hot = prob.new_zeros(len(prob), len(prob[0]) + 1)
+    target_one_hot = target_one_hot.scatter_(1, target.unsqueeze(1), 1)[:, :-1]
     flatten_alpha = torch.empty_like(prob).fill_(1 - alpha)
     flatten_alpha[target_one_hot == 1] = alpha
-
     pt = torch.where(target_one_hot == 1, prob, 1 - prob)
-
     ce_loss = F.binary_cross_entropy(prob, target_one_hot, reduction='none')
     loss = flatten_alpha * torch.pow(1 - pt, gamma) * ce_loss
-
     if weight is not None:
-        loss = weight_reduce_loss(loss, weight.reshape(-1, 1), reduction,
-                                  avg_factor)
-    else:
-        loss = weight_reduce_loss(loss, weight, reduction, avg_factor)
-
+        weight = weight.reshape(-1, 1)
+    loss = weight_reduce_loss(loss, weight, reduction, avg_factor)
     return loss
 
 
-# python version for task aligned focal loss
-def task_aigned_focal_loss(prob,
-                           target,
-                           alignment_metric,
-                           weight=None,
-                           gamma=2.0,
-                           reduction='mean',
-                           avg_factor=None):
-    target_one_hot = prob.new_zeros(len(prob),
-                                    len(prob[0]) + 1).scatter_(
-                                        1, target.unsqueeze(1), 1)[:, :-1]
+def task_aligned_focal_loss(prob,
+                            target,
+                            alignment_metric,
+                            weight=None,
+                            gamma=2.0,
+                            reduction='mean',
+                            avg_factor=None):
+    """Task Aligned Focal Loss used in TOOD."""
+    target_one_hot = prob.new_zeros(len(prob), len(prob[0]) + 1)
+    target_one_hot = target_one_hot.scatter_(1, target.unsqueeze(1), 1)[:, :-1]
     soft_label = alignment_metric.unsqueeze(-1) * target_one_hot
-
     ce_loss = F.binary_cross_entropy(prob, soft_label, reduction='none')
     loss = torch.pow(torch.abs(soft_label - prob), gamma) * ce_loss
-
     loss = weight_reduce_loss(loss, weight, reduction, avg_factor)
-
     return loss
 
 
@@ -65,7 +53,7 @@ class FocalLossWithProb(nn.Module):
                  alpha=0.25,
                  reduction='mean',
                  loss_weight=1.0):
-        """`Focal Loss <https://arxiv.org/abs/1708.02002>`_
+        """A variant of Focal Loss used in TOOD.
 
         Args:
             use_sigmoid (bool, optional): Whether to the prediction is
@@ -80,7 +68,7 @@ class FocalLossWithProb(nn.Module):
             loss_weight (float, optional): Weight of loss. Defaults to 1.0.
         """
         super(FocalLossWithProb, self).__init__()
-        # assert use_sigmoid is True, 'Only sigmoid focal loss supported now.'
+        assert use_sigmoid is True, 'Only sigmoid focal loss supported now.'
         self.use_sigmoid = use_sigmoid
         self.gamma = gamma
         self.alpha = alpha
@@ -134,22 +122,20 @@ class TaskAlignedFocalLoss(nn.Module):
                  gamma=2.0,
                  reduction='mean',
                  loss_weight=1.0):
-        """`Focal Loss <https://arxiv.org/abs/1708.02002>`_
+        """Task Aligned Focal Loss used in TOOD.
 
         Args:
             use_sigmoid (bool, optional): Whether to the prediction is
                 used for sigmoid or softmax. Defaults to True.
             gamma (float, optional): The gamma for calculating the modulating
                 factor. Defaults to 2.0.
-            alpha (float, optional): A balanced form for Focal Loss.
-                Defaults to 0.25.
             reduction (str, optional): The method used to reduce the loss into
                 a scalar. Defaults to 'mean'. Options are "none", "mean" and
                 "sum".
             loss_weight (float, optional): Weight of loss. Defaults to 1.0.
         """
         super(TaskAlignedFocalLoss, self).__init__()
-        # assert use_sigmoid is True, 'Only sigmoid focal loss supported now.'
+        assert use_sigmoid is True, 'Only sigmoid focal loss supported now.'
         self.use_sigmoid = use_sigmoid
         self.gamma = gamma
         self.reduction = reduction
@@ -182,7 +168,7 @@ class TaskAlignedFocalLoss(nn.Module):
         reduction = (
             reduction_override if reduction_override else self.reduction)
         if self.use_sigmoid:
-            loss_cls = self.loss_weight * task_aigned_focal_loss(
+            loss_cls = self.loss_weight * task_aligned_focal_loss(
                 prob,
                 target,
                 alignment_metric,
