@@ -244,7 +244,10 @@ def main():
             ]:
                 eval_kwargs.pop(key, None)
             eval_kwargs.update(dict(metric=args.eval, **kwargs))
-            metric = dataset.evaluate(outputs, **eval_kwargs)
+            if 'area_range_type' in eval_kwargs:
+                metric = dataset.evaluate_custom(outputs, **eval_kwargs)
+            else:
+                metric = dataset.evaluate(outputs, **eval_kwargs)
             print(metric)
             metric_dict = dict(config=args.config, metric=metric)
             if args.work_dir is not None and rank == 0:

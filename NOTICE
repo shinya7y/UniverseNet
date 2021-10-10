@@ -41,6 +41,7 @@ SOFTWARE.
 
 Copyright (c) 2014, Piotr Dollar and Tsung-Yi Lin All rights reserved.
 - mmdet/datasets/nightowls_cocoeval.py
+- mmdet/datasets/usbeval.py
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:

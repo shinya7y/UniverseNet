@@ -10,6 +10,7 @@ https://arxiv.org/abs/2103.14027
 ## Changelog
 
 - recent:
+  - Support [finer scale-wise AP metrics](docs/tutorials/finer_scale_ap.md)
   - Add codes for TOOD
   - Update codes for PyTorch 1.9.0, mmdet 2.16.0, mmcv-full 1.3.13
 - 21.09 (Sept. 2021):

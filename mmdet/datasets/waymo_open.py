@@ -12,6 +12,7 @@ from mmdet.core import eval_recalls
 from .api_wrappers import COCO, COCOeval
 from .builder import DATASETS
 from .custom import CustomDataset
+from .usbeval import USBeval
 
 
 @DATASETS.register_module()
@@ -597,6 +598,185 @@ class WaymoOpenDataset(CustomDataset):
                 eval_results[f'{metric}_mAP_copypaste'] = map_copypaste
                 print_log(
                     f'{metric}_mAP_copypaste: {map_copypaste}', logger=logger)
+        if tmp_dir is not None:
+            tmp_dir.cleanup()
+        return eval_results
+
+    def evaluate_custom(self,
+                        results,
+                        metric='bbox',
+                        logger=None,
+                        outfile_prefix=None,
+                        classwise=False,
+                        proposal_nums=(100, 300, 1000),
+                        largest_max_dets=None,
+                        iou_thrs=np.arange(0.5, 0.96, 0.05),
+                        area_range_type='COCO'):
+        """Evaluation in COCO protocol.
+
+        Args:
+            results (list[list | tuple]): Testing results of the dataset.
+            metric (str | list[str]): Metrics to be evaluated. Options are
+                'bbox', 'segm', 'proposal', 'proposal_fast'.
+            logger (logging.Logger | str | None): Logger used for printing
+                related information during evaluation. Default: None.
+            outfile_prefix (str | None): The prefix of json files. It includes
+                the file path and the prefix of filename, e.g., "a/b/prefix".
+                If not specified, a temp file will be created. Default: None.
+            classwise (bool): Whether to evaluating the AP for each class.
+            proposal_nums (Sequence[int]): Proposal number used for evaluating
+                recalls, such as recall@100, recall@1000.
+                Default: (100, 300, 1000).
+            iou_thrs (Sequence[float]): IoU threshold used for evaluating
+                recalls. If set to a list, the average recall of all IoUs will
+                also be computed. Default: 0.5.
+            area_range_type (str, optional): Type of area range to compute
+                scale-wise AP metrics. Default: 'COCO'.
+
+        Returns:
+            dict[str, float]: COCO style evaluation metric.
+        """
+
+        metrics = metric if isinstance(metric, list) else [metric]
+        allowed_metrics = ['bbox', 'segm', 'proposal', 'proposal_fast']
+        for metric in metrics:
+            if metric not in allowed_metrics:
+                raise KeyError(f'metric {metric} is not supported')
+
+        result_files, tmp_dir = self.format_results(
+            results, outfile_prefix, format_type='coco')
+
+        eval_results = {}
+        cocoGt = self.coco
+        for metric in metrics:
+            msg = f'Evaluating {metric}...'
+            if logger is None:
+                msg = '\n' + msg
+            print_log(msg, logger=logger)
+
+            if metric == 'proposal_fast':
+                ar = self.fast_eval_recall(
+                    results, proposal_nums, iou_thrs, logger='silent')
+                log_msg = []
+                for i, num in enumerate(proposal_nums):
+                    eval_results[f'AR@{num}'] = ar[i]
+                    log_msg.append(f'\nAR@{num}\t{ar[i]:.4f}')
+                log_msg = ''.join(log_msg)
+                print_log(log_msg, logger=logger)
+                continue
+
+            if metric not in result_files:
+                raise KeyError(f'{metric} is not in results')
+            try:
+                cocoDt = cocoGt.loadRes(result_files[metric])
+            except IndexError:
+                print_log(
+                    'The testing results of the whole dataset is empty.',
+                    logger=logger,
+                    level=logging.ERROR)
+                break
+
+            iou_type = 'bbox' if metric == 'proposal' else metric
+            cocoEval = USBeval(
+                cocoGt, cocoDt, iou_type, area_range_type=area_range_type)
+            cocoEval.params.catIds = self.cat_ids
+            cocoEval.params.imgIds = self.img_ids
+            if metric == 'proposal':
+                cocoEval.params.useCats = 0
+                cocoEval.params.maxDets = list(proposal_nums)
+                cocoEval.evaluate()
+                cocoEval.accumulate()
+                cocoEval.summarize()
+                for key, val in cocoEval.stats.items():
+                    if key.startswith('mAP'):
+                        key = f'{metric}_{key}'
+                    eval_results[key] = float(f'{val:.3f}')
+            else:
+                if largest_max_dets is not None:
+                    assert largest_max_dets > 100, \
+                        'specify largest_max_dets only when' \
+                        'you need to evaluate more than 100 detections'
+                    cocoEval.params.maxDets[-1] = largest_max_dets
+                    cocoEval.params.maxDets[-2] = 100
+                cocoEval.evaluate()
+                cocoEval.accumulate()
+                cocoEval.summarize()
+                for key, val in cocoEval.stats.items():
+                    if key.startswith('mAP'):
+                        key = f'{metric}_{key}'
+                    eval_results[key] = float(f'{val:.3f}')
+                if classwise:  # Compute per-category AP
+                    # Compute per-category AP
+                    # from https://github.com/facebookresearch/detectron2/
+                    precisions = cocoEval.eval['precision']
+                    # precision: (iou, recall, cls, area range, max dets)
+                    assert len(self.cat_ids) == precisions.shape[2]
+
+                    table_data = []
+                    waymo_iou_metrics = {}
+                    iouThr_dict = {None: 'AP', 0.5: 'AP 0.5', 0.7: 'AP 0.7'}
+                    for iouThr, metric_name in iouThr_dict.items():
+                        results_per_category = []
+                        for idx, catId in enumerate(self.cat_ids):
+                            # area range index 0: all area ranges
+                            # max dets index -1: typically 100 per image
+                            nm = self.coco.loadCats(catId)[0]
+                            precision = precisions[:, :, idx, 0, -1]
+                            if iouThr is not None:
+                                t = np.where(
+                                    iouThr == cocoEval.params.iouThrs)[0]
+                                precision = precision[t]
+                            precision = precision[precision > -1]
+                            if precision.size:
+                                ap = np.mean(precision)
+                            else:
+                                ap = float('nan')
+                            results_per_category.append(
+                                (f'{nm["name"]}', f'{float(ap):0.4f}'))
+
+                            if self.CLASSWISE_IOU[nm['name']] == iouThr:
+                                waymo_iou_metrics[nm['name']] = ap
+
+                        num_columns = min(6, len(results_per_category) * 2)
+                        results_flatten = list(
+                            itertools.chain(*results_per_category))
+                        headers = ['category', metric_name] * (
+                            num_columns // 2)
+                        results_2d = itertools.zip_longest(*[
+                            results_flatten[i::num_columns]
+                            for i in range(num_columns)
+                        ])
+                        table_data += [headers]
+                        table_data += [result for result in results_2d]
+                    table = AsciiTable(table_data)
+                    table.inner_heading_row_border = False
+                    table.inner_row_border = True
+                    print_log('\n' + table.table, logger=logger)
+
+                    for category, category_iou in self.CLASSWISE_IOU.items():
+                        if category not in waymo_iou_metrics:
+                            continue
+                        print_log(
+                            f'AP{category_iou} ({category}): ' +
+                            f'{waymo_iou_metrics[category]:0.4f}',
+                            logger=logger)
+                    ap_waymo = np.mean(list(waymo_iou_metrics.values()))
+                    print_log(
+                        'AP (Waymo challenge IoU, COCO script): ' +
+                        f'{ap_waymo:0.4f}',
+                        logger=logger)
+
+                try:
+                    copypastes = []
+                    coco_metrics = [
+                        'mAP', 'mAP_50', 'mAP_75', 'mAP_s', 'mAP_m', 'mAP_l'
+                    ]
+                    for coco_metric in coco_metrics:
+                        copypastes.append(f'{cocoEval.stats[coco_metric]:.3f}')
+                    mAP_copypaste = ' '.join(copypastes)
+                    eval_results[f'{metric}_mAP_copypaste'] = mAP_copypaste
+                except KeyError:
+                    pass
         if tmp_dir is not None:
             tmp_dir.cleanup()
         return eval_results
