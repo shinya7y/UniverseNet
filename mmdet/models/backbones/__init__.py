@@ -7,6 +7,7 @@ from .detectors_resnext import DetectoRS_ResNeXt
 from .hourglass import HourglassNet
 from .hrnet import HRNet
 from .mobilenet_v2 import MobileNetV2
+from .pvt import PyramidVisionTransformer, PyramidVisionTransformerV2
 from .pvtv2_original import (pvt_v2_b0, pvt_v2_b1, pvt_v2_b2, pvt_v2_b2_li,
                              pvt_v2_b3, pvt_v2_b4, pvt_v2_b5)
 from .regnet import RegNet
@@ -23,7 +24,7 @@ __all__ = [
     'RegNet', 'ResNet', 'ResNetV1d', 'ResNeXt', 'SSDVGG', 'HRNet',
     'MobileNetV2', 'Res2Net', 'HourglassNet', 'DetectoRS_ResNet',
     'DetectoRS_ResNeXt', 'Darknet', 'ResNeSt', 'TridentResNet', 'CSPDarknet',
-    'SwinTransformer'
+    'SwinTransformer', 'PyramidVisionTransformer', 'PyramidVisionTransformerV2'
 ]
 
 __all__ += [

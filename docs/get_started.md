@@ -9,29 +9,30 @@
 
 Compatible MMDetection and MMCV versions are shown as below. Please install the correct version of MMCV to avoid installation issues.
 
-| MMDetection version |       MMCV version       |
-| :-----------------: | :----------------------: |
-|       master        | mmcv-full>=1.3.8, <1.4.0 |
-|       2.16.0        | mmcv-full>=1.3.8, <1.4.0 |
-|       2.15.1        | mmcv-full>=1.3.8, <1.4.0 |
-|       2.15.0        | mmcv-full>=1.3.8, <1.4.0 |
-|       2.14.0        | mmcv-full>=1.3.8, <1.4.0 |
-|       2.13.0        | mmcv-full>=1.3.3, <1.4.0 |
-|       2.12.0        | mmcv-full>=1.3.3, <1.4.0 |
-|       2.11.0        | mmcv-full>=1.2.4, <1.4.0 |
-|       2.10.0        | mmcv-full>=1.2.4, <1.4.0 |
-|        2.9.0        | mmcv-full>=1.2.4, <1.4.0 |
-|        2.8.0        | mmcv-full>=1.2.4, <1.4.0 |
-|        2.7.0        | mmcv-full>=1.1.5, <1.4.0 |
-|        2.6.0        | mmcv-full>=1.1.5, <1.4.0 |
-|        2.5.0        | mmcv-full>=1.1.5, <1.4.0 |
-|        2.4.0        | mmcv-full>=1.1.1, <1.4.0 |
-|        2.3.0        |     mmcv-full==1.0.5     |
-|      2.3.0rc0       |     mmcv-full>=1.0.2     |
-|        2.2.1        |       mmcv==0.6.2        |
-|        2.2.0        |       mmcv==0.6.2        |
-|        2.1.0        |   mmcv>=0.5.9, <=0.6.1   |
-|        2.0.0        |   mmcv>=0.5.1, <=0.5.8   |
+| MMDetection version |    MMCV version     |
+|:-------------------:|:-------------------:|
+| master              | mmcv-full>=1.3.8, <1.4.0 |
+| 2.17.0              | mmcv-full>=1.3.8, <1.4.0 |
+| 2.16.0              | mmcv-full>=1.3.8, <1.4.0 |
+| 2.15.1              | mmcv-full>=1.3.8, <1.4.0 |
+| 2.15.0              | mmcv-full>=1.3.8, <1.4.0 |
+| 2.14.0              | mmcv-full>=1.3.8, <1.4.0 |
+| 2.13.0              | mmcv-full>=1.3.3, <1.4.0 |
+| 2.12.0              | mmcv-full>=1.3.3, <1.4.0 |
+| 2.11.0              | mmcv-full>=1.2.4, <1.4.0 |
+| 2.10.0              | mmcv-full>=1.2.4, <1.4.0 |
+| 2.9.0               | mmcv-full>=1.2.4, <1.4.0 |
+| 2.8.0               | mmcv-full>=1.2.4, <1.4.0 |
+| 2.7.0               | mmcv-full>=1.1.5, <1.4.0 |
+| 2.6.0               | mmcv-full>=1.1.5, <1.4.0 |
+| 2.5.0               | mmcv-full>=1.1.5, <1.4.0 |
+| 2.4.0               | mmcv-full>=1.1.1, <1.4.0 |
+| 2.3.0               | mmcv-full==1.0.5    |
+| 2.3.0rc0            | mmcv-full>=1.0.2    |
+| 2.2.1               | mmcv==0.6.2         |
+| 2.2.0               | mmcv==0.6.2         |
+| 2.1.0               | mmcv>=0.5.9, <=0.6.1|
+| 2.0.0               | mmcv>=0.5.1, <=0.5.8|
 
 **Note:** You need to run `pip uninstall mmcv` first if you have mmcv installed.
 If mmcv and mmcv-full are both installed, there will be `ModuleNotFoundError`.
@@ -70,7 +71,7 @@ If mmcv and mmcv-full are both installed, there will be `ModuleNotFoundError`.
     conda install pytorch=1.3.1 cudatoolkit=9.2 torchvision=0.4.2 -c pytorch
     ```
 
-    If you build PyTorch from source instead of installing the prebuilt pacakge,
+    If you build PyTorch from source instead of installing the prebuilt package,
     you can use more CUDA versions such as 9.0.
 
 ### Install MMDetection

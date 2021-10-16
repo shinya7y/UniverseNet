@@ -141,7 +141,8 @@ class TwoStageDetector(BaseDetector):
                 gt_bboxes,
                 gt_labels=None,
                 gt_bboxes_ignore=gt_bboxes_ignore,
-                proposal_cfg=proposal_cfg)
+                proposal_cfg=proposal_cfg,
+                **kwargs)
             losses.update(rpn_losses)
         else:
             proposal_list = proposals
@@ -290,7 +291,8 @@ class TwoStageDetector(BaseDetector):
                     gt_bboxes,
                     gt_labels=None,
                     gt_bboxes_ignore=gt_bboxes_ignore,
-                    proposal_cfg=proposal_cfg)
+                    proposal_cfg=proposal_cfg,
+                    **kwargs)
                 if len(xs) > 1:
                     rpn_losses = self._update_loss_for_cbnet(
                         rpn_losses, idx=i, weight=cb_loss_weights[i])
