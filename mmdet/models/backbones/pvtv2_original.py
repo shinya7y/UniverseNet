@@ -213,8 +213,13 @@ class OverlapPatchEmbed(nn.Module):
         return x, H, W
 
 
-class PyramidVisionTransformerV2(BaseModule):
-    """Pyramid Vision Transformer v2 backbone."""
+class PyramidVisionTransformerV2Original(BaseModule):
+    """Pyramid Vision Transformer v2 backbone.
+
+    The original implementation of PVTv2 with minor modifications. Please
+    consider using the mmdet's implementation in pvt.py when you train new
+    models.
+    """
 
     def __init__(self,
                  patch_sizes=(7, 3, 3, 3),
@@ -336,7 +341,7 @@ class PyramidVisionTransformerV2(BaseModule):
 
 
 @BACKBONES.register_module()
-class pvt_v2_b0(PyramidVisionTransformerV2):
+class pvt_v2_b0(PyramidVisionTransformerV2Original):
     """PVTv2-B0."""
 
     def __init__(self, **kwargs):
@@ -356,7 +361,7 @@ class pvt_v2_b0(PyramidVisionTransformerV2):
 
 
 @BACKBONES.register_module()
-class pvt_v2_b1(PyramidVisionTransformerV2):
+class pvt_v2_b1(PyramidVisionTransformerV2Original):
     """PVTv2-B1."""
 
     def __init__(self, **kwargs):
@@ -376,7 +381,7 @@ class pvt_v2_b1(PyramidVisionTransformerV2):
 
 
 @BACKBONES.register_module()
-class pvt_v2_b2(PyramidVisionTransformerV2):
+class pvt_v2_b2(PyramidVisionTransformerV2Original):
     """PVTv2-B2."""
 
     def __init__(self, **kwargs):
@@ -396,7 +401,7 @@ class pvt_v2_b2(PyramidVisionTransformerV2):
 
 
 @BACKBONES.register_module()
-class pvt_v2_b2_li(PyramidVisionTransformerV2):
+class pvt_v2_b2_li(PyramidVisionTransformerV2Original):
     """PVTv2-B2-Li."""
 
     def __init__(self, **kwargs):
@@ -417,7 +422,7 @@ class pvt_v2_b2_li(PyramidVisionTransformerV2):
 
 
 @BACKBONES.register_module()
-class pvt_v2_b3(PyramidVisionTransformerV2):
+class pvt_v2_b3(PyramidVisionTransformerV2Original):
     """PVTv2-B3."""
 
     def __init__(self, **kwargs):
@@ -437,7 +442,7 @@ class pvt_v2_b3(PyramidVisionTransformerV2):
 
 
 @BACKBONES.register_module()
-class pvt_v2_b4(PyramidVisionTransformerV2):
+class pvt_v2_b4(PyramidVisionTransformerV2Original):
     """PVTv2-B4."""
 
     def __init__(self, **kwargs):
@@ -457,7 +462,7 @@ class pvt_v2_b4(PyramidVisionTransformerV2):
 
 
 @BACKBONES.register_module()
-class pvt_v2_b5(PyramidVisionTransformerV2):
+class pvt_v2_b5(PyramidVisionTransformerV2Original):
     """PVTv2-B5."""
 
     def __init__(self, **kwargs):

@@ -4,14 +4,15 @@
 
 <!-- [ALGORITHM] -->
 
-This directory contains the configs and results of [PVTv1](https://arxiv.org/abs/2102.12122) and [PVTv2](https://arxiv.org/abs/2106.13797).
+This directory contains the configs and results of [PVTv2](https://arxiv.org/abs/2106.13797).
 You can find more examples in [the original repository](https://github.com/whai362/PVT/tree/v2/detection).
+
+Please consider using the [mmdet's configs](../pvt/) when you train new models.
 
 ## Results and Models
 
 |       Method       | Backbone    |  Pretrain   | Lr schd |  Aug  | box AP | mask AP | Config                                                                  | Download                                                                                                                                                                                |
 | :----------------: | ----------- | :---------: | :-----: | :---: | :----: | :-----: | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|     RetinaNet      | PVT-Small   | ImageNet-1K |   1x    |  No   |  40.4  |    -    | [config](retinanet_pvt_s_fpn_fp16_1x_coco.py)                           | log & [model](https://drive.google.com/file/d/1U02ngyT_IYxS8SlU3WXf5r0TFsoBE3Lm/view?usp=sharing)                                                                                       |
 |        ATSS        | PVTv2-B2-Li | ImageNet-1K |   3x    |  Yes  |  48.9  |    -    | [config](atss_pvt_v2_b2_li_fpn_fp16_detraug_3x_coco.py)                 | [log](https://drive.google.com/file/d/1pg2O6gC5zKvFnAuC98wsexcx7mAqmv16/view?usp=sharing) & [model](https://drive.google.com/file/d/1CB4teTBwOpofCrHM91QvKKFLKcVMzZVi/view?usp=sharing) |
 |        ATSS        | PVTv2-B2    | ImageNet-1K |   3x    |  Yes  |  49.9  |    -    | [config](atss_pvt_v2_b2_fpn_fp16_detraug_3x_coco.py)                    | [log](https://drive.google.com/file/d/1Vnf8-BszhTEkOQqwLA2-XLeuMT9n5ceR/view?usp=sharing) & [model](https://drive.google.com/file/d/1TKbj-i7oLgC7zstFuV0Neumu4iKMpBGh/view?usp=sharing) |
 |        GFL         | PVTv2-B2-Li | ImageNet-1K |   3x    |  Yes  |  49.2  |    -    | [config](gfl_pvt_v2_b2_li_fpn_fp16_detraug_3x_coco.py)                  | [log](https://drive.google.com/file/d/1hqieuwCe79HAVMMVz8sEZsnG-R74Z_AO/view?usp=sharing) & [model](https://drive.google.com/file/d/1CnXlOEs9g7-LAoaDFcukTh5x0R4popZp/view?usp=sharing) |

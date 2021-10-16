@@ -7,9 +7,8 @@ from .detectors_resnext import DetectoRS_ResNeXt
 from .hourglass import HourglassNet
 from .hrnet import HRNet
 from .mobilenet_v2 import MobileNetV2
-from .pvt import pvt_large, pvt_medium, pvt_small, pvt_tiny
-from .pvt_v2 import (pvt_v2_b0, pvt_v2_b1, pvt_v2_b2, pvt_v2_b2_li, pvt_v2_b3,
-                     pvt_v2_b4, pvt_v2_b5)
+from .pvtv2_original import (pvt_v2_b0, pvt_v2_b1, pvt_v2_b2, pvt_v2_b2_li,
+                             pvt_v2_b3, pvt_v2_b4, pvt_v2_b5)
 from .regnet import RegNet
 from .res2net import Res2Net
 from .resnest import ResNeSt
@@ -31,7 +30,6 @@ __all__ += [
     'SwinTransformerOriginal', 'CBResNet', 'CBRes2Net', 'CBSwinTransformer'
 ]
 __all__ += [
-    'pvt_tiny', 'pvt_small', 'pvt_medium', 'pvt_large', 'pvt_v2_b0',
-    'pvt_v2_b1', 'pvt_v2_b2', 'pvt_v2_b2_li', 'pvt_v2_b3', 'pvt_v2_b4',
-    'pvt_v2_b5'
+    'pvt_v2_b0', 'pvt_v2_b1', 'pvt_v2_b2', 'pvt_v2_b2_li', 'pvt_v2_b3',
+    'pvt_v2_b4', 'pvt_v2_b5'
 ]

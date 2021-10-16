@@ -45,14 +45,15 @@ Methods and architectures:
 - [x] [UniverseNets (arXiv 2021)](configs/universenet/)
 - [x] [CBNetV2 (arXiv 2021)](configs/cbnet/)
 - [x] [TOOD (ICCV 2021)](configs/tood/)
-- [x] [PVT (ICCV 2021), PVTv2 (arXiv 2021)](configs/pvt/)
-- [x] [Swin Transformer (ICCV 2021)](configs/swin_original/)
+- [x] [PVTv2 (arXiv 2021)](configs/pvtv2_original/) stronger models
+- [x] ~~PVT (ICCV 2021)~~ supported
+- [x] [Swin Transformer (ICCV 2021)](configs/swin_original/) stronger models
 - [x] [DDOD (ACMMM 2021)](configs/ddod/)
 - [x] [GFLv2 (CVPR 2021)](configs/gflv2/)
 - [x] [RelationNet++ (BVR) (NeurIPS 2020)](configs/bvr/)
 - [x] SEPC (CVPR 2020)
 - [x] [ATSS-style TTA (CVPR 2020)](configs/universenet/universenet101_2008d_fp16_4x4_mstrain_480_960_20e_coco_test_vote.py)
-- [x] ~~Test-time augmentation for ATSS and GFL~~ [merged](https://github.com/open-mmlab/mmdetection/commits?author=shinya7y)
+- [x] ~~Test-time augmentation for ATSS and GFL~~ merged
 
 Benchmarks and datasets:
 
