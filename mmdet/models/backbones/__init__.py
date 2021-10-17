@@ -1,5 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from .cbnet import CBRes2Net, CBResNet, CBSwinTransformer
+from .convmlp import ConvMLP, ConvMLPLarge, ConvMLPMedium, ConvMLPSmall
 from .csp_darknet import CSPDarknet
 from .darknet import Darknet
 from .detectors_resnet import DetectoRS_ResNet
@@ -28,7 +29,8 @@ __all__ = [
 ]
 
 __all__ += [
-    'SwinTransformerOriginal', 'CBResNet', 'CBRes2Net', 'CBSwinTransformer'
+    'SwinTransformerOriginal', 'CBResNet', 'CBRes2Net', 'CBSwinTransformer',
+    'ConvMLP', 'ConvMLPLarge', 'ConvMLPMedium', 'ConvMLPSmall'
 ]
 __all__ += [
     'pvt_v2_b0', 'pvt_v2_b1', 'pvt_v2_b2', 'pvt_v2_b2_li', 'pvt_v2_b3',
