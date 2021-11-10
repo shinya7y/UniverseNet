@@ -72,12 +72,14 @@ data = dict(
         ann_file=data_root +
         'annotations_coco_format/manga109s_coco_4val.json',
         img_prefix=data_root,
-        pipeline=test_pipeline),
+        pipeline=test_pipeline,
+        force_filter_imgs=True),
     test=dict(
         type=dataset_type,
         classes=classes,
         ann_file=data_root +
         'annotations_coco_format/manga109s_coco_15test.json',
         img_prefix=data_root,
-        pipeline=test_pipeline))
+        pipeline=test_pipeline,
+        force_filter_imgs=True))
 evaluation = dict(interval=1, metric='bbox')

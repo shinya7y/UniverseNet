@@ -48,8 +48,10 @@ class CustomDataset(Dataset):
         test_mode (bool, optional): If set True, annotation will not be loaded.
         filter_empty_gt (bool, optional): If set true, images without bounding
             boxes of the dataset's classes will be filtered out. This option
-            only works when `test_mode=False`, i.e., we never filter images
-            during tests.
+            only works when `force_filter_imgs=True` or `test_mode=False`.
+            Default: True.
+        force_filter_imgs (bool, optional): If set true, filter images even
+            during test. Default: False.
     """
 
     CLASSES = None
@@ -63,7 +65,8 @@ class CustomDataset(Dataset):
                  seg_prefix=None,
                  proposal_file=None,
                  test_mode=False,
-                 filter_empty_gt=True):
+                 filter_empty_gt=True,
+                 force_filter_imgs=False):
         self.ann_file = ann_file
         self.data_root = data_root
         self.img_prefix = img_prefix
@@ -71,6 +74,7 @@ class CustomDataset(Dataset):
         self.proposal_file = proposal_file
         self.test_mode = test_mode
         self.filter_empty_gt = filter_empty_gt
+        self.force_filter_imgs = force_filter_imgs
         self.CLASSES = self.get_classes(classes)
 
         # join paths if data_root is specified
@@ -94,11 +98,13 @@ class CustomDataset(Dataset):
             self.proposals = None
 
         # filter images too small and containing no annotations
-        if not test_mode:
+        should_filter_imgs = force_filter_imgs or not test_mode
+        if should_filter_imgs:
             valid_inds = self._filter_imgs()
             self.data_infos = [self.data_infos[i] for i in valid_inds]
             if self.proposals is not None:
                 self.proposals = [self.proposals[i] for i in valid_inds]
+        if not test_mode:
             # set group flag for the sampler
             self._set_group_flag()
 
