@@ -11,7 +11,7 @@ https://arxiv.org/abs/2103.14027
 
 - recent:
   - Support [finer scale-wise AP metrics](docs/tutorials/finer_scale_ap.md)
-  - Add codes for TOOD, ConvMLP
+  - Add codes for TOOD, ConvMLP, PoolFormer
   - Update codes for PyTorch 1.9.0, mmdet 2.17.0, mmcv-full 1.3.13
 - 21.09 (Sept. 2021):
   - Support gradient accumulation to simulate large batch size with few GPUs ([example](configs/manga109/universenet50_2008_fp16_1x4x4_mstrain_480_960_1x_manga109s.py))
@@ -43,6 +43,7 @@ https://arxiv.org/abs/2103.14027
 Methods and architectures:
 
 - [x] [UniverseNets (arXiv 2021)](configs/universenet/)
+- [x] [PoolFormer (arXiv 2021)](configs/poolformer/)
 - [x] [ConvMLP (arXiv 2021)](configs/convmlp/)
 - [x] [CBNetV2 (arXiv 2021)](configs/cbnet/)
 - [x] [TOOD (ICCV 2021)](configs/tood/)
@@ -116,6 +117,7 @@ Plsease check [NOTICE](NOTICE) for exceptions.
 ## Acknowledgements
 
 Some codes are modified from the repositories of
+[PoolFormer](https://github.com/sail-sg/poolformer),
 [ConvMLP](https://github.com/SHI-Labs/Convolutional-MLPs),
 [TOOD](https://github.com/fcjian/TOOD),
 [Swin Transformer](https://github.com/SwinTransformer/Swin-Transformer-Object-Detection),
