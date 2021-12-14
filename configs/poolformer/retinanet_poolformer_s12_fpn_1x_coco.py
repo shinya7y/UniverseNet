@@ -1,13 +1,15 @@
 _base_ = [
-    '_base_/models/retinanet_r50_fpn.py', '_base_/datasets/coco_detection.py',
-    '_base_/schedules/schedule_1x.py', '_base_/default_runtime.py'
+    '../_base_/models/retinanet_r50_fpn.py',
+    '../_base_/datasets/coco_detection.py',
+    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
 
 pretrained = 'https://github.com/sail-sg/poolformer/releases/download/v1.0/poolformer_s12.pth.tar'  # noqa
 model = dict(
     backbone=dict(
+        _delete_=True,
         type='poolformer_s12_feat',
-        style='pytorch',
+        skip_first_out_norm=True,
         init_cfg=dict(type='Pretrained', checkpoint=pretrained)),
     neck=dict(
         type='FPN',

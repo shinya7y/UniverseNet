@@ -1,13 +1,14 @@
 _base_ = [
-    '_base_/models/mask_rcnn_r50_fpn.py', '_base_/datasets/coco_instance.py',
-    '_base_/schedules/schedule_1x.py', '_base_/default_runtime.py'
+    '../_base_/models/mask_rcnn_r50_fpn.py',
+    '../_base_/datasets/coco_instance.py',
+    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
 
 pretrained = 'https://github.com/sail-sg/poolformer/releases/download/v1.0/poolformer_s24.pth.tar'  # noqa
 model = dict(
     backbone=dict(
+        _delete_=True,
         type='poolformer_s24_feat',
-        style='pytorch',
         init_cfg=dict(type='Pretrained', checkpoint=pretrained)),
     neck=dict(
         type='FPN',

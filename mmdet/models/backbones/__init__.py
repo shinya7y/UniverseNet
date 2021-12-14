@@ -8,6 +8,9 @@ from .detectors_resnext import DetectoRS_ResNeXt
 from .hourglass import HourglassNet
 from .hrnet import HRNet
 from .mobilenet_v2 import MobileNetV2
+from .poolformer import (poolformer_m36_feat, poolformer_m48_feat,
+                         poolformer_s12_feat, poolformer_s24_feat,
+                         poolformer_s36_feat)
 from .pvt import PyramidVisionTransformer, PyramidVisionTransformerV2
 from .pvtv2_original import (pvt_v2_b0, pvt_v2_b1, pvt_v2_b2, pvt_v2_b2_li,
                              pvt_v2_b3, pvt_v2_b4, pvt_v2_b5)
@@ -35,4 +38,8 @@ __all__ += [
 __all__ += [
     'pvt_v2_b0', 'pvt_v2_b1', 'pvt_v2_b2', 'pvt_v2_b2_li', 'pvt_v2_b3',
     'pvt_v2_b4', 'pvt_v2_b5'
+]
+__all__ += [
+    'poolformer_s12_feat', 'poolformer_s24_feat', 'poolformer_s36_feat',
+    'poolformer_m36_feat', 'poolformer_m48_feat'
 ]
