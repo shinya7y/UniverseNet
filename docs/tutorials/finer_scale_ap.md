@@ -45,7 +45,7 @@ bash tools/dist_test.sh ${CONFIG_FILE} ${CHECKPOINT_FILE} ${GPU_NUM} --eval bbox
 
 ## Citation
 
-Please cite the following paper. We will update it at a later date.
+Please cite the following paper.
 https://arxiv.org/abs/2103.14027
 
 ```

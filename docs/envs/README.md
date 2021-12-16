@@ -1,5 +1,14 @@
 ## Testing environment
 
+### UniverseNet 21.12 (Dec. 2021)
+
+- Ubuntu 18.04
+- Python 3.9
+- PyTorch 1.9.0
+- CUDA 11.1
+- GCC 7.5
+- mmcv-full 1.3.13
+
 ### UniverseNet 21.09 (Sept. 2021)
 
 - Ubuntu 18.04
@@ -40,7 +49,7 @@
 
 More details can be found in the conda environment file in this directory.
 Installation via `conda env create --file conda_env.yaml` is not supported.
-Some modifications (e.g., CUDA version, cocoapi from github) will be needed to do that.
+Some modifications (e.g., CUDA version) will be needed to do that.
 
 Versions used for measuring inference time may differ.
 Some values are new and others are outdated.
