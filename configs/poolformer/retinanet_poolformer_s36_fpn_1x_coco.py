@@ -9,13 +9,13 @@ model = dict(
     backbone=dict(
         _delete_=True,
         type='poolformer_s36_feat',
-        skip_first_out_norm=True,
+        out_indices=(2, 4, 6),
         init_cfg=dict(type='Pretrained', checkpoint=pretrained)),
     neck=dict(
         type='FPN',
-        in_channels=[64, 128, 320, 512],
+        in_channels=[128, 320, 512],
         out_channels=256,
-        start_level=1,
+        start_level=0,
         add_extra_convs='on_input',
         num_outs=5))
 

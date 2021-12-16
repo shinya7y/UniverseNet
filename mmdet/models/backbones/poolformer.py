@@ -269,11 +269,11 @@ class PoolFormer(BaseModule):
                  drop_path_rate=0.,
                  use_layer_scale=True,
                  layer_scale_init_value=1e-5,
-                 skip_first_out_norm=False,
+                 out_indices=(0, 2, 4, 6),
                  init_cfg=None):
-        self.out_indices = (0, 2, 4, 6)
+        self.out_indices = out_indices
         assert len(layers) == len(embed_dims) == len(mlp_ratios) == len(
-            downsamples) == len(self.out_indices)
+            downsamples)
         super().__init__(init_cfg=init_cfg)
 
         self.patch_embed = PatchEmbed(
@@ -285,6 +285,7 @@ class PoolFormer(BaseModule):
 
         # set the main block in network
         network = []
+        embed_dims_including_down = []
         for i in range(len(layers)):
             stage = basic_blocks(
                 embed_dims[i],
@@ -299,6 +300,7 @@ class PoolFormer(BaseModule):
                 use_layer_scale=use_layer_scale,
                 layer_scale_init_value=layer_scale_init_value)
             network.append(stage)
+            embed_dims_including_down.append(embed_dims[i])
             if i >= len(layers) - 1:
                 break
             if downsamples[i] or embed_dims[i] != embed_dims[i + 1]:
@@ -310,19 +312,15 @@ class PoolFormer(BaseModule):
                         padding=down_pad,
                         in_chans=embed_dims[i],
                         embed_dim=embed_dims[i + 1]))
+                embed_dims_including_down.append(embed_dims[i + 1])
         self.network = ModuleList(network)
 
         # add a norm layer for each output
-        for i_emb, i_layer in enumerate(self.out_indices):
-            if i_emb == 0 and skip_first_out_norm:
-                # TODO: more elegant way
-                # For RetinaNet, `start_level=1`.
-                # The first norm layer will not be used.
-                layer = nn.Identity()
-            else:
-                layer = norm_layer(embed_dims[i_emb])
-            layer_name = f'norm{i_layer}'
-            self.add_module(layer_name, layer)
+        for idx, embed_dim in enumerate(embed_dims_including_down):
+            if idx in self.out_indices:
+                layer = norm_layer(embed_dim)
+                layer_name = f'norm{idx}'
+                self.add_module(layer_name, layer)
 
     @staticmethod
     def _init_weights(m):
