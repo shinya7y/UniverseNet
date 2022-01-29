@@ -219,28 +219,6 @@ def bbox_rescale(bboxes, scale_factor=1.0):
     return rescaled_bboxes
 
 
-def bbox_limit(bboxes, max_shape=None):
-    """Limit bounding box to max_shape.
-
-    Args:
-        bboxes (Tensor): Shape (n, 4).
-        max_shape (tuple[int, int]): Maximum bounds for boxes. specifies (H, W)
-
-    Returns:
-        Tensor: Limited bboxes.
-    """
-    x1 = bboxes[:, 0]
-    y1 = bboxes[:, 1]
-    x2 = bboxes[:, 2]
-    y2 = bboxes[:, 3]
-    if max_shape is not None:
-        x1 = x1.clamp(min=0, max=max_shape[1])
-        y1 = y1.clamp(min=0, max=max_shape[0])
-        x2 = x2.clamp(min=0, max=max_shape[1])
-        y2 = y2.clamp(min=0, max=max_shape[0])
-    return torch.stack([x1, y1, x2, y2], -1)
-
-
 def bbox_cxcywh_to_xyxy(bbox):
     """Convert bbox coordinates from (cx, cy, w, h) to (x1, y1, x2, y2).
 

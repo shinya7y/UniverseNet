@@ -32,7 +32,6 @@ from .scnet import SCNet
 from .single_stage import SingleStageDetector
 from .solo import SOLO
 from .sparse_rcnn import SparseRCNN
-from .tood import TOOD
 from .trident_faster_rcnn import TridentFasterRCNN
 from .two_stage import TwoStageDetector
 from .vfnet import VFNet
@@ -52,4 +51,4 @@ __all__ = [
     'TwoStagePanopticSegmentor', 'PanopticFPN', 'QueryInst'
 ]
 
-__all__ += ['BVR', 'TOOD']
+__all__ += ['BVR']

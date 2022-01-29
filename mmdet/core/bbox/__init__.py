@@ -10,9 +10,9 @@ from .samplers import (BaseSampler, CombinedSampler,
                        OHEMSampler, PseudoSampler, RandomSampler,
                        SamplingResult, ScoreHLRSampler)
 from .transforms import (bbox2distance, bbox2result, bbox2roi,
-                         bbox_cxcywh_to_xyxy, bbox_flip, bbox_limit,
-                         bbox_mapping, bbox_mapping_back, bbox_rescale,
-                         bbox_xyxy_to_cxcywh, distance2bbox, roi2bbox)
+                         bbox_cxcywh_to_xyxy, bbox_flip, bbox_mapping,
+                         bbox_mapping_back, bbox_rescale, bbox_xyxy_to_cxcywh,
+                         distance2bbox, roi2bbox)
 
 __all__ = [
     'bbox_overlaps', 'BboxOverlaps2D', 'BaseAssigner', 'MaxIoUAssigner',
@@ -26,5 +26,3 @@ __all__ = [
     'CenterRegionAssigner', 'bbox_rescale', 'bbox_cxcywh_to_xyxy',
     'bbox_xyxy_to_cxcywh', 'RegionAssigner'
 ]
-
-__all__ += ['bbox_limit']
