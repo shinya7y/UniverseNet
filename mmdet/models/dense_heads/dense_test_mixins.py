@@ -244,8 +244,12 @@ class BBoxTestMixin(object):
         for aug_idx, (x, img_meta) in enumerate(zip(feats, img_metas)):
             # only one image in the batch
             outs = self.forward(x)
-            bbox_inputs = outs + (img_meta, self.test_cfg, False, True)
-            det_bboxes, det_labels = self.get_bboxes(*bbox_inputs)[0]
+            det_bboxes, det_labels = self.get_bboxes(
+                *outs,
+                img_metas=img_meta,
+                cfg=self.test_cfg,
+                rescale=False,
+                with_nms=True)[0]
             min_scale, max_scale = scale_ranges[aug_idx // num_same_scale_tta]
             in_range_idxs = self.remove_boxes(det_bboxes, min_scale, max_scale)
             det_bboxes = det_bboxes[in_range_idxs, :]
