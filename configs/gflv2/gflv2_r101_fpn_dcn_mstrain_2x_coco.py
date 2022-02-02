@@ -38,7 +38,8 @@ model = dict(
             strides=[8, 16, 32, 64, 128]),
         loss_cls=dict(
             type='QualityFocalLoss',
-            use_sigmoid=False,
+            use_sigmoid=True,
+            activated=True,  # use probability instead of logit as input
             beta=2.0,
             loss_weight=1.0),
         loss_dfl=dict(type='DistributionFocalLoss', loss_weight=0.25),
@@ -47,6 +48,7 @@ model = dict(
         reg_topk=4,
         reg_channels=64,
         add_mean=True,
+        one_more_cls_out_channels=False,  # True to load official weights
         loss_bbox=dict(type='GIoULoss', loss_weight=2.0)),
     # training and testing settings
     train_cfg=dict(

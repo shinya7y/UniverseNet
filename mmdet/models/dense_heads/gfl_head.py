@@ -87,6 +87,9 @@ class GFLHead(AnchorHead):
         reg_channels (int): Number of hidden layer unit of DGQP. Default: 64.
         add_mean (bool): Whether to add mean to the input statistics of DGQP.
             Default: True.
+        one_more_cls_out_channels (bool): Whether to add one to
+            cls_out_channels for loading the official GFLv2 weights.
+            Default: False.
         avg_samples_to_int (bool): Whether to integerize average numbers of
             samples. True for compatibility with old MMDetection versions.
             False for following original ATSS. Default: False.
@@ -111,6 +114,7 @@ class GFLHead(AnchorHead):
                  reg_topk=4,
                  reg_channels=64,
                  add_mean=True,
+                 one_more_cls_out_channels=False,
                  avg_samples_to_int=False,
                  init_cfg=dict(
                      type='Normal',
@@ -133,6 +137,7 @@ class GFLHead(AnchorHead):
         self.total_dim = reg_topk
         if add_mean:
             self.total_dim += 1
+        self.one_more_cls_out_channels = one_more_cls_out_channels
         self.avg_samples_to_int = avg_samples_to_int
         super(GFLHead, self).__init__(
             num_classes,
@@ -177,6 +182,8 @@ class GFLHead(AnchorHead):
                     conv_cfg=self.conv_cfg,
                     norm_cfg=self.norm_cfg))
         assert self.num_anchors == 1, 'anchor free version'
+        if self.one_more_cls_out_channels:
+            self.cls_out_channels += 1
         self.gfl_cls = nn.Conv2d(
             self.feat_channels, self.cls_out_channels, 3, padding=1)
         self.gfl_reg = nn.Conv2d(
