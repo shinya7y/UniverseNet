@@ -152,18 +152,19 @@ class MlvlPointGenerator:
         shift_x = (torch.arange(0, feat_w, device=device) +
                    self.offset) * stride_w
         # keep featmap_size as Tensor instead of int, so that we
-        # can covert to ONNX correctly
+        # can convert to ONNX correctly
         shift_x = shift_x.to(dtype)
 
         shift_y = (torch.arange(0, feat_h, device=device) +
                    self.offset) * stride_h
         # keep featmap_size as Tensor instead of int, so that we
-        # can covert to ONNX correctly
+        # can convert to ONNX correctly
         shift_y = shift_y.to(dtype)
         shift_xx, shift_yy = self._meshgrid(shift_x, shift_y)
         if not with_stride:
             shifts = torch.stack([shift_xx, shift_yy], dim=-1)
         else:
+            # use `shape[0]` instead of `len(shift_xx)` for ONNX export
             stride_w = shift_xx.new_full((shift_xx.shape[0], ),
                                          stride_w).to(dtype)
             stride_h = shift_xx.new_full((shift_yy.shape[0], ),
