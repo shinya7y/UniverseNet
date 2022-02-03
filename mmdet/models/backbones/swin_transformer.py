@@ -545,7 +545,7 @@ class SwinTransformerOriginal(BaseModule):
 
     Args:
         pretrain_img_size (int): Input image size for training the pretrained
-            model, used in absolute postion embedding. Default 224.
+            model, used in absolute position embedding. Default 224.
         patch_size (int | tuple(int)): Patch size. Default: 4.
         in_chans (int): Number of input image channels. Default: 3.
         embed_dim (int): Number of linear projection output channels.

@@ -62,7 +62,7 @@ class KeypointHead(AnchorFreeHead):
         # construct shared layers
         self.shared_layers = self._init_layer_list(self.in_channels,
                                                    self.shared_stacked_convs)
-        # construct seperated heads
+        # construct separated heads
         self.keypoint_layers = nn.ModuleDict()
         self.keypoint_cls_heads = nn.ModuleDict()
         self.keypoint_offset_heads = nn.ModuleDict()
@@ -320,7 +320,7 @@ class KeypointHead(AnchorFreeHead):
             points, gt_points, gt_bboxes, gt_labels)
 
         avg_factor = reduce_mean(torch.sum(pos_masks))
-        # TODO: Maybe positive samples and negative samples shoud have
+        # TODO: Maybe positive samples and negative samples should have
         # different avg factors.
         loss_cls = self.loss_cls(
             keypoint_scores.sigmoid(), score_targets, avg_factor=avg_factor)

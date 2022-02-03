@@ -255,7 +255,7 @@ def multi_head_attention_forward(
             This is an additive mask
             (i.e. the values will be added to the attention layer).
         use_separate_proj_weight: the function accept the proj. weights for
-            query, key, and value in differnt forms. If false, in_proj_weight
+            query, key, and value in different forms. If false, in_proj_weight
             will be used, which is a combination of q_proj_weight,
             k_proj_weight, v_proj_weight.
         q_proj_weight, k_proj_weight, v_proj_weight, in_proj_bias: input
@@ -513,7 +513,7 @@ def multi_head_attention_forward(
             bsz * num_heads, tgt_len, src_len)
 
     assert attn_output_weights is not None, \
-        ('Please either specify relative postion relation '
+        ('Please either specify relative position relation '
          'or appearance relation.')
 
     if attn_mask is not None:

@@ -1,3 +1,5 @@
+import contextlib
+import io
 import itertools
 import logging
 import os.path as osp
@@ -506,7 +508,11 @@ class WaymoOpenDataset(CustomDataset):
                 cocoEval.params.maxDets = list(proposal_nums)
                 cocoEval.evaluate()
                 cocoEval.accumulate()
-                cocoEval.summarize()
+                # Save coco summarize print information to logger
+                redirect_string = io.StringIO()
+                with contextlib.redirect_stdout(redirect_string):
+                    cocoEval.summarize()
+                print_log('\n' + redirect_string.getvalue(), logger=logger)
                 metric_items = [
                     'AR@100', 'AR@300', 'AR@1000', 'AR_s@1000', 'AR_m@1000',
                     'AR_l@1000'
@@ -523,7 +529,11 @@ class WaymoOpenDataset(CustomDataset):
                     cocoEval.params.maxDets[-2] = 100
                 cocoEval.evaluate()
                 cocoEval.accumulate()
-                cocoEval.summarize()
+                # Save coco summarize print information to logger
+                redirect_string = io.StringIO()
+                with contextlib.redirect_stdout(redirect_string):
+                    cocoEval.summarize()
+                print_log('\n' + redirect_string.getvalue(), logger=logger)
                 if classwise:  # Compute per-category AP
                     # Compute per-category AP
                     # from https://github.com/facebookresearch/detectron2/
@@ -686,7 +696,11 @@ class WaymoOpenDataset(CustomDataset):
                 cocoEval.params.maxDets = list(proposal_nums)
                 cocoEval.evaluate()
                 cocoEval.accumulate()
-                cocoEval.summarize()
+                # Save coco summarize print information to logger
+                redirect_string = io.StringIO()
+                with contextlib.redirect_stdout(redirect_string):
+                    cocoEval.summarize()
+                print_log('\n' + redirect_string.getvalue(), logger=logger)
                 for key, val in cocoEval.stats.items():
                     if key.startswith('mAP'):
                         key = f'{metric}_{key}'
@@ -700,7 +714,11 @@ class WaymoOpenDataset(CustomDataset):
                     cocoEval.params.maxDets[-2] = 100
                 cocoEval.evaluate()
                 cocoEval.accumulate()
-                cocoEval.summarize()
+                # Save coco summarize print information to logger
+                redirect_string = io.StringIO()
+                with contextlib.redirect_stdout(redirect_string):
+                    cocoEval.summarize()
+                print_log('\n' + redirect_string.getvalue(), logger=logger)
                 for key, val in cocoEval.stats.items():
                     if key.startswith('mAP'):
                         key = f'{metric}_{key}'

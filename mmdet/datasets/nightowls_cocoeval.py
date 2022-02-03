@@ -432,7 +432,7 @@ class COCOeval:
     def summarize(self, id_setup, res_file=None):
         """Compute and display summary metrics for evaluation results.
 
-        Note this functin can *only* be applied on the default parameter
+        Note this function can *only* be applied on the default parameter
         setting
         """
 

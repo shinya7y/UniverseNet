@@ -678,7 +678,11 @@ class CocoDataset(CustomDataset):
                 cocoEval.params.useCats = 0
                 cocoEval.evaluate()
                 cocoEval.accumulate()
-                cocoEval.summarize()
+                # Save coco summarize print information to logger
+                redirect_string = io.StringIO()
+                with contextlib.redirect_stdout(redirect_string):
+                    cocoEval.summarize()
+                print_log('\n' + redirect_string.getvalue(), logger=logger)
                 for key, val in cocoEval.stats.items():
                     if key.startswith('mAP'):
                         key = f'{metric}_{key}'
@@ -686,7 +690,11 @@ class CocoDataset(CustomDataset):
             else:
                 cocoEval.evaluate()
                 cocoEval.accumulate()
-                cocoEval.summarize()
+                # Save coco summarize print information to logger
+                redirect_string = io.StringIO()
+                with contextlib.redirect_stdout(redirect_string):
+                    cocoEval.summarize()
+                print_log('\n' + redirect_string.getvalue(), logger=logger)
                 for key, val in cocoEval.stats.items():
                     if key.startswith('mAP'):
                         key = f'{metric}_{key}'

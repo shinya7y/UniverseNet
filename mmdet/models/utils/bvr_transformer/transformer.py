@@ -107,7 +107,7 @@ class SimpleBVR_Transformer(nn.Module):
             assert isinstance(scale_terms, list) and (len(scale_terms)
                                                       == len(query_features))
         # For each level, each kind of keypoints,
-        # we oly compute embedding basis(400x400) once.
+        # we only compute embedding basis(400x400) once.
         if self.with_relative_positional_encoding:
             # precompute positional embedding if approximated
             if isinstance(self.relative_positional_encoding, nn.ModuleList):
