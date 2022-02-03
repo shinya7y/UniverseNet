@@ -10,7 +10,7 @@ https://arxiv.org/abs/2103.14027
 ## Changelog
 
 - 21.12 (Dec. 2021):
-  - Support [finer scale-wise AP metrics](docs/tutorials/finer_scale_ap.md)
+  - Support [finer scale-wise AP metrics](docs/en/tutorials/finer_scale_ap.md)
   - Add codes for TOOD, ConvMLP, PoolFormer
   - Update codes for PyTorch 1.9.0, mmdet 2.17.0, mmcv-full 1.3.13
 - 21.09 (Sept. 2021):
@@ -68,12 +68,12 @@ Benchmarks and datasets:
 
 ### Installation
 
-See [get_started.md](docs/get_started.md).
+See [get_started.md](docs/en/get_started.md).
 
 ### Basic Usage
 
 See [MMDetection documents](#getting-started).
-Especially, see [this document](docs/1_exist_data_model.md) to evaluate and train existing models on COCO.
+Especially, see [this document](docs/en/1_exist_data_model.md) to evaluate and train existing models on COCO.
 
 ### Examples
 

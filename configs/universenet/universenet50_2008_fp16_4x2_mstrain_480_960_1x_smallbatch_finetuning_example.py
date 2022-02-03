@@ -1,6 +1,6 @@
 # This config shows an example for small-batch fine-tuning from a COCO model.
 # Please see also the MMDetection tutorial below.
-# https://github.com/shinya7y/UniverseNet/blob/master/docs/tutorials/finetune.md
+# https://github.com/shinya7y/UniverseNet/blob/master/docs/en/tutorials/finetune.md
 
 _base_ = [
     '../universenet/models/universenet50_2008.py',
