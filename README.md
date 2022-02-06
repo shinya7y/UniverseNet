@@ -9,6 +9,8 @@ https://arxiv.org/abs/2103.14027
 
 ## Changelog
 
+- recent:
+  - Update codes for mmdet 2.20.0, mmcv-full 1.4.4
 - 21.12 (Dec. 2021):
   - Support [finer scale-wise AP metrics](docs/en/tutorials/finer_scale_ap.md)
   - Add codes for TOOD, ConvMLP, PoolFormer
@@ -46,7 +48,7 @@ Methods and architectures:
 - [x] [PoolFormer (arXiv 2021)](configs/poolformer/)
 - [x] [ConvMLP (arXiv 2021)](configs/convmlp/)
 - [x] [CBNetV2 (arXiv 2021)](configs/cbnet/)
-- [x] [TOOD (ICCV 2021)](configs/tood/)
+- [x] ~~TOOD (ICCV 2021)~~ supported
 - [x] [PVTv2 (arXiv 2021)](configs/pvtv2_original/) stronger models
 - [x] ~~PVT (ICCV 2021)~~ supported
 - [x] [Swin Transformer (ICCV 2021)](configs/swin_original/) stronger models
@@ -119,7 +121,6 @@ Plsease check [NOTICE](NOTICE) for exceptions.
 Some codes are modified from the repositories of
 [PoolFormer](https://github.com/sail-sg/poolformer),
 [ConvMLP](https://github.com/SHI-Labs/Convolutional-MLPs),
-[TOOD](https://github.com/fcjian/TOOD),
 [Swin Transformer](https://github.com/SwinTransformer/Swin-Transformer-Object-Detection),
 [RelationNet++](https://github.com/microsoft/RelationNet2),
 [SEPC](https://github.com/jshilong/SEPC),
