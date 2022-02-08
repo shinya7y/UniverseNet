@@ -56,6 +56,8 @@ class CustomDataset(Dataset):
 
     CLASSES = None
 
+    PALETTE = None
+
     def __init__(self,
                  ann_file,
                  pipeline,
