@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument(
         '--palette',
         default='coco',
-        choices=['coco', 'voc', 'citys', 'random'],
+        choices=['coco', 'voc', 'citys', 'wod', 'random'],
         help='Color palette used for visualization')
     parser.add_argument(
         '--score-thr', type=float, default=0.3, help='bbox score threshold')

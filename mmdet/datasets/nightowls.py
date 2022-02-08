@@ -21,6 +21,8 @@ class NightOwlsDataset(CustomDataset):
 
     CLASSES = ('pedestrian', 'bicycledriver', 'motorbikedriver')
 
+    PALETTE = [(0, 255, 0), (0, 0, 255), (255, 0, 0)]
+
     def load_annotations(self, ann_file):
         """Load annotation from COCO style annotation file.
 

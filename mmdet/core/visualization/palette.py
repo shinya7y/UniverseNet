@@ -41,6 +41,8 @@ def get_palette(palette, num_classes=None):
         return mmdet.datasets.VOCDataset.PALETTE
     elif palette == 'citys':
         return mmdet.datasets.CityscapesDataset.PALETTE
+    elif palette == 'wod':
+        return mmdet.datasets.WaymoOpenDataset.PALETTE
     elif palette == 'random' or palette is None:
         assert isinstance(num_classes, int)
         state = np.random.get_state()

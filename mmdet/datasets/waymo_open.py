@@ -35,6 +35,8 @@ class WaymoOpenDataset(CustomDataset):
         'TYPE_CYCLIST': 4
     }
 
+    PALETTE = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+
     def load_annotations(self, ann_file):
         """Load annotation from COCO style annotation file.
 

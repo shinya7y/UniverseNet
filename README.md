@@ -10,7 +10,7 @@ https://arxiv.org/abs/2103.14027
 ## Changelog
 
 - recent:
-  - Update codes for mmdet 2.20.0, mmcv-full 1.4.4
+  - Update codes for mmdet 2.21.0, mmcv-full 1.4.4
 - 21.12 (Dec. 2021):
   - Support [finer scale-wise AP metrics](docs/en/tutorials/finer_scale_ap.md)
   - Add codes for TOOD, ConvMLP, PoolFormer

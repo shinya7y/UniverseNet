@@ -9,7 +9,8 @@ import pytest
 import torch
 
 from mmdet.core import visualization as vis
-from mmdet.datasets import CityscapesDataset, CocoDataset, VOCDataset
+from mmdet.datasets import (CityscapesDataset, CocoDataset, VOCDataset,
+                            WaymoOpenDataset)
 
 
 def test_color():
@@ -162,6 +163,9 @@ def test_palette():
         assert color == color_
     palette = vis.get_palette('citys')
     for color, color_ in zip(palette, CityscapesDataset.PALETTE):
+        assert color == color_
+    palette = vis.get_palette('wod')
+    for color, color_ in zip(palette, WaymoOpenDataset.PALETTE):
         assert color == color_
 
     # test random
