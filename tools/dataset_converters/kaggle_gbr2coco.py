@@ -8,23 +8,34 @@ from ast import literal_eval
 import pandas as pd
 
 
-def convert_to_coco_dict(df):
+def convert_to_coco_dict(df, limit_wh=True):
     categories = [{'id': 1, 'name': 'cots', 'supercategory': 'animal'}]
+    image_w = 1280
+    image_h = 720
 
     annotation_id = 0
     images = []
     annotations = []
-    for image_index, row in df.iterrows():
+    for _, row in df.iterrows():
         images.append({
-            'id': image_index,
-            'width': 1280,
-            'height': 720,
-            'file_name': f"{row['image_id']}.jpg",
+            'id': row['image_id_int'],
+            'width': image_w,
+            'height': image_h,
+            'file_name': row['image_file_name'],
         })
         for bbox in row['annotations']:
+            if limit_wh:
+                orig_width = bbox['width']
+                orig_height = bbox['height']
+                bbox['width'] = min(bbox['width'], image_w - 1 - bbox['x'])
+                bbox['height'] = min(bbox['height'], image_h - 1 - bbox['y'])
+                if orig_width != bbox['width']:
+                    print(f"Change box width {orig_width}->{bbox['width']}")
+                if orig_height != bbox['height']:
+                    print(f"Change box height {orig_height}->{bbox['height']}")
             annotations.append({
                 'id': annotation_id,
-                'image_id': image_index,
+                'image_id': row['image_id_int'],
                 'category_id': 1,
                 'segmentation': None,
                 'area': bbox['width'] * bbox['height'],
@@ -52,8 +63,9 @@ def parse_args():
     parser.add_argument(
         '--label_dir',
         default='/kaggle/data/tensorflow-great-barrier-reef/annotations')
-    parser.add_argument('--label_train', default='instances_train2021.json')
-    parser.add_argument('--label_val', default='instances_val2021.json')
+    parser.add_argument('--train_json', default=None)
+    parser.add_argument('--val_json', default=None)
+    parser.add_argument('--val_video_id', default=2, type=int)
     parser.add_argument('--num_samples', default=None, type=int)
     parser.add_argument('--json_indent', default=None, type=int)
     args = parser.parse_args()
@@ -64,8 +76,14 @@ def main():
     args = parse_args()
 
     os.makedirs(args.label_dir, exist_ok=True)
-    train_json_path = os.path.join(args.label_dir, args.label_train)
-    val_json_path = os.path.join(args.label_dir, args.label_val)
+    prefix = 'instances_' + str(
+        args.num_samples if args.num_samples else 'full')
+    if args.train_json is None:
+        args.train_json = f'{prefix}_not_video_{args.val_video_id}.json'
+    if args.val_json is None:
+        args.val_json = f'{prefix}_video_{args.val_video_id}.json'
+    train_json_path = os.path.join(args.label_dir, args.train_json)
+    val_json_path = os.path.join(args.label_dir, args.val_json)
 
     df = pd.read_csv(args.train_csv)
     with_anno = df[df['annotations'] != '[]']
@@ -80,16 +98,20 @@ def main():
         print('undersampling images without annotation')
         print('num_samples', args.num_samples)
         print('num_empty_gt', num_empty_gt)
-        if num_empty_gt < 0:
+        if num_empty_gt <= 1:
             raise NotImplementedError
-        without_anno = without_anno.sample(num_empty_gt)
+        equally_spaced_indices = [
+            int((num_img_without_anno - 1) * i / (num_empty_gt - 1))
+            for i in range(num_empty_gt)
+        ]
+        without_anno = without_anno.iloc[equally_spaced_indices]
     df = pd.concat([with_anno, without_anno]).reset_index(drop=True)
 
-    df['is_val_data'] = df['video_id'] == 2
+    df['is_val_data'] = df['video_id'] == args.val_video_id
     df['annotations'] = df['annotations'].apply(literal_eval)
-    df['path'] = df.apply(
-        lambda row:
-        f"{args.image_dir}/video_{row['video_id']}/{row['video_frame']}.jpg",
+    df['image_id_int'] = df['video_id'] * 1000000 + df['video_frame']
+    df['image_file_name'] = df.apply(
+        lambda row: f"video_{row['video_id']}/{row['video_frame']}.jpg",
         axis=1)
 
     print(df.tail())
