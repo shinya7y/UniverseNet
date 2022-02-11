@@ -432,6 +432,8 @@ class CocoDataset(CustomDataset):
         if iou_thrs is None:
             iou_thrs = np.linspace(
                 .5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
+        elif isinstance(iou_thrs, (list, tuple)):
+            iou_thrs = np.array(iou_thrs)
         if metric_items is not None:
             if not isinstance(metric_items, list):
                 metric_items = [metric_items]
@@ -639,6 +641,8 @@ class CocoDataset(CustomDataset):
         if iou_thrs is None:
             iou_thrs = np.linspace(
                 .5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
+        elif isinstance(iou_thrs, (list, tuple)):
+            iou_thrs = np.array(iou_thrs)
 
         result_files, tmp_dir = self.format_results(results, jsonfile_prefix)
 
