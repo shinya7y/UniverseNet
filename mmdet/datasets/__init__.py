@@ -7,6 +7,7 @@ from .custom import CustomDataset
 from .dataset_wrappers import (ClassBalancedDataset, ConcatDataset,
                                MultiImageMixDataset, RepeatDataset)
 from .deepfashion import DeepFashionDataset
+from .kaggle_gbr_cots import GBRCOTSDataset
 from .lvis import LVISDataset, LVISV1Dataset, LVISV05Dataset
 from .nightowls import NightOwlsDataset
 from .samplers import DistributedGroupSampler, DistributedSampler, GroupSampler
@@ -27,4 +28,4 @@ __all__ = [
     'NumClassCheckHook', 'CocoPanopticDataset', 'MultiImageMixDataset'
 ]
 
-__all__ += ['WaymoOpenDataset', 'NightOwlsDataset']
+__all__ += ['WaymoOpenDataset', 'NightOwlsDataset', 'GBRCOTSDataset']
