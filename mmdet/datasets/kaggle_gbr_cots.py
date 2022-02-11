@@ -103,26 +103,31 @@ class GBRCOTSDataset(CocoDataset):
 
         return gt_bboxes_list
 
-    def evaluate_mean_f2(self, results, iou_thrs=[0.5], logger=None):
+    def evaluate_mean_f2(self,
+                         results,
+                         iou_thrs=[0.5],
+                         score_thr=0.,
+                         logger=None):
         """Evaluate mean F2-score."""
         num_classes_of_results = len(results[0])
         if num_classes_of_results != 1:
             raise NotImplementedError
 
         gt_bboxes_list = self.prepare_gt_bboxes_list()
-        pred_bboxes_list = [result[0] for result in results]  # cots class only
+        cots_results = [result[0] for result in results]  # cots class only
+        pred_bboxes_list = [det[det[:, 4] > score_thr] for det in cots_results]
 
         f2_scores = []
         for iou_thr in iou_thrs:
             f2_score = calc_f2_score(
                 gt_bboxes_list, pred_bboxes_list, iou_thr=iou_thr)
             f2_scores.append(f2_score)
-            iou_str = f'f2 @[ IoU={iou_thr:.2f}      ]'
-            print_log(f'{iou_str} = {f2_score:.4f}', logger=logger)
+            log_msg = f'f2 @[ IoU={iou_thr:.2f}      | score>{score_thr:.2f} ] = {f2_score:.4f}'  # noqa
+            print_log(log_msg, logger=logger)
 
         mean_f2_score = np.mean(f2_scores)
-        iou_str = f'f2 @[ IoU={iou_thrs[0]:.2f}:{iou_thrs[-1]:.2f} ]'
-        print_log(f'{iou_str} = {mean_f2_score:.4f}', logger=logger)
+        log_msg = f'f2 @[ IoU={iou_thrs[0]:.2f}:{iou_thrs[-1]:.2f} | score>{score_thr:.2f} ] = {mean_f2_score:.4f}'  # noqa
+        print_log(log_msg, logger=logger)
 
         return mean_f2_score
 
@@ -134,11 +139,15 @@ class GBRCOTSDataset(CocoDataset):
                  classwise=False,
                  proposal_nums=(1, 10, 100),
                  iou_thrs=None,
+                 score_thrs=None,
                  metric_items=None):
         """Evaluate COCO metrics and mean F2-score."""
         if iou_thrs is None:
             iou_thrs = np.linspace(
-                0.3, 0.8, int(np.round((0.8 - 0.3) / 0.05)) + 1, endpoint=True)
+                .3, .8, int(np.round((.8 - .3) / .05)) + 1, endpoint=True)
+        if score_thrs is None:
+            score_thrs = np.linspace(
+                .05, .95, int(np.round((.95 - .05) / .05)) + 1, endpoint=True)
 
         # evaluate COCO metrics
         eval_results = super().evaluate(
@@ -152,8 +161,9 @@ class GBRCOTSDataset(CocoDataset):
             metric_items=metric_items)
 
         # evaluate mean F2-score
-        mean_f2 = self.evaluate_mean_f2(
-            results, iou_thrs=iou_thrs, logger=logger)
-        eval_results['mean_f2'] = float(f'{mean_f2:.4f}')
+        for score_thr in score_thrs:
+            mean_f2 = self.evaluate_mean_f2(
+                results, iou_thrs=iou_thrs, score_thr=score_thr, logger=logger)
+            eval_results[f'mean_f2_{score_thr:.2f}'] = float(f'{mean_f2:.4f}')
 
         return eval_results
