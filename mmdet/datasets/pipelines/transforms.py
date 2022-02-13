@@ -665,6 +665,7 @@ class Pad:
             results[key] = mmcv.impad(
                 results[key], shape=results['pad_shape'][:2], pad_val=pad_val)
 
+    # @imwrite_denormalized_debug_img
     def __call__(self, results):
         """Call function to pad images, masks, semantic segmentation maps.
 
