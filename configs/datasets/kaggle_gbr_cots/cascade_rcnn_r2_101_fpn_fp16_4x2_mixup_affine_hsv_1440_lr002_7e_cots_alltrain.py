@@ -1,6 +1,6 @@
 _base_ = [
     '_cascade_rcnn_r50_fpn_1class.py',
-    '_kaggle_gbr_cots_alltrain_mixup_affine_960_1920_hsv.py',
+    '_kaggle_gbr_cots_alltrain_mixup_affine_hsv_1440.py',
     '../../_base_/schedules/schedule_7e.py', '../../_base_/default_runtime.py'
 ]
 
