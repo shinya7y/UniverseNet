@@ -24,6 +24,7 @@ from .guided_anchor_head import FeatureAdaption, GuidedAnchorHead
 from .keypoint_head import KeypointHead
 from .lad_head import LADHead
 from .ld_head import LDHead
+from .maskformer_head import MaskFormerHead
 from .nasfcos_head import NASFCOSHead
 from .paa_head import PAAHead
 from .pisa_retinanet_head import PISARetinaHead
@@ -53,7 +54,7 @@ __all__ = [
     'CascadeRPNHead', 'EmbeddingRPNHead', 'LDHead', 'CascadeRPNHead',
     'AutoAssignHead', 'DETRHead', 'YOLOFHead', 'DeformableDETRHead',
     'SOLOHead', 'DecoupledSOLOHead', 'CenterNetHead', 'YOLOXHead',
-    'DecoupledSOLOLightHead', 'LADHead', 'TOODHead'
+    'DecoupledSOLOLightHead', 'LADHead', 'TOODHead', 'MaskFormerHead'
 ]
 
 __all__ += [
