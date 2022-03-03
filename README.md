@@ -10,7 +10,8 @@ https://arxiv.org/abs/2103.14027
 ## Changelog
 
 - recent:
-  - Update codes for mmdet 2.21.0, mmcv-full 1.4.4
+  - Add GBR COTS dataset
+  - Update codes for mmdet 2.22.0, mmcv-full 1.4.4
 - 21.12 (Dec. 2021):
   - Support [finer scale-wise AP metrics](docs/en/tutorials/finer_scale_ap.md)
   - Add codes for TOOD, ConvMLP, PoolFormer
@@ -65,6 +66,7 @@ Benchmarks and datasets:
 - [x] [Waymo Open Dataset (CVPR 2020)](configs/waymo_open/)
 - [x] [Manga109-s dataset (MTAP 2017, IEEE MultiMedia 2020)](configs/manga109/)
 - [x] [NightOwls dataset (ACCV 2018)](configs/nightowls/)
+- [x] [GBR COTS dataset (arXiv 2021)](configs/datasets/kaggle_gbr_cots/)
 
 ## Usage
 
