@@ -10,7 +10,7 @@ https://arxiv.org/abs/2103.14027
 ## Changelog
 
 - recent:
-  - Add GBR COTS dataset
+  - Add FocalNet, GBR COTS dataset
   - Update codes for mmdet 2.22.0, mmcv-full 1.4.4
 - 21.12 (Dec. 2021):
   - Support [finer scale-wise AP metrics](docs/en/tutorials/finer_scale_ap.md)
@@ -46,6 +46,7 @@ https://arxiv.org/abs/2103.14027
 Methods and architectures:
 
 - [x] [UniverseNets (arXiv 2021)](configs/universenet/)
+- [x] [FocalNet (arXiv 2022)](configs/focalnet/)
 - [x] [PoolFormer (arXiv 2021)](configs/poolformer/)
 - [x] [ConvMLP (arXiv 2021)](configs/convmlp/)
 - [x] [CBNetV2 (arXiv 2021)](configs/cbnet/)
@@ -121,6 +122,7 @@ Plsease check [NOTICE](NOTICE) for exceptions.
 ## Acknowledgements
 
 Some codes are modified from the repositories of
+[FocalNet](https://github.com/microsoft/FocalNet),
 [PoolFormer](https://github.com/sail-sg/poolformer),
 [ConvMLP](https://github.com/SHI-Labs/Convolutional-MLPs),
 [Swin Transformer](https://github.com/SwinTransformer/Swin-Transformer-Object-Detection),

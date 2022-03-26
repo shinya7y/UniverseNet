@@ -16,6 +16,8 @@ Copyright (c) Microsoft Corporation.
 - mmdet/models/utils/bvr_transformer
 - mmdet/models/utils/bvr_utils.py
 - mmdet/models/utils/corner_pool.py
+- configs/focalnet
+- mmdet/models/backbones/focalnet.py
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
