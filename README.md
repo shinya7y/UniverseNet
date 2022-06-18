@@ -11,7 +11,7 @@ https://arxiv.org/abs/2103.14027
 
 - recent:
   - Add FocalNet, GBR COTS dataset
-  - Update codes for mmdet 2.22.0, mmcv-full 1.4.4
+  - Update codes for mmdet 2.25.0, mmcv-full 1.4.4
 - 21.12 (Dec. 2021):
   - Support [finer scale-wise AP metrics](docs/en/tutorials/finer_scale_ap.md)
   - Add codes for TOOD, ConvMLP, PoolFormer
@@ -135,7 +135,6 @@ and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
 When merging, please note that there are some minor differences from the above repositories and [the original MMDetection repository](https://github.com/open-mmlab/mmdetection).
 
 <br><br>
-
 
 <div align="center">
   <img src="resources/mmdet-logo.png" width="600"/>

@@ -34,7 +34,6 @@ Please consider using the [mmdet's configs](../swin/) when you train new models.
 |  Swin-S  | ImageNet-1K |   3x    |  51.9  |  45.0   |  107M   | 838G  | [config](cascade_mask_rcnn_swin_small_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py) |  [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_small_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/17Vyufk85vyocxrBT1AbavQ)  |  [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_small_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1Sv9-gP1Qpl6SGOF6DBhUbw)  |
 |  Swin-B  | ImageNet-1K |   3x    |  51.9  |  45.0   |  145M   | 982G  | [config](cascade_mask_rcnn_swin_base_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py)  |  [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_base_patch4_window7.log.json)/[baidu](https://pan.baidu.com/s/1UZAR39g-0kE_aGrINwfVHg)   |  [github](https://github.com/SwinTransformer/storage/releases/download/v1.0.2/cascade_mask_rcnn_swin_base_patch4_window7.pth)/[baidu](https://pan.baidu.com/s/1tHoC9PMVnldQUAfcF6FT3A)   |
 
-
 <!--
 
 ### RepPoints V2
@@ -59,6 +58,7 @@ Please consider using the [mmdet's configs](../swin/) when you train new models.
 ## Usage
 
 ### Inference
+
 ```
 # single-gpu testing
 python tools/test.py <CONFIG_FILE> <DET_CHECKPOINT_FILE> --eval bbox segm
@@ -70,6 +70,7 @@ tools/dist_test.sh <CONFIG_FILE> <DET_CHECKPOINT_FILE> <GPU_NUM> --eval bbox seg
 ### Training
 
 To train a detector with pre-trained models, run:
+
 ```
 # single-gpu training
 python tools/train.py <CONFIG_FILE> --cfg-options model.pretrained=<PRETRAIN_MODEL> [model.backbone.use_checkpoint=True] [other optional arguments]
@@ -77,13 +78,14 @@ python tools/train.py <CONFIG_FILE> --cfg-options model.pretrained=<PRETRAIN_MOD
 # multi-gpu training
 tools/dist_train.sh <CONFIG_FILE> <GPU_NUM> --cfg-options model.pretrained=<PRETRAIN_MODEL> [model.backbone.use_checkpoint=True] [other optional arguments]
 ```
+
 For example, to train a Cascade Mask R-CNN model with a `Swin-T` backbone and 8 gpus, run:
+
 ```
 tools/dist_train.sh configs/swin_original/cascade_mask_rcnn_swin_tiny_patch4_window7_mstrain_480-800_giou_4conv1f_adamw_3x_coco.py 8 --cfg-options model.pretrained=<PRETRAIN_MODEL>
 ```
 
 **Note:** `use_checkpoint` is used to save GPU memory. Please refer to [this page](https://pytorch.org/docs/stable/checkpoint.html) for more details.
-
 
 ### Mixed Precision Training
 

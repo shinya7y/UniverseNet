@@ -18,11 +18,11 @@ For details see [GFocalV2](https://arxiv.org/abs/2011.12885).
 | X-101-dcn  |   2x    |         Yes          |  48.8  |      10.7      | [model](https://drive.google.com/file/d/1AHDVQoclYPSP0Ync2a5FCsr_rhq2QdMH/view?usp=sharing) |
 | R2-101-dcn |   2x    |         Yes          |  49.9  |      10.9      | [model](https://drive.google.com/file/d/1sAXfYLXIxZgMrC44LBqDgfYImThZ_kud/view?usp=sharing) |
 
-[1] *The reported numbers here are from new experimental trials (in the cleaned repo), which may be slightly different from the original paper.* \
-[2] *Note that the 1x performance may be slightly unstable due to insufficient training. In practice, the 2x results are considerably stable between multiple runs.* \
-[3] *All results are obtained with a single model and without any test time data augmentation such as multi-scale, flipping and etc..* \
-[4] *`dcn` denotes deformable convolutional networks.* \
-[5] *FPS is tested with a single GeForce RTX 2080Ti GPU, using a batch size of 1.*
+\[1\] *The reported numbers here are from new experimental trials (in the cleaned repo), which may be slightly different from the original paper.* \
+\[2\] *Note that the 1x performance may be slightly unstable due to insufficient training. In practice, the 2x results are considerably stable between multiple runs.* \
+\[3\] *All results are obtained with a single model and without any test time data augmentation such as multi-scale, flipping and etc..* \
+\[4\] *`dcn` denotes deformable convolutional networks.* \
+\[5\] *FPS is tested with a single GeForce RTX 2080Ti GPU, using a batch size of 1.*
 
 ## Citation
 

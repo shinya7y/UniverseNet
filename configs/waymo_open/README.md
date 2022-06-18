@@ -12,9 +12,9 @@ Please see [WaymoCOCO](https://github.com/shinya7y/WaymoCOCO) (Waymo Open Datase
 The converter supports to extract 1/10 size dataset based on the ones place of frame index.
 For example, *f0* (frame 0) subsets are extracted from frames 0, 10, 20, ..., 190.
 Using 1/10 size subsets is useful when you would like to:
+
 - do much trial and error before full training.
 - evaluate the generalization of your method on the second dataset other than COCO.
-
 
 ## Results
 
@@ -58,7 +58,6 @@ Using 1/10 size subsets is useful when you would like to:
 - All models were trained and evaluated using fp16 (mixed precision).
 - Each model was fine-tuned from a corresponding COCO pre-trained model.
 
-
 ### full train, f0val
 
 |   Method    | Backbone |  Lr   | Lr schd | soft-NMS |     Test scale      |  CAP  |  KAP   |
@@ -74,7 +73,6 @@ Using 1/10 size subsets is useful when you would like to:
 - 7e: 7 epochs training, lr decay at 6 epoch.
 - Higher learning rates and/or longer training will be preferable for better AP.
 - A machine with 208-416 GB of CPU memory is needed for full training as of MMDetection v2.0.
-
 
 ## Training memory and inference time
 
@@ -92,14 +90,12 @@ Using 1/10 size subsets is useful when you would like to:
 - samples_per_gpu=1 for measuring inference time on V100.
 - All models were trained and evaluated using fp16 (mixed precision).
 
-
 ## Notes
 
 - Models trained on the Waymo Open Dataset cannot be published due to [the dataset license](https://waymo.com/open/terms/).
   If you need pre-trained UniverseNet models, please send a evidence for Waymo Open Dataset registration to shinya7y via [Twitter](https://twitter.com/shinya7y), [LinkedIn](https://www.linkedin.com/in/yosukeshinya), or other media.
 - In the tables above, test scales are shown by shorter side pixels. Longer side pixels are 1.5x.
   The number of maximum total pixels of (1248, 832) for Waymo Open is almost the same as that of (1333, 800) for COCO.
-
 
 ## Citations
 

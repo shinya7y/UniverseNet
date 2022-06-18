@@ -46,7 +46,11 @@ mim install mmcv-full
 
 **Step 1.** Install MMDetection.
 
+<!--
+
 Case a: If you develop and run mmdet directly, install it from source:
+
+-->
 
 ```shell
 git clone https://github.com/shinya7y/UniverseNet.git
@@ -57,11 +61,15 @@ pip install -v -e .
 # thus any local modifications made to the code will take effect without reinstallation.
 ```
 
+<!--
+
 Case b: If you use mmdet as a dependency or third-party package, install it with pip:
 
 ```shell
 pip install mmdet
 ```
+
+-->
 
 ## Verify the installation
 
@@ -77,13 +85,19 @@ The downloading will take several seconds or more, depending on your network env
 
 **Step 2.** Verify the inference demo.
 
+<!--
+
 Option (a). If you install mmdetection from source, just run the following command.
+
+-->
 
 ```shell
 python demo/image_demo.py demo/demo.jpg yolov3_mobilenetv2_320_300e_coco.py yolov3_mobilenetv2_320_300e_coco_20210719_215349-d18dff72.pth --device cpu --out-file result.jpg
 ```
 
 You will see a new image `result.jpg` on your current folder, where bounding boxes are plotted on cars, benches, etc.
+
+<!--
 
 Option (b). If you install mmdetection with pip, open you python interpreter and copy&paste the following codes.
 
@@ -97,6 +111,8 @@ inference_detector(model, 'demo/cat.jpg')
 ```
 
 You will see a list of arrays printed, indicating the detected bounding boxes.
+
+-->
 
 ## Customize Installation
 
@@ -205,4 +221,4 @@ docker run --gpus all --shm-size=8g -it -v {DATA_DIR}:/mmdetection/data mmdetect
 ## Trouble shooting
 
 If you have some issues during the installation, please first view the [FAQ](faq.md) page.
-You may [open an issue](https://github.com/open-mmlab/mmdetection/issues/new/choose) on GitHub if no solution is found.
+You may open an issue on GitHub if no solution is found.

@@ -14,8 +14,8 @@ from mmcv.cnn.bricks import DropPath
 from mmcv.cnn.utils.weight_init import trunc_normal_
 from mmcv.runner import BaseModule
 from mmcv.utils import to_2tuple
-from mmcv_custom import load_checkpoint
 
+from mmcv_custom import load_checkpoint
 from mmdet.utils import get_root_logger
 from ..builder import BACKBONES
 

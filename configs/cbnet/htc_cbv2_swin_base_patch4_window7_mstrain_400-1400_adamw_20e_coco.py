@@ -85,7 +85,7 @@ data = dict(
 optimizer = dict(
     _delete_=True,
     type='AdamW',
-    lr=0.0001 * (samples_per_gpu / 2),
+    lr=0.0001 / 2,
     betas=(0.9, 0.999),
     weight_decay=0.05,
     paramwise_cfg=dict(
@@ -96,3 +96,8 @@ optimizer = dict(
         }))
 
 fp16 = dict(loss_scale=dict(init_scale=512))
+
+# NOTE: `auto_scale_lr` is for automatically scaling LR,
+# USER SHOULD NOT CHANGE ITS VALUES.
+# base_batch_size = (8 GPUs) x (1 samples per GPU)
+auto_scale_lr = dict(base_batch_size=8)

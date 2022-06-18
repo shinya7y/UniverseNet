@@ -27,3 +27,8 @@ evaluation = dict(interval=7)
 custom_hooks = [
     dict(type='YOLOXModeSwitchHook', num_last_epochs=0, priority=48)
 ]
+
+# NOTE: `auto_scale_lr` is for automatically scaling LR,
+# USER SHOULD NOT CHANGE ITS VALUES.
+# base_batch_size = (4 GPUs) x (2 samples per GPU)
+auto_scale_lr = dict(base_batch_size=8)

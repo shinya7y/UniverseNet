@@ -62,3 +62,8 @@ fp16 = dict(loss_scale=512.)
 
 # Please set `load_from` to use a COCO pre-trained model.
 load_from = 'https://github.com/shinya7y/UniverseNet/releases/download/20.08/universenet50_2008_fp16_4x4_mstrain_480_960_2x_coco_20200815_epoch_24-81356447.pth'  # noqa
+
+# NOTE: `auto_scale_lr` is for automatically scaling LR,
+# USER SHOULD NOT CHANGE ITS VALUES.
+# base_batch_size = (4 GPUs) x (2 samples per GPU)
+auto_scale_lr = dict(base_batch_size=8)

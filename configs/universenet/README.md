@@ -1,6 +1,5 @@
 # UniverseNet
 
-
 ## Introduction
 
 <!-- [ALGORITHM] -->
@@ -18,11 +17,9 @@ https://arxiv.org/abs/2103.14027
 }
 ```
 
-
 ## Example for fine-tuning
 
 For fine-tuning from a COCO pre-trained model, please see [this example](universenet50_2008_fp16_4x2_mstrain_480_960_1x_smallbatch_finetuning_example.py).
-
 
 ## Results and Models
 
@@ -47,7 +44,6 @@ For fine-tuning from a COCO pre-trained model, please see [this example](univers
 - All models except for ATSS+SEPC were trained and evaluated using fp16 (mixed precision).
 - The above UniverseNet (2x) model is a checkpoint at epoch 23. The AP of [a checkpoint at epoch 24](https://github.com/shinya7y/UniverseNet/releases/download/20.06/universenet50_fp16_8x2_mstrain_480_960_2x_coco_20200523_epoch_24-726c5c93.pth) is quite similar (48.9) but slightly worse.
 
-
 ### Faster models
 
 |       Method       | Backbone | Test scale  | Lr schd | Mem (GB) | Inf time (fps) | box AP |                                                                              Download                                                                               |
@@ -59,18 +55,17 @@ For fine-tuning from a COCO pre-trained model, please see [this example](univers
 - 4 GPUs x 16 `samples_per_gpu` for small test scales ((512, 512) and (224, 224)).
   You will be able to use BatchNorm with `norm_eval=False` even on 1 GPU.
 
-
 ### Test scale and test-dev AP
 
-|       Method       | Backbone | Max test scale |  TTA  | Inf time (fps) | box AP (val) | box AP (test-dev) |
-| :----------------: | :------: | :------------: | :---: | :------------: | :----------: | :---------------: |
-|    UniverseNet     |  R2-50   |  (1333, 800)   |   -   |      15.8      |     48.9     |       49.2        |
-|    UniverseNet     |  R2-50   |  (1600, 960)   |   -   |      14.5      |     49.2     |       49.5        |
-| UniverseNet 20.08s |  R-50-C  |  (1333, 800)   |   -   |      31.6      |     46.9     |       47.4        |
-| UniverseNet 20.08  |  R2-50   |  (1333, 800)   |   -   |      24.9      |     48.5     |       48.8        |
-| UniverseNet 20.08d |  R2-101  |  (1333, 800)   |   -   |      11.7      |     50.9     |       51.3        |
-| UniverseNet 20.08d |  R2-101  |  (2000, 1200)  |   5   |       -        |     53.1     |       53.8        |
-| UniverseNet 20.08d |  R2-101  |  (3000, 1800)  |  13   |       -        |     53.5     |       54.1        |
+|       Method       | Backbone | Max test scale | TTA | Inf time (fps) | box AP (val) | box AP (test-dev) |
+| :----------------: | :------: | :------------: | :-: | :------------: | :----------: | :---------------: |
+|    UniverseNet     |  R2-50   |  (1333, 800)   |  -  |      15.8      |     48.9     |       49.2        |
+|    UniverseNet     |  R2-50   |  (1600, 960)   |  -  |      14.5      |     49.2     |       49.5        |
+| UniverseNet 20.08s |  R-50-C  |  (1333, 800)   |  -  |      31.6      |     46.9     |       47.4        |
+| UniverseNet 20.08  |  R2-50   |  (1333, 800)   |  -  |      24.9      |     48.5     |       48.8        |
+| UniverseNet 20.08d |  R2-101  |  (1333, 800)   |  -  |      11.7      |     50.9     |       51.3        |
+| UniverseNet 20.08d |  R2-101  |  (2000, 1200)  |  5  |       -        |     53.1     |       53.8        |
+| UniverseNet 20.08d |  R2-101  |  (3000, 1800)  | 13  |       -        |     53.5     |       54.1        |
 
 - TTA: test-time augmentation including horizontal flip and multi-scale testing (numbers denote scales).
 

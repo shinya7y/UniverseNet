@@ -21,6 +21,9 @@ See the [official repository](https://github.com/microsoft/FocalNet/tree/ecfa580
 ### Notes
 
 - We may need key conversion for the official Sparse R-CNN weights.
+- Although most configs set `samples_per_gpu=1`, the authors overwrite it with `samples_per_gpu=2`.
+  See [detection/README.md](https://github.com/microsoft/FocalNet/blob/main/detection/README.md) and `"iter": 7330` in [logs](https://github.com/microsoft/FocalNet/tree/ecfa580e252a106899e03de13af543f580f43da2#object-detection-on-coco).
+  Thus we keep `base_batch_size=16` in `auto_scale_lr`.
 - If you find performance difference from apex (used by the original authors), please raise an issue.
 
 ## Citation
