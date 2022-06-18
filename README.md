@@ -54,7 +54,7 @@ Methods and architectures:
 - [x] [PVTv2 (arXiv 2021)](configs/pvtv2_original/) stronger models
 - [x] ~~PVT (ICCV 2021)~~ supported
 - [x] [Swin Transformer (ICCV 2021)](configs/swin_original/) stronger models
-- [x] [DDOD (ACMMM 2021)](configs/ddod/)
+- [x] ~~DDOD (ACMMM 2021)~~ supported
 - [x] [GFLv2 (CVPR 2021)](configs/gflv2/)
 - [x] [RelationNet++ (BVR) (NeurIPS 2020)](configs/bvr/)
 - [x] SEPC (CVPR 2020)
@@ -131,7 +131,6 @@ Some codes are modified from the repositories of
 [PVT](https://github.com/whai362/PVT),
 [CBNetV2](https://github.com/VDIGPKU/CBNetV2),
 [GFLv2](https://github.com/implus/GFocalV2),
-[DDOD](https://github.com/zehuichen123/DDOD),
 and [NightOwls](https://gitlab.com/vgg/nightowlsapi).
 When merging, please note that there are some minor differences from the above repositories and [the original MMDetection repository](https://github.com/open-mmlab/mmdetection).
 
