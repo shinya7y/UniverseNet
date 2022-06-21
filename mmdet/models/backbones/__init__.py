@@ -24,6 +24,7 @@ from .resnext import ResNeXt
 from .ssd_vgg import SSDVGG
 from .swin import SwinTransformer
 from .swin_transformer import SwinTransformerOriginal
+from .swin_transformer_v2 import SwinTransformerV2
 from .trident_resnet import TridentResNet
 
 __all__ = [
@@ -36,7 +37,8 @@ __all__ = [
 
 __all__ += [
     'SwinTransformerOriginal', 'CBResNet', 'CBRes2Net', 'CBSwinTransformer',
-    'ConvMLP', 'ConvMLPLarge', 'ConvMLPMedium', 'ConvMLPSmall', 'FocalNet'
+    'ConvMLP', 'ConvMLPLarge', 'ConvMLPMedium', 'ConvMLPSmall', 'FocalNet',
+    'SwinTransformerV2'
 ]
 __all__ += [
     'pvt_v2_b0', 'pvt_v2_b1', 'pvt_v2_b2', 'pvt_v2_b2_li', 'pvt_v2_b3',

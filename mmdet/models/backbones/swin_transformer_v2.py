@@ -4,20 +4,32 @@
 # Licensed under The MIT License [see NOTICE for details]
 # Written by Ze Liu, Yutong Lin, Yixuan Wei
 # --------------------------------------------------------
+# Swin Transformer V2
+# Copyright (c) 2022 Microsoft
+# Licensed under The MIT License [see NOTICE for details]
+# Written by Ze Liu
+# --------------------------------------------------------
+# Reference:
+# https://github.com/rwightman/pytorch-image-models/blob/master/timm/models/swin_transformer_v2.py
 
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
+from mmcv.cnn import constant_init, trunc_normal_init
 from mmcv.cnn.bricks import DropPath
 from mmcv.cnn.utils.weight_init import trunc_normal_
-from mmcv.runner import BaseModule
+from mmcv.runner import BaseModule, _load_checkpoint, load_state_dict
 from mmcv.utils import to_2tuple
 
-from mmcv_custom import load_checkpoint
 from mmdet.utils import get_root_logger
 from ..builder import BACKBONES
+
+try:
+    from torch.cuda.amp import autocast
+except ImportError:
+    pass
 
 
 class Mlp(nn.Module):
@@ -92,11 +104,11 @@ class WindowAttention(nn.Module):
         num_heads (int): Number of attention heads.
         qkv_bias (bool, optional): If True, add a learnable bias to query, key,
             value. Default: True
-        qk_scale (float | None, optional): Override default qk scale of
-            head_dim ** -0.5 if set
         attn_drop (float, optional): Dropout ratio of attention weight.
             Default: 0.0
         proj_drop (float, optional): Dropout ratio of output. Default: 0.0
+        pretrained_window_size (tuple[int]): The height and width of the
+            window in pre-training.
     """
 
     def __init__(self,
@@ -104,21 +116,50 @@ class WindowAttention(nn.Module):
                  window_size,
                  num_heads,
                  qkv_bias=True,
-                 qk_scale=None,
                  attn_drop=0.,
-                 proj_drop=0.):
+                 proj_drop=0.,
+                 pretrained_window_size=[0, 0]):
 
         super().__init__()
         self.dim = dim
         self.window_size = window_size  # Wh, Ww
+        self.pretrained_window_size = pretrained_window_size
         self.num_heads = num_heads
-        head_dim = dim // num_heads
-        self.scale = qk_scale or head_dim**-0.5
 
-        # define a parameter table of relative position bias
-        self.relative_position_bias_table = nn.Parameter(
-            torch.zeros((2 * window_size[0] - 1) * (2 * window_size[1] - 1),
-                        num_heads))  # 2*Wh-1 * 2*Ww-1, nH
+        self.logit_scale = nn.Parameter(
+            torch.log(10 * torch.ones((num_heads, 1, 1))), requires_grad=True)
+
+        # mlp to generate continuous relative position bias
+        self.cpb_mlp = nn.Sequential(
+            nn.Linear(2, 512, bias=True), nn.ReLU(inplace=True),
+            nn.Linear(512, num_heads, bias=False))
+
+        # get relative_coords_table
+        relative_coords_h = torch.arange(
+            -(self.window_size[0] - 1),
+            self.window_size[0],
+            dtype=torch.float32)
+        relative_coords_w = torch.arange(
+            -(self.window_size[1] - 1),
+            self.window_size[1],
+            dtype=torch.float32)
+        relative_coords_table = torch.stack(
+            torch.meshgrid([relative_coords_h, relative_coords_w])).permute(
+                1, 2, 0).contiguous().unsqueeze(0)  # 1, 2*Wh-1, 2*Ww-1, 2
+        if pretrained_window_size[0] > 0:
+            relative_coords_table[:, :, :, 0] /= (
+                pretrained_window_size[0] - 1)
+            relative_coords_table[:, :, :, 1] /= (
+                pretrained_window_size[1] - 1)
+        else:
+            relative_coords_table[:, :, :, 0] /= (self.window_size[0] - 1)
+            relative_coords_table[:, :, :, 1] /= (self.window_size[1] - 1)
+        relative_coords_table *= 8  # normalize to -8, 8
+        relative_coords_table = torch.sign(relative_coords_table) * torch.log2(
+            torch.abs(relative_coords_table) + 1.0) / np.log2(8)
+
+        self.register_buffer(
+            'relative_coords_table', relative_coords_table, persistent=False)
 
         # get pair-wise relative position index for each token inside the
         # window
@@ -135,15 +176,23 @@ class WindowAttention(nn.Module):
         relative_coords[:, :, 1] += self.window_size[1] - 1
         relative_coords[:, :, 0] *= 2 * self.window_size[1] - 1
         relative_position_index = relative_coords.sum(-1)  # Wh*Ww, Wh*Ww
-        self.register_buffer('relative_position_index',
-                             relative_position_index)
+        self.register_buffer(
+            'relative_position_index',
+            relative_position_index,
+            persistent=False)
 
-        self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
+        self.qkv = nn.Linear(dim, dim * 3, bias=False)
+        if qkv_bias:
+            self.q_bias = nn.Parameter(torch.zeros(dim))
+            self.register_buffer('k_bias', torch.zeros(dim), persistent=False)
+            self.v_bias = nn.Parameter(torch.zeros(dim))
+        else:
+            self.q_bias = None
+            self.k_bias = None
+            self.v_bias = None
         self.attn_drop = nn.Dropout(attn_drop)
         self.proj = nn.Linear(dim, dim)
         self.proj_drop = nn.Dropout(proj_drop)
-
-        trunc_normal_(self.relative_position_bias_table, std=.02)
         self.softmax = nn.Softmax(dim=-1)
 
     def forward(self, x, mask=None):
@@ -155,21 +204,32 @@ class WindowAttention(nn.Module):
                 None
         """
         B_, N, C = x.shape
-        qkv = self.qkv(x).reshape(B_, N, 3, self.num_heads,
-                                  C // self.num_heads).permute(2, 0, 3, 1, 4)
+        qkv_bias = None
+        if self.q_bias is not None:
+            qkv_bias = torch.cat((self.q_bias, self.k_bias, self.v_bias))
+        with autocast(enabled=False):
+            qkv = F.linear(input=x, weight=self.qkv.weight, bias=qkv_bias)
+        qkv = qkv.reshape(B_, N, 3, self.num_heads, -1).permute(2, 0, 3, 1, 4)
         q, k, v = qkv[0], qkv[1], qkv[
             2]  # make torchscript happy (cannot use tensor as tuple)
 
-        q = q * self.scale
-        attn = (q @ k.transpose(-2, -1))
+        # cosine attention
+        attn = (
+            F.normalize(q, dim=-1) @ F.normalize(k, dim=-1).transpose(-2, -1))
+        logit_scale = torch.clamp(
+            self.logit_scale, max=torch.log(torch.tensor(1. / 0.01))).exp()
+        attn = attn * logit_scale
 
-        relative_position_bias = self.relative_position_bias_table[
+        relative_position_bias_table = self.cpb_mlp(
+            self.relative_coords_table).view(-1, self.num_heads)
+        relative_position_bias = relative_position_bias_table[
             self.relative_position_index.view(-1)].view(
                 self.window_size[0] * self.window_size[1],
                 self.window_size[0] * self.window_size[1],
                 -1)  # Wh*Ww,Wh*Ww,nH
         relative_position_bias = relative_position_bias.permute(
             2, 0, 1).contiguous()  # nH, Wh*Ww, Wh*Ww
+        relative_position_bias = 16 * torch.sigmoid(relative_position_bias)
         attn = attn + relative_position_bias.unsqueeze(0)
 
         if mask is not None:
@@ -200,14 +260,13 @@ class SwinTransformerBlock(nn.Module):
         mlp_ratio (float): Ratio of mlp hidden dim to embedding dim.
         qkv_bias (bool, optional): If True, add a learnable bias to query, key,
             value. Default: True
-        qk_scale (float | None, optional): Override default qk scale of
-            head_dim ** -0.5 if set.
         drop (float, optional): Dropout rate. Default: 0.0
         attn_drop (float, optional): Attention dropout rate. Default: 0.0
         drop_path (float, optional): Stochastic depth rate. Default: 0.0
         act_layer (nn.Module, optional): Activation layer. Default: nn.GELU
         norm_layer (nn.Module, optional): Normalization layer.
             Default: nn.LayerNorm
+        pretrained_window_size (int): Window size in pre-training.
     """
 
     def __init__(self,
@@ -217,12 +276,12 @@ class SwinTransformerBlock(nn.Module):
                  shift_size=0,
                  mlp_ratio=4.,
                  qkv_bias=True,
-                 qk_scale=None,
                  drop=0.,
                  attn_drop=0.,
                  drop_path=0.,
                  act_layer=nn.GELU,
-                 norm_layer=nn.LayerNorm):
+                 norm_layer=nn.LayerNorm,
+                 pretrained_window_size=0):
         super().__init__()
         self.dim = dim
         self.num_heads = num_heads
@@ -238,9 +297,9 @@ class SwinTransformerBlock(nn.Module):
             window_size=to_2tuple(self.window_size),
             num_heads=num_heads,
             qkv_bias=qkv_bias,
-            qk_scale=qk_scale,
             attn_drop=attn_drop,
-            proj_drop=drop)
+            proj_drop=drop,
+            pretrained_window_size=to_2tuple(pretrained_window_size))
 
         self.drop_path = DropPath(
             drop_path) if drop_path > 0. else nn.Identity()
@@ -268,7 +327,6 @@ class SwinTransformerBlock(nn.Module):
         assert L == H * W, 'input feature has wrong size'
 
         shortcut = x
-        x = self.norm1(x)
         x = x.view(B, H, W, C)
 
         # pad feature maps to multiples of window size
@@ -316,10 +374,10 @@ class SwinTransformerBlock(nn.Module):
             x = x[:, :H, :W, :].contiguous()
 
         x = x.view(B, H * W, C)
-        x = shortcut + self.drop_path(x)
+        x = shortcut + self.drop_path(self.norm1(x))
 
         # FFN
-        x = x + self.drop_path(self.mlp(self.norm2(x)))
+        x = x + self.drop_path(self.norm2(self.mlp(x)))
 
         return x
 
@@ -337,7 +395,7 @@ class PatchMerging(nn.Module):
         super().__init__()
         self.dim = dim
         self.reduction = nn.Linear(4 * dim, 2 * dim, bias=False)
-        self.norm = norm_layer(4 * dim)
+        self.norm = norm_layer(2 * dim)
 
     def forward(self, x, H, W):
         """Forward function.
@@ -363,8 +421,8 @@ class PatchMerging(nn.Module):
         x = torch.cat([x0, x1, x2, x3], -1)  # B H/2 W/2 4*C
         x = x.view(B, -1, 4 * C)  # B H/2*W/2 4*C
 
-        x = self.norm(x)
         x = self.reduction(x)
+        x = self.norm(x)
 
         return x
 
@@ -381,8 +439,6 @@ class BasicLayer(nn.Module):
             Default: 4.
         qkv_bias (bool, optional): If True, add a learnable bias to query, key,
             value. Default: True
-        qk_scale (float | None, optional): Override default qk scale of
-            head_dim ** -0.5 if set.
         drop (float, optional): Dropout rate. Default: 0.0
         attn_drop (float, optional): Attention dropout rate. Default: 0.0
         drop_path (float | tuple[float], optional): Stochastic depth rate.
@@ -393,6 +449,7 @@ class BasicLayer(nn.Module):
             of the layer. Default: None
         use_checkpoint (bool): Whether to use checkpointing to save memory.
             Default: False.
+        pretrained_window_size (int): Local window size in pre-training.
     """
 
     def __init__(self,
@@ -402,13 +459,13 @@ class BasicLayer(nn.Module):
                  window_size=7,
                  mlp_ratio=4.,
                  qkv_bias=True,
-                 qk_scale=None,
                  drop=0.,
                  attn_drop=0.,
                  drop_path=0.,
                  norm_layer=nn.LayerNorm,
                  downsample=None,
-                 use_checkpoint=False):
+                 use_checkpoint=False,
+                 pretrained_window_size=0):
         super().__init__()
         self.window_size = window_size
         self.shift_size = window_size // 2
@@ -424,12 +481,13 @@ class BasicLayer(nn.Module):
                 shift_size=0 if (i % 2 == 0) else window_size // 2,
                 mlp_ratio=mlp_ratio,
                 qkv_bias=qkv_bias,
-                qk_scale=qk_scale,
                 drop=drop,
                 attn_drop=attn_drop,
                 drop_path=drop_path[i]
                 if isinstance(drop_path, list) else drop_path,
-                norm_layer=norm_layer) for i in range(depth)
+                norm_layer=norm_layer,
+                pretrained_window_size=pretrained_window_size)
+            for i in range(depth)
         ])
 
         # patch merging layer
@@ -484,6 +542,13 @@ class BasicLayer(nn.Module):
         else:
             return x, H, W, x, H, W
 
+    def _init_respostnorm(self):
+        for blk in self.blocks:
+            nn.init.constant_(blk.norm1.bias, 0)
+            nn.init.constant_(blk.norm1.weight, 0)
+            nn.init.constant_(blk.norm2.bias, 0)
+            nn.init.constant_(blk.norm2.weight, 0)
+
 
 class PatchEmbed(nn.Module):
     """Image to Patch Embedding.
@@ -536,12 +601,12 @@ class PatchEmbed(nn.Module):
 
 
 @BACKBONES.register_module()
-class SwinTransformerOriginal(BaseModule):
-    """Swin Transformer backbone.
+class SwinTransformerV2(BaseModule):
+    """Swin Transformer V2 backbone.
 
-    The original implementation of Swin Transformer with minor modifications.
-    Please consider using the mmdet's implementation in swin.py when you train
-    new models.
+    This implementation is based on SwinV1 detection and SwinV2 classification.
+    https://github.com/SwinTransformer/Swin-Transformer-Object-Detection/blob/master/mmdet/models/backbones/swin_transformer.py
+    https://github.com/microsoft/Swin-Transformer/blob/main/models/swin_transformer_v2.py
 
     Args:
         pretrain_img_size (int): Input image size for training the pretrained
@@ -557,7 +622,6 @@ class SwinTransformerOriginal(BaseModule):
             Default: 4.
         qkv_bias (bool): If True, add a learnable bias to query, key, value.
             Default: True
-        qk_scale (float): Override default qk scale of head_dim ** -0.5 if set.
         drop_rate (float): Dropout rate.
         attn_drop_rate (float): Attention dropout rate. Default: 0.
         drop_path_rate (float): Stochastic depth rate. Default: 0.2.
@@ -571,7 +635,8 @@ class SwinTransformerOriginal(BaseModule):
             -1 means not freezing any parameters.
         use_checkpoint (bool): Whether to use checkpointing to save memory.
             Default: False.
-        pretrained (str, optional): model pretrained path. Default: None.
+        pretrained_window_sizes (tuple(int)): Pretrained window sizes of each
+            layer.
         init_cfg (dict or list[dict], optional): Initialization config dict.
             Default: None.
     """
@@ -586,7 +651,6 @@ class SwinTransformerOriginal(BaseModule):
                  window_size=7,
                  mlp_ratio=4.,
                  qkv_bias=True,
-                 qk_scale=None,
                  drop_rate=0.,
                  attn_drop_rate=0.,
                  drop_path_rate=0.2,
@@ -596,10 +660,8 @@ class SwinTransformerOriginal(BaseModule):
                  out_indices=(0, 1, 2, 3),
                  frozen_stages=-1,
                  use_checkpoint=False,
-                 pretrained=None,
+                 pretrained_window_sizes=[0, 0, 0, 0],
                  init_cfg=None):
-        assert init_cfg is None, 'To prevent abnormal initialization ' \
-                                 'behavior, init_cfg is not allowed to be set'
         super().__init__(init_cfg=init_cfg)
         self.pretrain_img_size = pretrain_img_size
         self.num_layers = len(depths)
@@ -608,7 +670,6 @@ class SwinTransformerOriginal(BaseModule):
         self.patch_norm = patch_norm
         self.out_indices = out_indices
         self.frozen_stages = frozen_stages
-        self.pretrained = pretrained
 
         # split image into non-overlapping patches
         self.patch_embed = PatchEmbed(
@@ -648,14 +709,14 @@ class SwinTransformerOriginal(BaseModule):
                 window_size=window_size,
                 mlp_ratio=mlp_ratio,
                 qkv_bias=qkv_bias,
-                qk_scale=qk_scale,
                 drop=drop_rate,
                 attn_drop=attn_drop_rate,
                 drop_path=dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
                 norm_layer=norm_layer,
                 downsample=PatchMerging if
                 (i_layer < self.num_layers - 1) else None,
-                use_checkpoint=use_checkpoint)
+                use_checkpoint=use_checkpoint,
+                pretrained_window_size=pretrained_window_sizes[i_layer])
             self.layers.append(layer)
 
         num_features = [int(embed_dim * 2**i) for i in range(self.num_layers)]
@@ -688,24 +749,42 @@ class SwinTransformerOriginal(BaseModule):
 
     def init_weights(self):
         """Initialize the weights in backbone."""
-
-        def _init_weights(m):
-            if isinstance(m, nn.Linear):
-                trunc_normal_(m.weight, std=.02)
-                if isinstance(m, nn.Linear) and m.bias is not None:
-                    nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.LayerNorm):
-                nn.init.constant_(m.bias, 0)
-                nn.init.constant_(m.weight, 1.0)
-
-        if isinstance(self.pretrained, str):
-            self.apply(_init_weights)
-            logger = get_root_logger()
-            load_checkpoint(self, self.pretrained, strict=False, logger=logger)
-        elif self.pretrained is None:
-            self.apply(_init_weights)
+        logger = get_root_logger()
+        if self.init_cfg is None:
+            logger.warning(f'No pre-trained weights for '
+                           f'{self.__class__.__name__}, '
+                           f'training start from scratch')
+            for m in self.modules():
+                if isinstance(m, nn.Linear):
+                    trunc_normal_init(m, std=.02, bias=0.)
+                elif isinstance(m, nn.LayerNorm):
+                    constant_init(m, 1.0)
+            for bly in self.layers:
+                bly._init_respostnorm()
         else:
-            raise TypeError('pretrained must be a str or None')
+            if self.ape:
+                raise NotImplementedError
+            assert 'checkpoint' in self.init_cfg, f'Only support ' \
+                                                  f'specify `Pretrained` in ' \
+                                                  f'`init_cfg` in ' \
+                                                  f'{self.__class__.__name__} '
+            ckpt = _load_checkpoint(
+                self.init_cfg.checkpoint, logger=logger, map_location='cpu')
+            if 'state_dict' in ckpt:
+                state_dict = ckpt['state_dict']
+            elif 'model' in ckpt:
+                state_dict = ckpt['model']
+            else:
+                state_dict = ckpt
+
+            # delete keys for reinitialization
+            reinit_keys = ('relative_position_index', 'relative_coords_table')
+            for reinit_key in reinit_keys:
+                for k in list(state_dict.keys()):
+                    if reinit_key in k:
+                        del state_dict[k]
+
+            load_state_dict(self, state_dict, strict=False, logger=logger)
 
     def forward(self, x):
         """Forward function."""

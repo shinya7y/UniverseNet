@@ -5,6 +5,9 @@ Even if files were moved or renamed, licenses are applied for equivalent files.
 MIT License
 ===============================================================================
 
+Copyright (c) 2021 Microsoft, Copyright (c) 2022 Microsoft
+- mmdet/models/backbones/swin_transformer_v2.py
+
 Copyright (c) 2021 Microsoft
 - mmdet/models/backbones/swin_transformer.py
 
