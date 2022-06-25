@@ -9,7 +9,7 @@ https://arxiv.org/abs/2103.14027
 
 ## Changelog
 
-- recent:
+- 22.06 (June 2022):
   - Add SwinV2, FocalNet, GBR COTS dataset
   - Update codes for mmdet 2.25.0, mmcv-full 1.4.4
 - 21.12 (Dec. 2021):
@@ -48,11 +48,11 @@ Methods and architectures:
 - [x] [UniverseNets (arXiv 2021)](configs/universenet/)
 - [x] [Swin Transformer V2 (CVPR 2022)](configs/swinv2/)
 - [x] [FocalNet (arXiv 2022)](configs/focalnet/)
-- [x] [PoolFormer (arXiv 2021)](configs/poolformer/)
+- [x] [PoolFormer (CVPR 2022)](configs/poolformer/)
 - [x] [ConvMLP (arXiv 2021)](configs/convmlp/)
 - [x] [CBNetV2 (arXiv 2021)](configs/cbnet/)
 - [x] ~~TOOD (ICCV 2021)~~ supported
-- [x] [PVTv2 (arXiv 2021)](configs/pvtv2_original/) stronger models
+- [x] [PVTv2 (CVMJ 2022)](configs/pvtv2_original/) stronger models
 - [x] ~~PVT (ICCV 2021)~~ supported
 - [x] [Swin Transformer (ICCV 2021)](configs/swin_original/) stronger models
 - [x] ~~DDOD (ACMMM 2021)~~ supported
