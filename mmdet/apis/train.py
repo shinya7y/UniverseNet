@@ -24,6 +24,33 @@ except ImportError:
     apex = None
 
 
+class DebugGradientCumulativeOptimizerHook(GradientCumulativeOptimizerHook):
+
+    def after_train_iter(self, runner):
+        if not self.initialized:
+            self._init(runner)
+
+        if runner.iter < runner.max_iters - self.remainder_iters:
+            loss_factor = self.cumulative_iters
+        else:
+            loss_factor = self.remainder_iters
+        loss = runner.outputs['loss']
+        loss = loss / loss_factor
+        loss.backward()
+
+        if (self.every_n_iters(runner, self.cumulative_iters)
+                or self.is_last_iter(runner)):
+
+            if self.grad_clip is not None:
+                grad_norm = self.clip_grads(runner.model.parameters())
+                if grad_norm is not None:
+                    # Add grad norm to the logger
+                    runner.log_buffer.update({'grad_norm': float(grad_norm)},
+                                             runner.outputs['num_samples'])
+            runner.optimizer.step()
+            runner.optimizer.zero_grad()
+
+
 def init_random_seed(seed=None, device='cuda'):
     """Initialize random seed.
 
@@ -210,7 +237,7 @@ def train_detector(model,
             optimizer_config = GradientCumulativeFp16OptimizerHook(
                 **cfg.optimizer_config, **fp16_cfg, distributed=distributed)
         elif distributed and 'type' not in cfg.optimizer_config:
-            optimizer_config = GradientCumulativeOptimizerHook(
+            optimizer_config = DebugGradientCumulativeOptimizerHook(
                 **cfg.optimizer_config)
         else:
             optimizer_config = cfg.optimizer_config
