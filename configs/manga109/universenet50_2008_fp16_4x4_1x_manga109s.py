@@ -15,5 +15,4 @@ evaluation = dict(classwise=True)
 
 fp16 = dict(loss_scale=dict(init_scale=512))
 
-# TODO
-load_from = '../logs/coco/ablation/universenet50_2008_fp16_4x4_1x_coco_20201009_193747/epoch_12.pth'  # noqa
+load_from = 'https://github.com/shinya7y/weights/releases/download/v1.0.0/universenet50_2008_fp16_4x4_1x_coco_20201009_epoch_12-cbd3958a.pth'  # noqa

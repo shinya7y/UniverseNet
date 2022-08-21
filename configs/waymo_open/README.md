@@ -23,17 +23,22 @@ Using 1/10 size subsets is useful when you would like to:
 <details open>
 <summary>Fine-tuning from COCO 1x models</summary>
 
-|      Method       | Backbone | Lr schd | CAP @832 | CAP @1280 | KAP @832 | KAP @1280 |
-| :---------------: | :------: | :-----: | :------: | :-------: | :------: | :-------: |
-|   Faster R-CNN    |   R-50   |   1x    |  0.345   |   0.362   |  0.4984  |  0.5265   |
-|   Cascade R-CNN   |   R-50   |   1x    |  0.364   |   0.382   |  0.5107  |  0.5388   |
-|     RetinaNet     |   R-50   |   1x    |  0.325   |   0.353   |  0.4618  |  0.5066   |
-|       ATSS        |   R-50   |   1x    |  0.354   |   0.380   |  0.5056  |  0.5438   |
-|       ATSS        |  Swin-T  |   1x    |  0.372   |   0.388   |  0.5291  |  0.5549   |
-|     ATSS+SEPC     |   R-50   |   1x    |  0.350   |   0.385   |  0.4968  |  0.5494   |
-|        GFL        |   R-50   |   1x    |  0.357   |   0.383   |  0.5034  |  0.5423   |
-|    UniverseNet    |  R2-50   |   1x    |  0.386   |   0.435   |  0.5430  |  0.6061   |
-| UniverseNet-20.08 |  R2-50   |   1x    |  0.390   |   0.437   |  0.5459  |  0.6091   |
+|      Method       |  Backbone  | Lr schd | CAP @832 | CAP @1280 | KAP @832 | KAP @1280 |
+| :---------------: | :--------: | :-----: | :------: | :-------: | :------: | :-------: |
+|   Faster R-CNN    |    R-50    |   1x    |  0.345   |   0.362   |  0.4984  |  0.5265   |
+|   Cascade R-CNN   |    R-50    |   1x    |  0.364   |   0.382   |  0.5107  |  0.5388   |
+|     RetinaNet     |    R-50    |   1x    |  0.325   |   0.353   |  0.4618  |  0.5066   |
+|       ATSS        |    R-50    |   1x    |  0.354   |   0.380   |  0.5056  |  0.5438   |
+|        GFL        |    R-50    |   1x    |  0.357   |   0.383   |  0.5034  |  0.5423   |
+|       DETR        |    R-50    |   1x    |  0.178   |     -     |  0.2935  |     -     |
+|  Deformable DETR  |    R-50    |   1x    |  0.327   |     -     |  0.4852  |     -     |
+|   Sparse R-CNN    |    R-50    |   1x    |  0.328   |     -     |  0.4792  |     -     |
+|       ATSS        |   Swin-T   |   1x    |  0.372   |   0.388   |  0.5291  |  0.5549   |
+|       ATSS        | ConvNeXt-T |   1x    |  0.383   |     -     |  0.5426  |     -     |
+|     ATSS+SEPC     |    R-50    |   1x    |  0.350   |   0.385   |  0.4968  |  0.5494   |
+|    ATSS+DyHead    |    R-50    |   1x    |  0.371   |     -     |  0.5227  |     -     |
+|    UniverseNet    |   R2-50    |   1x    |  0.386   |   0.435   |  0.5430  |  0.6061   |
+| UniverseNet-20.08 |   R2-50    |   1x    |  0.390   |   0.437   |  0.5459  |  0.6091   |
 
 </details>
 
@@ -44,9 +49,19 @@ Using 1/10 size subsets is useful when you would like to:
 | :---------------: | :------: | :-----: | :------: | :------: |
 |   Faster R-CNN    |   R-50   |   1x    |  0.347   |  0.4997  |
 |     RetinaNet     |   R-50   |   1x    |  0.326   |  0.4630  |
+|      YOLOX-L      |  CSP v5  |   1x    |  0.410   |  0.5756  |
 |    UniverseNet    |  R2-50   |   1x    |  0.391   |  0.5475  |
 |    UniverseNet    |  R2-50   |   2x    |  0.390   |  0.5505  |
 | UniverseNet-20.08 |  R2-50   |   1x    |  0.397   |  0.5539  |
+
+</details>
+
+<details open>
+<summary>Fine-tuning from COCO 3x models</summary>
+
+| Method  | Backbone | Lr schd | CAP @832 | KAP @832 |
+| :-----: | :------: | :-----: | :------: | :------: |
+| YOLOX-L |  CSP v5  |   1x    |  0.416   |  0.5824  |
 
 </details>
 
@@ -55,7 +70,7 @@ Using 1/10 size subsets is useful when you would like to:
 - KAP denotes KITTI-style AP (IoU thresholds: 0.7 for vehicles, 0.5 for pedestrians and cyclists).
 - In addition to ATSS+SEPC, UniverseNet uses Res2Net-v1b-50, DCN, and multi-scale training (640-1280).
 - The settings for normalization layers (including whether to use iBN of SEPC) depend on the config files.
-- All models were trained and evaluated using fp16 (mixed precision).
+- Most models were trained and evaluated using fp16 (mixed precision).
 - Each model was fine-tuned from a corresponding COCO pre-trained model.
 
 ### full train, f0val

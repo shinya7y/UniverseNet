@@ -27,6 +27,13 @@ In this report, we present some experienced improvements to YOLO series, forming
 2. Due to the need for pre-training weights, we cannot reproduce the performance of the `yolox-nano` model. Please refer to https://github.com/Megvii-BaseDetection/YOLOX/issues/674 for more information.
 3. We also trained the model by the official release of YOLOX based on [Megvii-BaseDetection/YOLOX#735](https://github.com/Megvii-BaseDetection/YOLOX/issues/735) with commit ID [38c633](https://github.com/Megvii-BaseDetection/YOLOX/tree/38c633bf176462ee42b110c70e4ffe17b5753208). We found that the best AP of `YOLOX-tiny`, `YOLOX-s`, `YOLOX-l`, and `YOLOX-x` is 31.8, 40.3, 49.2, and 50.9, respectively. The performance is consistent with that of our re-implementation (see Table above) but still has a gap (0.3~0.8 AP) in comparison with the reported performance in their [README](https://github.com/Megvii-BaseDetection/YOLOX/blob/38c633bf176462ee42b110c70e4ffe17b5753208/README.md#benchmark).
 
+### Short training
+
+| Backbone | size | Lr schd | Mem (GB) | box AP |                    Config                     |                                                              Download                                                               |
+| :------: | :--: | :-----: | :------: | :----: | :-------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------: |
+| YOLOX-l  | 1024 |   24e   |    -     |  37.8  | [config](./yolox_l_1024_fp16_4x4_24e_coco.py) | [model](https://github.com/shinya7y/weights/releases/download/v1.0.0/yolox_l_1024_fp16_4x4_24e_coco_20220801_epoch_24-c2e31c2a.pth) |
+| YOLOX-l  | 1024 |   36e   |    -     |  41.1  | [config](./yolox_l_1024_fp16_4x4_36e_coco.py) | [model](https://github.com/shinya7y/weights/releases/download/v1.0.0/yolox_l_1024_fp16_4x4_36e_coco_20220719_epoch_36-2145a442.pth) |
+
 ## Citation
 
 ```latex

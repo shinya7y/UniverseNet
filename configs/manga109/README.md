@@ -20,21 +20,27 @@ The 15test set was selected to be well-balanced for reliable evaluation.
 
 ### 68train, 15test (Manga109-s v2020.12.18)
 
-|      Method       | Backbone | Lr schd |  AP  |                                                                             Download                                                                             |
-| :---------------: | :------: | :-----: | :--: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-|   Faster R-CNN    |   R-50   |   1x    | 65.8 |        [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/faster_rcnn_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-264d9f31.pth)         |
-|   Cascade R-CNN   |   R-50   |   1x    | 67.6 |        [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/cascade_rcnn_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-aece91e1.pth)        |
-|     RetinaNet     |   R-50   |   1x    | 65.3 |         [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/retinanet_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-9fa45ba4.pth)          |
-|       ATSS        |   R-50   |   1x    | 66.5 |            [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/atss_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-c3e34e96.pth)            |
-|       ATSS        |  Swin-T  |   1x    | 66.2 |         [model](https://github.com/shinya7y/weights/releases/download/v1.0.1/atss_swint_fpn_fp16_4x4_adamw_1x_manga109s_20210504_epoch_12-c96ddec3.pth)          |
-|     ATSS+SEPC     |   R-50   |   1x    | 67.1 |      [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/atss_r50_fpn_sepc_noibn_fp16_4x4_1x_manga109s_20201219_epoch_12-b9eef036.pth)       |
-|        GFL        |   R-50   |   1x    | 67.3 |            [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/gfl_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-49659797.pth)             |
-|    UniverseNet    |  R2-50   |   1x    | 68.9 |   [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/universenet50_fp16_4x4_mstrain_480_960_1x_manga109s_20201220_epoch_12-ae4e7451.pth)    |
-| UniverseNet 20.08 |  R2-50   |   1x    | 69.9 | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/universenet50_2008_fp16_4x4_mstrain_480_960_1x_manga109s_20201220_epoch_12-6af914a4.pth) |
+|      Method       |  Backbone  | Lr schd |  AP  |                                                                             Download                                                                             |
+| :---------------: | :--------: | :-----: | :--: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------: |
+|   Faster R-CNN    |    R-50    |   1x    | 65.8 |        [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/faster_rcnn_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-264d9f31.pth)         |
+|   Cascade R-CNN   |    R-50    |   1x    | 67.6 |        [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/cascade_rcnn_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-aece91e1.pth)        |
+|     RetinaNet     |    R-50    |   1x    | 65.3 |         [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/retinanet_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-9fa45ba4.pth)          |
+|       ATSS        |    R-50    |   1x    | 66.5 |            [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/atss_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-c3e34e96.pth)            |
+|        GFL        |    R-50    |   1x    | 67.3 |            [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/gfl_r50_fpn_fp16_4x4_1x_manga109s_20201219_epoch_12-49659797.pth)             |
+|       DETR        |    R-50    |   1x    | 31.2 |                  [model](https://github.com/shinya7y/weights/releases/download/v1.0.1/detr_r50_4x4_1x_manga109s_20220706_epoch_12-6d9a0c64.pth)                  |
+|  Deformable DETR  |    R-50    |   1x    | 64.1 |           [model](https://github.com/shinya7y/weights/releases/download/v1.0.1/deformable_detr_r50_4x2x2_1x_manga109s_20220630_epoch_12-d930c644.pth)            |
+|   Sparse R-CNN    |    R-50    |   1x    | 63.1 |          [model](https://github.com/shinya7y/weights/releases/download/v1.0.1/sparse_rcnn_r50_fpn_fp16_4x4_1x_manga109s_20220624_epoch_12-0d35864c.pth)          |
+|       ATSS        |   Swin-T   |   1x    | 66.2 |         [model](https://github.com/shinya7y/weights/releases/download/v1.0.1/atss_swint_fpn_fp16_4x4_adamw_1x_manga109s_20210504_epoch_12-c96ddec3.pth)          |
+|       ATSS        | ConvNeXt-T |   1x    | 67.4 |       [model](https://github.com/shinya7y/weights/releases/download/v1.0.1/atss_convnext-t_p4_w7_fpn_fp16_4x4_1x_manga109s_20220717_epoch_12-def8032b.pth)       |
+|     ATSS+SEPC     |    R-50    |   1x    | 67.1 |      [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/atss_r50_fpn_sepc_noibn_fp16_4x4_1x_manga109s_20201219_epoch_12-b9eef036.pth)       |
+|    ATSS+DyHead    |    R-50    |   1x    | 67.9 |          [model](https://github.com/shinya7y/weights/releases/download/v1.0.1/atss_r50_fpn_dyhead_fp16_4x4_1x_manga109s_20220626_epoch_12-9c75a796.pth)          |
+|      YOLOX-L      |   CSP v5   |   1x    | 70.2 |               [model](https://github.com/shinya7y/weights/releases/download/v1.0.1/yolox_l_fp16_4x4_12e_manga109s_20220722_epoch_12-a19f80f6.pth)                |
+|    UniverseNet    |   R2-50    |   1x    | 68.9 |   [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/universenet50_fp16_4x4_mstrain_480_960_1x_manga109s_20201220_epoch_12-ae4e7451.pth)    |
+| UniverseNet 20.08 |   R2-50    |   1x    | 69.9 | [model](https://github.com/shinya7y/UniverseNet/releases/download/20.12/universenet50_2008_fp16_4x4_mstrain_480_960_1x_manga109s_20201220_epoch_12-6af914a4.pth) |
 
 - In addition to ATSS+SEPC, UniverseNet uses Res2Net-v1b-50, DCN, and multi-scale training (480-960).
 - The settings for normalization layers (including whether to use iBN of SEPC) depend on the config files.
-- All models were trained and evaluated using fp16 (mixed precision).
+- Most models were trained and evaluated using fp16 (mixed precision).
 - Each model was fine-tuned from a corresponding COCO pre-trained model.
 
 ## Dataset splits
