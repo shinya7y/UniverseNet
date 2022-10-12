@@ -176,7 +176,7 @@ class MultiheadAttention(Module):
         else:
             if not hasattr(self, '_qkv_same_embed_dim'):
                 warnings.warn(
-                    'A new version of MultiheadAttention module has been implemented. \
+                    'A new MultiheadAttention module has been implemented. \
                     Please re-train your model with the new module',
                     UserWarning,
                 )
