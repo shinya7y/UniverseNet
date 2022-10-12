@@ -51,10 +51,10 @@ Please cite the following paper.
 https://arxiv.org/abs/2103.14027
 
 ```
-@article{USB_shinya_2021,
+@inproceedings{USB_shinya_BMVC2022,
   title={{USB}: Universal-Scale Object Detection Benchmark},
   author={Shinya, Yosuke},
-  journal={arXiv:2103.14027},
-  year={2021}
+  booktitle={British Machine Vision Conference (BMVC)},
+  year={2022}
 }
 ```

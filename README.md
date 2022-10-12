@@ -1,14 +1,23 @@
 # UniverseNet
 
-UniverseNets are state-of-the-art detectors for universal-scale object detection.
+This is the official repository of "[USB: Universal-Scale Object Detection Benchmark](https://arxiv.org/abs/2103.14027)" (BMVC 2022).
+
+We established a new benchmark *USB* with fair protocols and designed state-of-the-art detectors *UniverseNets* for universal-scale object detection.
+This repository extends MMDetection with more features and allows for more comprehensive benchmarking and development.
+
+## Introduction
+
+![universal-scale object detection](https://user-images.githubusercontent.com/42844407/113513063-b5aa2780-95a2-11eb-8413-2fb470256a1a.png)
+
+Benchmarks, such as COCO, play a crucial role in object detection. However, existing benchmarks are insufficient in scale variation, and their protocols are inadequate for fair comparison. In this paper, we introduce the Universal-Scale object detection Benchmark (USB). USB has variations in object scales and image domains by incorporating COCO with the recently proposed Waymo Open Dataset and Manga109-s dataset. To enable fair comparison and inclusive research, we propose training and evaluation protocols. They have multiple divisions for training epochs and evaluation image resolutions, like weight classes in sports, and compatibility across training protocols, like the backward compatibility of the Universal Serial Bus. Specifically, we request participants to report results with not only higher protocols (longer training) but also lower protocols (shorter training). Using the proposed benchmark and protocols, we conducted extensive experiments using 15 methods and found weaknesses of existing COCO-biased methods.
+
 Please refer to our paper for details.
 https://arxiv.org/abs/2103.14027
 
-![universal-scale object detection](https://user-images.githubusercontent.com/42844407/113513063-b5aa2780-95a2-11eb-8413-2fb470256a1a.png)
-![COCO AP](https://user-images.githubusercontent.com/42844407/112571346-317dd480-8e2b-11eb-8b1e-a97ba2e97997.png)
-
 ## Changelog
 
+- recent:
+  - Our paper got accepted to BMVC 2022!
 - 22.06 (June 2022):
   - Add SwinV2, FocalNet, GBR COTS dataset
   - Update codes for mmdet 2.25.0, mmcv-full 1.4.4
@@ -45,14 +54,14 @@ https://arxiv.org/abs/2103.14027
 
 Methods and architectures:
 
-- [x] [UniverseNets (arXiv 2021)](configs/universenet/)
+- [x] [UniverseNets (BMVC 2022)](configs/universenet/)
+- [x] [FocalNet (NeurIPS 2022)](configs/focalnet/)
 - [x] [Swin Transformer V2 (CVPR 2022)](configs/swinv2/)
-- [x] [FocalNet (arXiv 2022)](configs/focalnet/)
 - [x] [PoolFormer (CVPR 2022)](configs/poolformer/)
+- [x] [PVTv2 (CVMJ 2022)](configs/pvtv2_original/) stronger models
 - [x] [ConvMLP (arXiv 2021)](configs/convmlp/)
 - [x] [CBNetV2 (arXiv 2021)](configs/cbnet/)
 - [x] ~~TOOD (ICCV 2021)~~ supported
-- [x] [PVTv2 (CVMJ 2022)](configs/pvtv2_original/) stronger models
 - [x] ~~PVT (ICCV 2021)~~ supported
 - [x] [Swin Transformer (ICCV 2021)](configs/swin_original/) stronger models
 - [x] ~~DDOD (ACMMM 2021)~~ supported
@@ -64,7 +73,7 @@ Methods and architectures:
 
 Benchmarks and datasets:
 
-- [x] USB (arXiv 2021)
+- [x] USB (BMVC 2022)
 - [x] [Waymo Open Dataset (CVPR 2020)](configs/waymo_open/)
 - [x] [Manga109-s dataset (MTAP 2017, IEEE MultiMedia 2020)](configs/manga109/)
 - [x] [NightOwls dataset (ACCV 2018)](configs/nightowls/)
@@ -107,11 +116,11 @@ Even if you have one GPU, we recommend using `tools/dist_train.sh` and `tools/di
 ## Citation
 
 ```
-@article{USB_shinya_2021,
+@inproceedings{USB_shinya_BMVC2022,
   title={{USB}: Universal-Scale Object Detection Benchmark},
   author={Shinya, Yosuke},
-  journal={arXiv:2103.14027},
-  year={2021}
+  booktitle={British Machine Vision Conference (BMVC)},
+  year={2022}
 }
 ```
 

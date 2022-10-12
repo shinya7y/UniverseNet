@@ -62,11 +62,14 @@ UniverseNet achieves the 1st place in the NightOwls Detection Challenge 2020 all
 }
 ```
 
+For the results of UniverseNet, please cite the arXiv v2 version of our paper.
+https://arxiv.org/abs/2103.14027v2
+
 ```
 @article{USB_shinya_2021,
   title={{USB}: Universal-Scale Object Detection Benchmark},
   author={Shinya, Yosuke},
-  journal={arXiv:2103.14027},
+  journal={arXiv:2103.14027v2},
   year={2021}
 }
 ```
