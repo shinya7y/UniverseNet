@@ -1,11 +1,12 @@
 asynctest
 codecov
+coverage
 flake8
 interrogate
 isort==4.3.21
 # Note: used for kwarray.group_items, this may be ported to mmcv in the future.
 kwarray
--e git+https://github.com/open-mmlab/mmtracking#egg=mmtrack
+-e git+https://github.com/open-mmlab/mmtracking.git@v0.14.0#egg=mmtrack
 onnx==1.7.0
 onnxruntime>=1.8.0
 protobuf<=3.20.1

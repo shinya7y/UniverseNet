@@ -1,5 +1,5 @@
 cityscapesscripts
 imagecorruptions
 pandas
+scikit-learn
 scipy
-sklearn
