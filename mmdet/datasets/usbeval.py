@@ -1,3 +1,6 @@
+import datetime
+import time
+
 import numpy as np
 
 from .api_wrappers import COCOeval
@@ -99,13 +102,14 @@ class USBeval(COCOeval):
             else:
                 area = g['area']
             if g['ignore'] or (area < aRng[0] or area > aRng[1]):
-                g['_ignore'] = 1
+                g['weight'] = 0
             else:
-                g['_ignore'] = 0
+                g['weight'] = 1
 
-        # sort dt highest score first, sort gt ignore last
-        gtind = np.argsort([g['_ignore'] for g in gt], kind='mergesort')
+        # sort gt highest weight first
+        gtind = np.argsort([-g['weight'] for g in gt], kind='mergesort')
         gt = [gt[i] for i in gtind]
+        # sort dt highest score first
         dtind = np.argsort([-d['score'] for d in dt], kind='mergesort')
         dt = [dt[i] for i in dtind[0:maxDet]]
         iscrowd = [int(o['iscrowd']) for o in gt]
@@ -118,8 +122,8 @@ class USBeval(COCOeval):
         D = len(dt)
         gtm = np.zeros((T, G))
         dtm = np.zeros((T, D))
-        gtIg = np.array([g['_ignore'] for g in gt])
-        dtIg = np.zeros((T, D))
+        gt_weights = np.array([g['weight'] for g in gt])
+        dt_weights = np.ones((T, D))
         if not len(ious) == 0:
             for tind, t in enumerate(p.iouThrs):
                 for dind, d in enumerate(dt):
@@ -131,7 +135,7 @@ class USBeval(COCOeval):
                         if gtm[tind, gind] > 0 and not iscrowd[gind]:
                             continue
                         # if dt matched to reg gt, and on ignore gt, stop
-                        if m > -1 and gtIg[m] == 0 and gtIg[gind] == 1:
+                        if m > -1 and gt_weights[m] and not gt_weights[gind]:
                             break
                         # continue to next gt unless better match made
                         if ious[dind, gind] < iou:
@@ -142,21 +146,20 @@ class USBeval(COCOeval):
                     # if match made store id of match for both dt and gt
                     if m == -1:
                         continue
-                    dtIg[tind, dind] = gtIg[m]
+                    dt_weights[tind, dind] = gt_weights[m]
                     dtm[tind, dind] = gt[m]['id']
                     gtm[tind, m] = d['id']
         # set unmatched detections outside of area range to ignore
         if self.relative_area:
-            a = np.array([
+            outside = np.array([
                 d['area'] / img_area < aRng[0]
                 or d['area'] / img_area > aRng[1] for d in dt
             ])
         else:
-            a = np.array(
+            outside = np.array(
                 [d['area'] < aRng[0] or d['area'] > aRng[1] for d in dt])
-        a = a.reshape((1, len(dt)))
-        dtIg = np.logical_or(dtIg, np.logical_and(dtm == 0, np.repeat(a, T,
-                                                                      0)))
+        outside = outside.reshape((1, len(dt)))
+        dt_weights = dt_weights * (1 - (dtm == 0) * np.repeat(outside, T, 0))
         # store results for given image and category
         return {
             'image_id': imgId,
@@ -168,9 +171,128 @@ class USBeval(COCOeval):
             'dtMatches': dtm,
             'gtMatches': gtm,
             'dtScores': [d['score'] for d in dt],
-            'gtIgnore': gtIg,
-            'dtIgnore': dtIg,
+            'gt_weights': gt_weights,
+            'dt_weights': dt_weights,
         }
+
+    def accumulate(self, p=None):
+        """Accumulate per image evaluation results and store the result in
+        self.eval.
+
+        :param p: input params for evaluation
+        :return: None
+        """
+        print('Accumulating evaluation results...')
+        tic = time.time()
+        if not self.evalImgs:
+            print('Please run evaluate() first')
+        # allows input customized parameters
+        if p is None:
+            p = self.params
+        p.catIds = p.catIds if p.useCats == 1 else [-1]
+        T = len(p.iouThrs)
+        R = len(p.recThrs)
+        K = len(p.catIds) if p.useCats else 1
+        A = len(p.areaRng)
+        M = len(p.maxDets)
+        precision = -np.ones(
+            (T, R, K, A, M))  # -1 for the precision of absent categories
+        recall = -np.ones((T, K, A, M))
+        scores = -np.ones((T, R, K, A, M))
+
+        # create dictionary for future indexing
+        _pe = self._paramsEval
+        catIds = _pe.catIds if _pe.useCats else [-1]
+        setK = set(catIds)
+        setA = set(map(tuple, _pe.areaRng))
+        setM = set(_pe.maxDets)
+        setI = set(_pe.imgIds)
+        # get inds to evaluate
+        k_list = [n for n, k in enumerate(p.catIds) if k in setK]
+        m_list = [m for n, m in enumerate(p.maxDets) if m in setM]
+        a_list = [
+            n for n, a in enumerate(map(lambda x: tuple(x), p.areaRng))
+            if a in setA
+        ]
+        i_list = [n for n, i in enumerate(p.imgIds) if i in setI]
+        I0 = len(_pe.imgIds)
+        A0 = len(_pe.areaRng)
+        # retrieve E at each category, area range, and max number of detections
+        for k, k0 in enumerate(k_list):
+            Nk = k0 * A0 * I0
+            for a, a0 in enumerate(a_list):
+                Na = a0 * I0
+                for m, maxDet in enumerate(m_list):
+                    E = [self.evalImgs[Nk + Na + i] for i in i_list]
+                    E = [e for e in E if e is not None]
+                    if len(E) == 0:
+                        continue
+                    dtScores = np.concatenate(
+                        [e['dtScores'][0:maxDet] for e in E])
+
+                    # different sorting method generates slightly different
+                    # results. mergesort is used to be consistent as Matlab
+                    # implementation.
+                    inds = np.argsort(-dtScores, kind='mergesort')
+                    dtScoresSorted = dtScores[inds]
+
+                    dtm = np.concatenate(
+                        [e['dtMatches'][:, 0:maxDet] for e in E], axis=1)[:,
+                                                                          inds]
+                    dt_weights = np.concatenate(
+                        [e['dt_weights'][:, 0:maxDet] for e in E],
+                        axis=1)[:, inds]
+                    gt_weights = np.concatenate([e['gt_weights'] for e in E])
+                    npig = np.sum(gt_weights)
+                    if npig == 0:
+                        continue
+                    tps = (dtm != 0) * dt_weights
+                    fps = (dtm == 0) * dt_weights
+
+                    tp_sum = np.cumsum(tps, axis=1).astype(dtype=np.float)
+                    fp_sum = np.cumsum(fps, axis=1).astype(dtype=np.float)
+                    for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
+                        tp = np.array(tp)
+                        fp = np.array(fp)
+                        nd = len(tp)
+                        rc = tp / npig
+                        pr = tp / (fp + tp + np.spacing(1))
+                        q = np.zeros((R, ))
+                        ss = np.zeros((R, ))
+
+                        if nd:
+                            recall[t, k, a, m] = rc[-1]
+                        else:
+                            recall[t, k, a, m] = 0
+
+                        # numpy is slow without cython for accessing elements
+                        # use python array gets significant speed improvement
+                        pr = pr.tolist()
+                        q = q.tolist()
+
+                        for i in range(nd - 1, 0, -1):
+                            if pr[i] > pr[i - 1]:
+                                pr[i - 1] = pr[i]
+
+                        inds = np.searchsorted(rc, p.recThrs, side='left')
+                        try:
+                            for ri, pi in enumerate(inds):
+                                q[ri] = pr[pi]
+                                ss[ri] = dtScoresSorted[pi]
+                        except IndexError:
+                            pass
+                        precision[t, :, k, a, m] = np.array(q)
+                        scores[t, :, k, a, m] = np.array(ss)
+        self.eval = {
+            'params': p,
+            'counts': [T, R, K, A, M],
+            'date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'precision': precision,
+            'recall': recall,
+            'scores': scores,
+        }
+        toc = time.time()
+        print('DONE (t={:0.2f}s).'.format(toc - tic))
 
     def _summarize(self, ap=1, iouThr=None, areaRng='all', maxDets=100):
         """Compute and display a specific metric."""
