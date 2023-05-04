@@ -1,3 +1,4 @@
+import copy
 import datetime
 import time
 
@@ -9,53 +10,72 @@ from .api_wrappers import COCOeval
 def calc_area_range_info(area_range_type):
     """Calculate area ranges and related information."""
     # use COCO setting as default
+    area_labels = ['all', 'small', 'medium', 'large']
     area_ranges = [[0**2, 1e5**2], [0**2, 32**2], [32**2, 96**2],
                    [96**2, 1e5**2]]
-    area_labels = ['all', 'small', 'medium', 'large']
+    peak_ranges = [None] * 4
     relative_area = False
 
     if area_range_type == 'COCO':
         pass
     elif area_range_type == 'relative_scale_ap':
         relative_area = True
-        area_ranges = [[0**2, 1**2]]
         area_labels = ['all']
+        area_ranges = [[0**2, 1**2]]
         inv_scale_thrs = np.power(2, np.arange(0, 10))[::-1]
         for inv_min, inv_max in zip(inv_scale_thrs[:-1], inv_scale_thrs[1:]):
             if inv_max == 256:
-                area_ranges.append([0**2, 1 / inv_max**2])
                 area_labels.append(f'0_1/{inv_max}')
+                area_ranges.append([0**2, 1 / inv_max**2])
             else:
-                area_ranges.append([1 / inv_min**2, 1 / inv_max**2])
                 area_labels.append(f'1/{inv_min}_1/{inv_max}')
+                area_ranges.append([1 / inv_min**2, 1 / inv_max**2])
+            peak_ranges.append(None)
     elif area_range_type == 'absolute_scale_ap':
         scale_thrs = np.power(2, np.arange(2, 12))
         scale_thrs[0] = 0
         scale_thrs[-1] = 1e5
         for min_scale, max_scale in zip(scale_thrs[:-1], scale_thrs[1:]):
-            area_ranges.append([min_scale**2, max_scale**2])
             area_labels.append(f'{min_scale:.0f}_{max_scale:.0f}')
+            area_ranges.append([min_scale**2, max_scale**2])
+            peak_ranges.append(None)
+    elif area_range_type == 'band_asap':
+        scale_thrs = np.power(2, np.arange(1, 12))
+        scale_thrs[0] = 0
+        scale_thrs[-1] = 1e5
+        for min_scale, peak_left, max_scale in zip(scale_thrs[:-2],
+                                                   scale_thrs[1:-1],
+                                                   scale_thrs[2:]):
+            peak_right = 1e5 if max_scale == 1e5 else peak_left
+            area_labels.append(
+                f'{min_scale:.0f}_{peak_left:.0f}_{max_scale:.0f}')
+            area_ranges.append([min_scale**2, max_scale**2])
+            peak_ranges.append([peak_left**2, peak_right**2])
     elif area_range_type == 'absolute_scale_ap_linear':
         scale_thrs = np.arange(0, 1024 + 32 + 1, 32)
         scale_thrs[-1] = 1e5
         for min_scale, max_scale in zip(scale_thrs[:-1], scale_thrs[1:]):
-            area_ranges.append([min_scale**2, max_scale**2])
             area_labels.append(f'{min_scale:.0f}_{max_scale:.0f}')
+            area_ranges.append([min_scale**2, max_scale**2])
+            peak_ranges.append(None)
     elif area_range_type == 'TinyPerson':
-        area_ranges = [[1**2, 1e5**2], [1**2, 20**2], [1**2, 8**2],
-                       [8**2, 12**2], [12**2, 20**2], [20**2, 32**2],
-                       [32**2, 1e5**2]]
         area_labels = [
             'all', 'tiny', 'tiny1', 'tiny2', 'tiny3', 'small', 'reasonable'
         ]
+        area_ranges = [[1**2, 1e5**2], [1**2, 20**2], [1**2, 8**2],
+                       [8**2, 12**2], [12**2, 20**2], [20**2, 32**2],
+                       [32**2, 1e5**2]]
+        peak_ranges = [None] * 7
     else:
         raise NotImplementedError
 
-    assert len(area_ranges) == len(area_labels)
+    assert len(area_labels) == len(area_ranges) == len(peak_ranges)
     area_range_map = dict(zip(area_labels, area_ranges))
     print('Area ranges:', str(area_range_map))
+    peak_range_map = dict(zip(area_labels, peak_ranges))
+    print('Peak ranges:', str(peak_range_map))
 
-    return area_ranges, area_labels, relative_area
+    return area_labels, area_ranges, peak_ranges, relative_area
 
 
 class USBeval(COCOeval):
@@ -72,19 +92,87 @@ class USBeval(COCOeval):
         :return: None
         """
         super().__init__(cocoGt=cocoGt, cocoDt=cocoDt, iouType=iouType)
-        area_ranges, area_labels, relative_area = calc_area_range_info(
-            area_range_type)
-        self.params.areaRng = area_ranges
+        area_labels, area_ranges, peak_ranges, relative_area = \
+            calc_area_range_info(area_range_type)
         self.params.areaRngLbl = area_labels
+        self.params.areaRng = area_ranges
+        self.params.peak_ranges = peak_ranges
         self.relative_area = relative_area
+        for area_range, peak_range in zip(area_ranges, peak_ranges):
+            if peak_range is None:
+                assert area_range[0] <= area_range[1]
+            else:
+                assert area_range[0] <= peak_range[0] <= peak_range[
+                    1] <= area_range[1]
 
-    def _calc_weight(self, divided_area, aRng):
-        if divided_area < aRng[0] or divided_area > aRng[1]:
-            return 0.0
-        else:
-            return 1.0 * 0.5  # TODO remove
+    def evaluate(self):
+        """Run per image evaluation on given images and store results (a list
+        of dict) in self.evalImgs
+        :return: None
+        """
+        tic = time.time()
+        print('Running per image evaluation...')
+        p = self.params
+        # add backward compatibility if useSegm is specified in params
+        if p.useSegm is not None:
+            p.iouType = 'segm' if p.useSegm == 1 else 'bbox'
+            print('useSegm (deprecated) is not None. Running {} evaluation'.
+                  format(p.iouType))
+        print('Evaluate annotation type *{}*'.format(p.iouType))
+        p.imgIds = list(np.unique(p.imgIds))
+        if p.useCats:
+            p.catIds = list(np.unique(p.catIds))
+        p.maxDets = sorted(p.maxDets)
+        self.params = p
 
-    def evaluateImg(self, imgId, catId, aRng, maxDet):
+        self._prepare()
+        # loop through images, area range, max detection number
+        catIds = p.catIds if p.useCats else [-1]
+
+        if p.iouType == 'segm' or p.iouType == 'bbox':
+            computeIoU = self.computeIoU
+        elif p.iouType == 'keypoints':
+            computeIoU = self.computeOks
+        self.ious = {(imgId, catId): computeIoU(imgId, catId)
+                     for imgId in p.imgIds for catId in catIds}
+
+        evaluateImg = self.evaluateImg
+        maxDet = p.maxDets[-1]
+        self.evalImgs = [
+            evaluateImg(imgId, catId, areaRng, maxDet, peak_range)
+            for catId in catIds
+            for areaRng, peak_range in zip(p.areaRng, p.peak_ranges)
+            for imgId in p.imgIds
+        ]
+        self._paramsEval = copy.deepcopy(self.params)
+        toc = time.time()
+        print('DONE (t={:0.2f}s).'.format(toc - tic))
+
+    def _calc_weight(self, area, area_range, peak_range=None):
+        # for fast calculation
+        if peak_range is None:
+            if area < area_range[0] or area > area_range[1]:
+                return 0.0
+            else:
+                return 1.0
+
+        condlist = [
+            area < area_range[0],
+            area_range[0] <= area < peak_range[0],
+            peak_range[0] <= area <= peak_range[1],
+            peak_range[1] < area <= area_range[1],
+            area > area_range[1],
+        ]
+        funclist = [
+            0.0,
+            lambda x: (x - area_range[0]) / (peak_range[0] - area_range[0]),
+            1.0,
+            lambda x: (x - area_range[1]) / (peak_range[1] - area_range[1]),
+            0.0,
+        ]
+        return np.piecewise(area, condlist, funclist)
+
+    def evaluateImg(self, imgId, catId, aRng, maxDet, peak_range=None):
         '''
         perform evaluation for single category and image
         :return: dict (single image results)
@@ -102,16 +190,16 @@ class USBeval(COCOeval):
         if len(gt) == 0 and len(dt) == 0:
             return None
 
-        # calculate divided_area for thresholding with absolute/relative scale
+        # divide area for thresholding with absolute/relative scale
         divisor = img_area if self.relative_area else 1
         for g in gt:
-            g['divided_area'] = g['area'] / divisor
-            g['weight'] = self._calc_weight(g['divided_area'], aRng)
+            area = g['area'] / divisor
+            g['weight'] = self._calc_weight(area, aRng, peak_range)
             if g['ignore']:
                 g['weight'] = 0.0
         for d in dt:
-            d['divided_area'] = d['area'] / divisor
-            d['weight'] = self._calc_weight(d['divided_area'], aRng)
+            area = d['area'] / divisor
+            d['weight'] = self._calc_weight(area, aRng, peak_range)
 
         # sort gt highest weight first
         gtind = np.argsort([-g['weight'] for g in gt], kind='mergesort')
@@ -157,13 +245,6 @@ class USBeval(COCOeval):
                     dt_weights[tind, dind] = gt_weights[m]
                     dtm[tind, dind] = gt[m]['id']
                     gtm[tind, m] = d['id']
-        # set unmatched detections outside of area range to ignore
-        # outside = np.array([
-        #     d['divided_area'] < aRng[0] or d['divided_area'] > aRng[1]
-        #     for d in dt
-        # ])
-        # outside = np.repeat(outside.reshape((1, len(dt))), T, 0)
-        # dt_weights = dt_weights * (1 - (dtm == 0) * outside)
         # store results for given image and category
         return {
             'image_id': imgId,
@@ -301,7 +382,7 @@ class USBeval(COCOeval):
     def _summarize(self, ap=1, iouThr=None, areaRng='all', maxDets=100):
         """Compute and display a specific metric."""
         p = self.params
-        iStr = (' {:<18} {} @[ IoU={:<9} | area={:>11s} | maxDets={:>4d} ]'
+        iStr = (' {:<18} {} @[ IoU={:<9} | area={:>16s} | maxDets={:>4d} ]'
                 ' = {:0.3f}')
         titleStr = 'Average Precision' if ap == 1 else 'Average Recall'
         typeStr = '(AP)' if ap == 1 else '(AR)'
