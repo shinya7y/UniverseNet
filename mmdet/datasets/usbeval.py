@@ -78,6 +78,12 @@ class USBeval(COCOeval):
         self.params.areaRngLbl = area_labels
         self.relative_area = relative_area
 
+    def _calc_weight(self, divided_area, aRng):
+        if divided_area < aRng[0] or divided_area > aRng[1]:
+            return 0.0
+        else:
+            return 1.0 * 0.5  # TODO remove
+
     def evaluateImg(self, imgId, catId, aRng, maxDet):
         '''
         perform evaluation for single category and image
@@ -96,15 +102,16 @@ class USBeval(COCOeval):
         if len(gt) == 0 and len(dt) == 0:
             return None
 
+        # calculate divided_area for thresholding with absolute/relative scale
+        divisor = img_area if self.relative_area else 1
         for g in gt:
-            if self.relative_area:
-                area = g['area'] / img_area
-            else:
-                area = g['area']
-            if g['ignore'] or (area < aRng[0] or area > aRng[1]):
-                g['weight'] = 0
-            else:
-                g['weight'] = 1
+            g['divided_area'] = g['area'] / divisor
+            g['weight'] = self._calc_weight(g['divided_area'], aRng)
+            if g['ignore']:
+                g['weight'] = 0.0
+        for d in dt:
+            d['divided_area'] = d['area'] / divisor
+            d['weight'] = self._calc_weight(d['divided_area'], aRng)
 
         # sort gt highest weight first
         gtind = np.argsort([-g['weight'] for g in gt], kind='mergesort')
@@ -123,7 +130,8 @@ class USBeval(COCOeval):
         gtm = np.zeros((T, G))
         dtm = np.zeros((T, D))
         gt_weights = np.array([g['weight'] for g in gt])
-        dt_weights = np.ones((T, D))
+        dt_weights = np.array([d['weight'] for d in dt])
+        dt_weights = np.repeat(dt_weights.reshape((1, len(dt))), T, 0)
         if not len(ious) == 0:
             for tind, t in enumerate(p.iouThrs):
                 for dind, d in enumerate(dt):
@@ -150,16 +158,12 @@ class USBeval(COCOeval):
                     dtm[tind, dind] = gt[m]['id']
                     gtm[tind, m] = d['id']
         # set unmatched detections outside of area range to ignore
-        if self.relative_area:
-            outside = np.array([
-                d['area'] / img_area < aRng[0]
-                or d['area'] / img_area > aRng[1] for d in dt
-            ])
-        else:
-            outside = np.array(
-                [d['area'] < aRng[0] or d['area'] > aRng[1] for d in dt])
-        outside = outside.reshape((1, len(dt)))
-        dt_weights = dt_weights * (1 - (dtm == 0) * np.repeat(outside, T, 0))
+        # outside = np.array([
+        #     d['divided_area'] < aRng[0] or d['divided_area'] > aRng[1]
+        #     for d in dt
+        # ])
+        # outside = np.repeat(outside.reshape((1, len(dt))), T, 0)
+        # dt_weights = dt_weights * (1 - (dtm == 0) * outside)
         # store results for given image and category
         return {
             'image_id': imgId,
