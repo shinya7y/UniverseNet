@@ -21,6 +21,7 @@ def calc_area_range_info(area_range_type):
         relative_area = True
         area_labels = ['all']
         scale_ranges = [[0, 1]]
+        peak_ranges = [None]
         inv_scale_thrs = np.power(2, np.arange(0, 10))[::-1]
         for inv_min, inv_max in zip(inv_scale_thrs[:-1], inv_scale_thrs[1:]):
             if inv_max == 256:
@@ -349,8 +350,8 @@ class USBeval(COCOeval):
                     tps = (dtm != 0) * dt_weights
                     fps = (dtm == 0) * dt_weights
 
-                    tp_sum = np.cumsum(tps, axis=1).astype(dtype=np.float)
-                    fp_sum = np.cumsum(fps, axis=1).astype(dtype=np.float)
+                    tp_sum = np.cumsum(tps, axis=1).astype(dtype=float)
+                    fp_sum = np.cumsum(fps, axis=1).astype(dtype=float)
                     for t, (tp, fp) in enumerate(zip(tp_sum, fp_sum)):
                         tp = np.array(tp)
                         fp = np.array(fp)
