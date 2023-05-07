@@ -3,9 +3,7 @@ _base_ = [
     '../../_base_/schedules/schedule_7e.py', '../../_base_/default_runtime.py'
 ]
 
-model = dict(
-    bbox_head=dict(num_classes=1),
-    test_cfg=dict(score_thr=0.001, max_per_img=300))
+model = dict(bbox_head=dict(num_classes=1), test_cfg=dict(score_thr=0.001))
 
 data = dict(samples_per_gpu=2, val=dict(samples_per_gpu=2))
 

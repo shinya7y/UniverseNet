@@ -22,7 +22,7 @@
 - Scale: shorter side pixels.
 - Flip: horizontal flip for test-time augmentation.
 - max 300: `max_per_img=300`.
-  The maximum number of detections per image for public test/private test evaluation is unknown.
+  This change is meaningless for public test evaluation because [the maximum number of detections per image is 100](https://github.com/IIM-TTIJ/mva2023_eval_tool_from_pycocotools-2.0.6/blob/main/pycocotools/cocoeval.py).
 
 ## Usage
 
