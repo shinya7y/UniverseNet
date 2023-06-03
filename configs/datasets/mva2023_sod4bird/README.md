@@ -14,15 +14,14 @@
 
 ## Results and Models
 
-| Method | Backbone | Lr schd | Scale | Flip | val AP | val AP50 | val AP50 (max 300) | public test AP50 |                               Config                                |                                                                      Download                                                                       |
-| :----: | :------: | :-----: | :---: | :--: | :----: | :------: | :----------------: | :--------------: | :-----------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------: |
-|  GFL   |   R-50   |   7e    | 2160  |  N   | 0.465  |  0.886   |       0.890        |      0.724       |   [config](./gfl_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160.py)    | [model](https://github.com/shinya7y/weights/releases/download/v1.0.3/gfl_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160_20230415_epoch_7-383174fb.pth) |
-|  GFL   |   R-50   |   7e    | 2160  |  Y   | 0.470  |  0.889   |       0.896        |      0.731       | [config](./gfl_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160_test.py) | [model](https://github.com/shinya7y/weights/releases/download/v1.0.3/gfl_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160_20230415_epoch_7-383174fb.pth) |
+|    Method    | Backbone | Lr schd | Scale | Flip | val AP | val AP50 | public test AP50 |                                 Config                                 |                                                                          Download                                                                           |
+| :----------: | :------: | :-----: | :---: | :--: | :----: | :------: | :--------------: | :--------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------: |
+| Faster R-CNN |   R-50   |   7e    | 2160  |  N   |  36.2  |   68.1   |       54.8       | [config](./faster_rcnn_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160.py) | [model](https://github.com/shinya7y/weights/releases/download/v1.0.3/faster_rcnn_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160_20230414_epoch_7-89cc4602.pth) |
+|     GFL      |   R-50   |   7e    | 2160  |  N   |  46.5  |   88.6   |       72.4       |     [config](./gfl_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160.py)     |     [model](https://github.com/shinya7y/weights/releases/download/v1.0.3/gfl_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160_20230415_epoch_7-383174fb.pth)     |
+|     GFL      |   R-50   |   7e    | 2160  |  Y   |  47.0  |   88.9   |       73.1       |  [config](./gfl_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160_test.py)   |     [model](https://github.com/shinya7y/weights/releases/download/v1.0.3/gfl_r50_fpn_fp16_1x2x8_7e_mva2023_sod4bird_2160_20230415_epoch_7-383174fb.pth)     |
 
 - Scale: shorter side pixels.
 - Flip: horizontal flip for test-time augmentation.
-- max 300: `max_per_img=300`.
-  This change is meaningless for public test evaluation because [the maximum number of detections per image is 100](https://github.com/IIM-TTIJ/mva2023_eval_tool_from_pycocotools-2.0.6/blob/main/pycocotools/cocoeval.py).
 
 ## Usage
 
@@ -62,7 +61,6 @@ If you have any problems with the above installation, `apt install` might be req
 For example, `sudo apt -y install build-essential libgl1-mesa-glx` and other libraries written in [Dockerfile](../../../docker/Dockerfile).
 
 To resolve installation problems, please see the documents and issues of MMDetection and MMCV.
-If problems persist, please contact shinya7y via the challenge's Discord, this repository's issue, or email.
 
 ### Preparation
 
@@ -105,10 +103,25 @@ which is publicly available from [mmdetection/configs/gfl](https://github.com/op
 
 ## Citation
 
+Dateset:
+
 ```latex
-@misc{sodbchallenge2023misc,
+@inproceedings{SOD4Bird_MVAW2023,
   title={{MVA2023 Small Object Detection Challenge for Spotting Birds}},
-  author={Yuki Kondo and Norimichi Ukita and Takayuki Yamaguchi},
-  howpublished={\url{https://www.mva-org.jp/mva2023/challenge}},
-  year={2023}}
+  author={Yuki Kondo and Norimichi Ukita and Takayuki Yamaguchi and Hao-Yu Hou and Mu-Yi Shen and Chia-Chi Hsu and En-Ming Huang and Yu-Chen Huang and Yu-Cheng Xia and Chien-Yao Wang and Chun-Yi Lee and Da Huo and Tingwei Liu and Yosuke Shinya and Guang Liang and Syusuke Yasui},
+  booktitle={18th International Conference on Machine Vision and Applications (MVA) Workshop},
+  note={\url{https://www.mva-org.jp/mva2023/challenge}},
+  year={2023}
+}
+```
+
+Results and models:
+
+```latex
+@inproceedings{BandRe_MVAW2023,
+  author    = {Yosuke Shinya},
+  title     = {{BandRe}: Rethinking Band-Pass Filters for Scale-Wise Object Detection Evaluation},
+  booktitle = {18th International Conference on Machine Vision and Applications (MVA) Workshop},
+  year      = {2023}
+}
 ```
