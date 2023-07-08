@@ -16,7 +16,10 @@ https://arxiv.org/abs/2103.14027
 
 ## Changelog
 
-- recent:
+- 23.07 (July 2023):
+  - Win Honorable Mention Solution Award in Small Object Detection Challenge for Spotting Birds
+  - Add SOD4SB dataset
+- 22.10 (Oct 2022):
   - Our paper got accepted to BMVC 2022!
 - 22.06 (June 2022):
   - Add SwinV2, FocalNet, GBR COTS dataset
@@ -78,6 +81,7 @@ Benchmarks and datasets:
 - [x] [Manga109-s dataset (MTAP 2017, IEEE MultiMedia 2020)](configs/manga109/)
 - [x] [NightOwls dataset (ACCV 2018)](configs/nightowls/)
 - [x] [GBR COTS dataset (arXiv 2021)](configs/datasets/kaggle_gbr_cots/)
+- [x] [SOD4SB dataset (MVA 2023)](configs/datasets/mva2023_sod4bird/)
 
 ## Usage
 

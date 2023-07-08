@@ -1,4 +1,4 @@
-# MVA2023 SOD4Bird
+# MVA2023 SOD4SB
 
 > [MVA2023 Small Object Detection Challenge for Spotting Birds](https://www.mva-org.jp/mva2023/challenge)
 
@@ -103,25 +103,26 @@ which is publicly available from [mmdetection/configs/gfl](https://github.com/op
 
 ## Citation
 
+Please check the latest bibliographic information. https://www.mva-org.jp/mva2023/challenge
+
 Dateset:
 
 ```latex
-@inproceedings{SOD4Bird_MVAW2023,
-  title={{MVA2023 Small Object Detection Challenge for Spotting Birds}},
-  author={Yuki Kondo and Norimichi Ukita and Takayuki Yamaguchi and Hao-Yu Hou and Mu-Yi Shen and Chia-Chi Hsu and En-Ming Huang and Yu-Chen Huang and Yu-Cheng Xia and Chien-Yao Wang and Chun-Yi Lee and Da Huo and Tingwei Liu and Yosuke Shinya and Guang Liang and Syusuke Yasui},
-  booktitle={18th International Conference on Machine Vision and Applications (MVA) Workshop},
-  note={\url{https://www.mva-org.jp/mva2023/challenge}},
-  year={2023}
+@inproceedings{SOD4SB_MVA2023,
+  title     = {{MVA2023 Small Object Detection Challenge for Spotting Birds: Dataset, Methods, and Results}},
+  author    = {Yuki Kondo and Norimichi Ukita and Takayuki Yamaguchi and Hao-Yu Hou and Mu-Yi Shen and Chia-Chi Hsu and En-Ming Huang and Yu-Chen Huang and Yu-Cheng Xia and Chien-Yao Wang and Chun-Yi Lee and Da Huo and Marc A. Kastner and Tingwei Liu and Yasutomo Kawanishi and Takatsugu Hirayama and Takahiro Komamizu and Ichiro Ide and Yosuke Shinya and Xinyao Liu and Guang Liang and Syusuke Yasui},
+  booktitle = {International Conference on Machine Vision and Applications (MVA)},
+  year      = {2023}
 }
 ```
 
 Results and models:
 
 ```latex
-@inproceedings{BandRe_MVAW2023,
-  author    = {Yosuke Shinya},
+@inproceedings{BandRe_MVA2023,
+  author    = {Shinya, Yosuke},
   title     = {{BandRe}: Rethinking Band-Pass Filters for Scale-Wise Object Detection Evaluation},
-  booktitle = {18th International Conference on Machine Vision and Applications (MVA) Workshop},
+  booktitle = {International Conference on Machine Vision and Applications (MVA)},
   year      = {2023}
 }
 ```
